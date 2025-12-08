@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotweb Theme Customizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 350px;
+            background: white;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .preview-panel {
+            flex: 1;
+            background: #e0e0e0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 5px;
+        }
+        
+        .color-control {
+            margin-bottom: 15px;
+        }
+        
+        .color-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .color-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .preset-themes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .preset-btn {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .preset-btn:hover {
+            border-color: #2196F3;
+            background: #f0f7ff;
+        }
+        
+        .preset-btn.active {
+            border-color: #2196F3;
+            background: #2196F3;
+            color: white;
+        }
+        
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1976D2;
+        }
+        
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #45a049;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+        
+        .toolbar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .switch.active {
+            background: #2196F3;
+        }
+        
+        .switch::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: 0.3s;
+        }
+        
+        .switch.active::after {
+            left: 29px;
+        }
+        
+        .code-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>🎨 Theme Customizer</h1>
+        <p class="subtitle">Create your perfect Spotweb theme</p>
+        
+        <div class="section">
+            <div class="section-title">📱 Presets</div>
+            <div class="preset-themes" id="presetThemes"></div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">🎨 Colors</div>
+            
+            <div class="color-control">
+                <label class="color-label">Background Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="bgColor" value="#1e1e1e">
+                    <input type="text" id="bgColorText" value="#1e1e1e">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Text Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="textColor" value="#e0e0e0">
+                    <input type="text" id="textColorText" value="#e0e0e0">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Primary Accent</label>
+                <div class="color-input-group">
+                    <input type="color" id="primaryColor" value="#0553a1">
+                    <input type="text" id="primaryColorText" value="#0553a1">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Secondary Background</label>
+                <div class="color-input-group">
+                    <input type="color" id="secondaryColor" value="#2d2d2d">
+                    <input type="text" id="secondaryColorText" value="#2d2d2d">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Hover Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="hoverColor" value="#333333">
+                    <input type="text" id="hoverColorText" value="#333333">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Border Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="borderColor" value="#444444">
+                    <input type="text" id="borderColorText" value="#444444">
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">⚙️ Options</div>
+            
+            <div class="toggle-switch">
+                <span>Use Gradients</span>
+                <div class="switch" id="gradientToggle"></div>
+            </div>
+            
+            <div class="toggle-switch">
+                <span>Add Glow Effects</span>
+                <div class="switch" id="glowToggle"></div>
+            </div>
+            
+            <div class="toggle-switch">
+                <span>Rounded Corners</span>
+                <div class="switch active" id="roundedToggle"></div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">💾 Export</div>
+            <div class="actions">
+                <button class="btn-success" onclick="downloadCSS()">📥 Download CSS</button>
+                <button class="btn-primary" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+                <button class="btn-secondary" onclick="resetTheme()">🔄 Reset to Default</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="preview-panel">
+        <div class="toolbar">
+            <button class="btn-secondary" onclick="toggleView('table')">📊 Table View</button>
+            <button class="btn-secondary" onclick="toggleView('details')">📄 Details View</button>
+        </div>
+        <iframe id="preview" class="preview-frame"></iframe>
+    </div>
+    
+    <script>
+        const presets = [
+            { id: 'dark', name: '🌙 Dark', colors: { bg: '#1e1e1e', text: '#e0e0e0', primary: '#0553a1', secondary: '#2d2d2d', hover: '#333333', border: '#444444' }},
+            { id: 'midnight', name: '🌊 Midnight', colors: { bg: '#0a192f', text: '#ccd6f6', primary: '#64ffda', secondary: '#1d2d50', hover: '#233554', border: '#233554' }},
+            { id: 'cyberpunk', name: '🎮 Cyberpunk', colors: { bg: '#0d0221', text: '#00ff41', primary: '#ff006e', secondary: '#1a0b2e', hover: '#2d1b3d', border: '#ff006e' }},
+            { id: 'nord', name: '❄️ Nord', colors: { bg: '#2e3440', text: '#d8dee9', primary: '#88c0d0', secondary: '#3b4252', hover: '#434c5e', border: '#434c5e' }},
+            { id: 'dracula', name: '🧛 Dracula', colors: { bg: '#282a36', text: '#f8f8f2', primary: '#ff79c6', secondary: '#44475a', hover: '#6272a4', border: '#6272a4' }},
+            { id: 'forest', name: '🌲 Forest', colors: { bg: '#1a3a2a', text: '#c9dac8', primary: '#7fbf7f', secondary: '#2d4a3e', hover: '#3a5f4e', border: '#2d4a3e' }},
+            { id: 'sunset', name: '🌅 Sunset', colors: { bg: '#1a1625', text: '#ffd6ba', primary: '#ff9a76', secondary: '#3d1f47', hover: '#5e2750', border: '#5e2750' }},
+            { id: 'custom', name: '✨ Custom', colors: null }
+        ];
+        
+        let currentColors = presets[0].colors;
+        let useGradients = false;
+        let useGlow = false;
+        let useRounded = true;
+        
+        // Initialize
+        renderPresets();
+        setupColorInputs();
+        setupToggles();
+        updatePreview();
+        
+        function renderPresets() {
+            const container = document.getElementById('presetThemes');
+            presets.forEach(preset => {
+                const btn = document.createElement('button');
+                btn.className = 'preset-btn';
+                btn.textContent = preset.name;
+                btn.onclick = () => loadPreset(preset);
+                container.appendChild(btn);
+            });
+        }
+        
+        function loadPreset(preset) {
+            if (!preset.colors) return;
+            
+            currentColors = {...preset.colors};
+            
+            // Update color pickers
+            Object.keys(currentColors).forEach(key => {
+                const picker = document.getElementById(key + 'Color');
+                const text = document.getElementById(key + 'ColorText');
+                if (picker && text) {
+                    picker.value = currentColors[key];
+                    text.value = currentColors[key];
+                }
+            });
+            
+            updatePreview();
+            
+            // Update active state
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        function setupColorInputs() {
+            const colorKeys = ['bg', 'text', 'primary', 'secondary', 'hover', 'border'];
+            
+            colorKeys.forEach(key => {
+                const picker = document.getElementById(key + 'Color');
+                const text = document.getElementById(key + 'ColorText');
+                
+                picker.addEventListener('input', (e) => {
+                    currentColors[key] = e.target.value;
+                    text.value = e.target.value;
+                    updatePreview();
+                });
+                
+                text.addEventListener('input', (e) => {
+                    currentColors[key] = e.target.value;
+                    picker.value = e.target.value;
+                    updatePreview();
+                });
+            });
+        }
+        
+        function setupToggles() {
+            document.getElementById('gradientToggle').onclick = function() {
+                useGradients = !useGradients;
+                this.classList.toggle('active');
+                updatePreview();
+            };
+            
+            document.getElementById('glowToggle').onclick = function() {
+                useGlow = !useGlow;
+                this.classList.toggle('active');
+                updatePreview();
+            };
+            
+            document.getElementById('roundedToggle').onclick = function() {
+                useRounded = !useRounded;
+                this.classList.toggle('active');
+                updatePreview();
+            };
+        }
+        
+        function updatePreview() {
+            const css = generateCSS();
+            const html = generatePreviewHTML();
+            
+            const iframe = document.getElementById('preview');
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(`
+                <html>
+                <head>
+                    <style>${css}</style>
+                </head>
+                <body>${html}</body>
+                </html>
+            `);
+            doc.close();
+        }
+        
+        function generateCSS() {
+            const themeName = 'custom';
+            const bg = useGradients ? `linear-gradient(135deg, ${currentColors.bg} 0%, ${adjustBrightness(currentColors.bg, 20)} 100%)` : currentColors.bg;
+            const glow = useGlow ? `text-shadow: 0 0 10px ${currentColors.primary};` : '';
+            const radius = useRounded ? '6px' : '0';
+            
+            return `
+                body {
+                    background: ${bg};
+                    color: ${currentColors.text};
+                    font-family: Arial, sans-serif;
+                    padding: 20px;
+                    margin: 0;
+                }
+                
+                .header {
+                    background: ${currentColors.secondary};
+                    padding: 20px;
+                    border-radius: ${radius};
+                    margin-bottom: 20px;
+                }
+                
+                h1 {
+                    color: ${currentColors.primary};
+                    ${glow}
+                    margin: 0;
+                }
+                
+                table {
+                    width: 100%;
+                    background: ${currentColors.secondary};
+                    border-collapse: collapse;
+                    border-radius: ${radius};
+                    overflow: hidden;
+                }
+                
+                th {
+                    background: ${currentColors.hover};
+                    color: ${currentColors.primary};
+                    padding: 12px;
+                    text-align: left;
+                    border-bottom: 2px solid ${currentColors.border};
+                }
+                
+                td {
+                    padding: 12px;
+                    border-bottom: 1px solid ${currentColors.border};
+                    color: ${currentColors.text};
+                }
+                
+                tr:hover {
+                    background: ${currentColors.hover};
+                }
+                
+                a {
+                    color: ${currentColors.primary};
+                    text-decoration: none;
+                }
+                
+                a:hover {
+                    ${glow}
+                }
+            `;
+        }
+        
+        function generatePreviewHTML() {
+            return `
+                <div class="header">
+                    <h1>Custom Theme Preview</h1>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Title</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Movies</td>
+                            <td><a href="#">Example Movie Title 2024</a></td>
+                            <td>Dec 08, 2025</td>
+                        </tr>
+                        <tr>
+                            <td>TV</td>
+                            <td><a href="#">TV Show S01E01</a></td>
+                            <td>Dec 08, 2025</td>
+                        </tr>
+                        <tr>
+                            <td>Music</td>
+                            <td><a href="#">Album Name - Artist</a></td>
+                            <td>Dec 08, 2025</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        function generateFullCSS() {
+            const themeName = 'custom';
+            return `/* Custom Spotweb Theme */
+body.theme-${themeName} {
+    background-color: ${currentColors.bg};
+    color: ${currentColors.text};
+}
+
+body.theme-${themeName} a:visited,
+body.theme-${themeName} a:link {
+    color: ${currentColors.primary};
+}
+
+body.theme-${themeName} div#toolbar {
+    background-color: ${currentColors.secondary};
+    border-color: ${currentColors.border};
+}
+
+body.theme-${themeName} table.spots {
+    background-color: ${currentColors.bg};
+    border-color: ${currentColors.border};
+}
+
+body.theme-${themeName} table.spots th {
+    background-color: ${currentColors.hover};
+    color: ${currentColors.primary};
+    border-color: ${currentColors.border};
+}
+
+body.theme-${themeName} table.spots tr:hover {
+    background-color: ${currentColors.hover};
+}
+
+body.theme-${themeName} table.spots td {
+    color: ${currentColors.text};
+    border-color: ${currentColors.border};
+}
+
+body.theme-${themeName} div.filter {
+    background-color: ${currentColors.secondary};
+    border-color: ${currentColors.border};
+}
+`;
+        }
+        
+        function downloadCSS() {
+            const css = generateFullCSS();
+            const blob = new Blob([css], { type: 'text/css' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'theme-custom.css';
+            a.click();
+        }
+        
+        function copyToClipboard() {
+            const css = generateFullCSS();
+            navigator.clipboard.writeText(css).then(() => {
+                alert('✓ CSS copied to clipboard!');
+            });
+        }
+        
+        function resetTheme() {
+            loadPreset(presets[0]);
+        }
+        
+        function toggleView(view) {
+            // Preview different views
+            updatePreview();
+        }
+        
+        function adjustBrightness(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255))
+                .toString(16).slice(1);
+        }
+    </script>
+</body>
+</html>

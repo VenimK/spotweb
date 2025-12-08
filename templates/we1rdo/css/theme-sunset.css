@@ -1,0 +1,57 @@
+/* SUNSET THEME - Warm sunset gradient vibes */
+body.theme-sunset {background: linear-gradient(135deg, #1a1625 0%, #3d1f47 50%, #5e2750 100%); color:#ffd6ba;}
+body.theme-sunset a:visited, body.theme-sunset a:link {color:#ff9a76;}
+body.theme-sunset a:hover {color:#ffb08a; text-decoration:underline;}
+
+/* Header with sunset glow */
+body.theme-sunset div.container {background:transparent;}
+body.theme-sunset div.logo h1 a {color:#ffb08a; text-shadow:0 0 15px rgba(255,154,118,0.5);}
+body.theme-sunset div.filter h4 {color:#ffd6ba;}
+body.theme-sunset ul.mainmenu li a {color:#ffd6ba;}
+body.theme-sunset ul.mainmenu li:hover {background: linear-gradient(90deg, rgba(255,154,118,0.2) 0%, transparent 100%);}
+body.theme-sunset ul.mainmenu li.active {background: linear-gradient(90deg, rgba(255,154,118,0.3) 0%, transparent 100%); border-left:3px solid #ff9a76;}
+
+/* Toolbar with warm gradient */
+body.theme-sunset div#toolbar {background: linear-gradient(180deg, #2d1b3d 0%, #3d1f47 100%); border-color:rgba(255,154,118,0.3);}
+body.theme-sunset div.notifications, body.theme-sunset div.toolbarButton {border-right-color:rgba(255,154,118,0.2);}
+body.theme-sunset div.toolbarButton:hover {background-color:rgba(255,154,118,0.15);}
+body.theme-sunset div.toolbarButton p a {color:#ffb08a;}
+
+/* Spots with sunset colors */
+body.theme-sunset table.spots {background-color:#1a1625; border-color:rgba(255,154,118,0.2);}
+body.theme-sunset table.spots th {background: linear-gradient(180deg, #2d1b3d 0%, #3d1f47 100%); color:#ffb08a; border-color:rgba(255,154,118,0.2); font-weight:600; text-shadow:0 0 8px rgba(255,154,118,0.3);}
+body.theme-sunset table.spots th a {color:#ffb08a;}
+body.theme-sunset table.spots th.sorted a {color:#ff9a76;}
+body.theme-sunset table.spots tr.even {background-color:#1a1625;}
+body.theme-sunset table.spots tr.odd {background-color:#231830;}
+body.theme-sunset table.spots tr:hover {background: linear-gradient(90deg, rgba(255,154,118,0.1) 0%, transparent 100%);}
+body.theme-sunset table.spots tr.active {background: linear-gradient(90deg, rgba(255,154,118,0.2) 0%, transparent 100%); border-left:3px solid #ff9a76;}
+body.theme-sunset table.spots td {color:#ffd6ba; border-color:rgba(255,154,118,0.1);}
+body.theme-sunset table.spots td a {color:#ff9a76;}
+body.theme-sunset table.spots td.category {color:#ffb08a;}
+
+/* Sunset sky colors for categories */
+body.theme-sunset table.spots tr.spotcat0 td.category {color:#ffa07a;}
+body.theme-sunset table.spots tr.spotcat1 td.category {color:#ffb6c1;}
+body.theme-sunset table.spots tr.spotcat2 td.category {color:#ffd700;}
+body.theme-sunset table.spots tr.spotcat3 td.category {color:#ff6b6b;}
+
+/* Details with warm glow */
+body.theme-sunset div.details {background-color:#1a1625; border:2px solid #ff9a76; box-shadow:0 0 30px rgba(255,154,118,0.3);}
+body.theme-sunset div.details a.closeDetails {background-color:#3d1f47; color:#ffb08a;}
+body.theme-sunset div.details a.closeDetails:hover {background-color:#5e2750;}
+body.theme-sunset div.details div.spotinfo h1 {color:#ffb08a; border-bottom:2px solid rgba(255,154,118,0.3); text-shadow:0 0 10px rgba(255,154,118,0.3);}
+body.theme-sunset div.details table th {color:#ffb08a; background-color:#3d1f47; border-color:rgba(255,154,118,0.2);}
+body.theme-sunset div.details table td {color:#ffd6ba; background-color:#231830; border-color:rgba(255,154,118,0.1);}
+
+/* Filters */
+body.theme-sunset div.filter {background-color:#231830; border-color:rgba(255,154,118,0.2);}
+body.theme-sunset div.filter h4 {background: linear-gradient(180deg, #2d1b3d 0%, #3d1f47 100%); border-color:rgba(255,154,118,0.2); color:#ffb08a;}
+body.theme-sunset div.filter ul.filterlist li {border-color:rgba(255,154,118,0.1);}
+body.theme-sunset div.filter ul.filterlist li:hover {background: linear-gradient(90deg, rgba(255,154,118,0.15) 0%, transparent 100%);}
+body.theme-sunset div.filter ul.filterlist li a {color:#ff9a76;}
+body.theme-sunset div.filter ul.filterlist li.active {background: linear-gradient(90deg, rgba(255,154,118,0.3) 0%, transparent 100%); border-left:3px solid #ff9a76;}
+
+/* Paging */
+body.theme-sunset div.paging a {color:#ffb08a; border-color:rgba(255,154,118,0.2); background-color:#3d1f47;}
+body.theme-sunset div.paging a:hover {background: linear-gradient(135deg, rgba(255,154,118,0.3) 0%, rgba(255,107,107,0.3) 100%); border-color:#ff9a76; box-shadow:0 0 10px rgba(255,154,118,0.3);}

@@ -1,0 +1,57 @@
+/* MIDNIGHT OCEAN THEME - Deep blue oceanic vibes */
+body.theme-midnight-ocean {background: linear-gradient(135deg, #0a192f 0%, #112240 100%); color:#ccd6f6;}
+body.theme-midnight-ocean a:visited, body.theme-midnight-ocean a:link {color:#64ffda;}
+body.theme-midnight-ocean a:hover {color:#5eead4; text-decoration:underline;}
+
+/* Header & Navigation */
+body.theme-midnight-ocean div.container {background:transparent;}
+body.theme-midnight-ocean div.logo h1 a {color:#64ffda; text-shadow: 0 0 10px rgba(100,255,218,0.3);}
+body.theme-midnight-ocean div.filter h4 {color:#8892b0;}
+body.theme-midnight-ocean ul.mainmenu li a {color:#ccd6f6;}
+body.theme-midnight-ocean ul.mainmenu li:hover {background-color:#1d2d50;}
+body.theme-midnight-ocean ul.mainmenu li.active {background-color:#233554; border-left:3px solid #64ffda;}
+
+/* Toolbar */
+body.theme-midnight-ocean div#toolbar {background: linear-gradient(180deg, #172a45 0%, #1d2d50 100%); border-color:#233554;}
+body.theme-midnight-ocean div.notifications, body.theme-midnight-ocean div.toolbarButton {border-right-color:#233554;}
+body.theme-midnight-ocean div.toolbarButton:hover {background-color:#233554;}
+body.theme-midnight-ocean div.toolbarButton p a {color:#64ffda;}
+
+/* Spots Table */
+body.theme-midnight-ocean table.spots {background-color:#0a192f; border-color:#1d2d50;}
+body.theme-midnight-ocean table.spots th {background: linear-gradient(180deg, #172a45 0%, #1d2d50 100%); color:#64ffda; border-color:#233554; font-weight:600;}
+body.theme-midnight-ocean table.spots th a {color:#64ffda;}
+body.theme-midnight-ocean table.spots th.sorted a {color:#5eead4;}
+body.theme-midnight-ocean table.spots tr.even {background-color:#0f1e33;}
+body.theme-midnight-ocean table.spots tr.odd {background-color:#112240;}
+body.theme-midnight-ocean table.spots tr:hover {background-color:#1d2d50; transition:all 0.2s ease;}
+body.theme-midnight-ocean table.spots tr.active {background-color:#233554; border-left:3px solid #64ffda;}
+body.theme-midnight-ocean table.spots td {color:#ccd6f6; border-color:#1d2d50;}
+body.theme-midnight-ocean table.spots td a {color:#5eead4;}
+body.theme-midnight-ocean table.spots td.category {color:#8892b0; font-weight:600;}
+
+/* Categories with ocean colors */
+body.theme-midnight-ocean table.spots tr.spotcat0 td.category {color:#64ffda;}
+body.theme-midnight-ocean table.spots tr.spotcat1 td.category {color:#7dd3c0;}
+body.theme-midnight-ocean table.spots tr.spotcat2 td.category {color:#ffd479;}
+body.theme-midnight-ocean table.spots tr.spotcat3 td.category {color:#ff6b9d;}
+
+/* Details Panel */
+body.theme-midnight-ocean div.details {background-color:#0a192f; border:2px solid #64ffda; box-shadow:0 8px 32px rgba(100,255,218,0.2);}
+body.theme-midnight-ocean div.details a.closeDetails {background-color:#1d2d50; color:#64ffda;}
+body.theme-midnight-ocean div.details a.closeDetails:hover {background-color:#233554;}
+body.theme-midnight-ocean div.details div.spotinfo h1 {color:#64ffda; border-bottom:2px solid #233554;}
+body.theme-midnight-ocean div.details table th {color:#8892b0; background-color:#112240; border-color:#1d2d50;}
+body.theme-midnight-ocean div.details table td {color:#ccd6f6; background-color:#0f1e33; border-color:#1d2d50;}
+
+/* Filters */
+body.theme-midnight-ocean div.filter {background-color:#0f1e33; border-color:#1d2d50;}
+body.theme-midnight-ocean div.filter h4 {background: linear-gradient(180deg, #172a45 0%, #1d2d50 100%); border-color:#233554; color:#64ffda;}
+body.theme-midnight-ocean div.filter ul.filterlist li {border-color:#1d2d50;}
+body.theme-midnight-ocean div.filter ul.filterlist li:hover {background-color:#1d2d50;}
+body.theme-midnight-ocean div.filter ul.filterlist li a {color:#5eead4;}
+body.theme-midnight-ocean div.filter ul.filterlist li.active {background-color:#233554; border-left:3px solid #64ffda;}
+
+/* Paging */
+body.theme-midnight-ocean div.paging a {color:#64ffda; border-color:#1d2d50; background-color:#112240;}
+body.theme-midnight-ocean div.paging a:hover {background-color:#1d2d50; border-color:#64ffda;}

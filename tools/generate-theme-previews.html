@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotweb Theme Preview Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .theme-preview {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .theme-preview:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        
+        .theme-header {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .theme-name {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .preview-container {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+        }
+        
+        .preview-iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            transform: scale(0.5);
+            transform-origin: top left;
+        }
+        
+        .theme-actions {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1976D2;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .download-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            margin: 10px;
+        }
+        
+        .download-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Spotweb Theme Preview Generator</h1>
+        
+        <div class="controls">
+            <h3>Generate Previews</h3>
+            <p>Click a theme to preview it full-size, or download all previews as images.</p>
+            <button class="download-btn" onclick="downloadAllPreviews()">📸 Download All Previews</button>
+            <button class="download-btn btn-secondary" onclick="copyCSS()">📋 Copy All Theme CSS</button>
+        </div>
+        
+        <div class="theme-grid" id="themeGrid"></div>
+    </div>
+    
+    <script>
+        const themes = [
+            { 
+                id: 'light', 
+                name: 'Light (Default)', 
+                icon: '☀️',
+                colors: {
+                    bg: '#ffffff',
+                    text: '#333',
+                    primary: '#0066cc',
+                    secondary: '#f5f5f5'
+                }
+            },
+            { 
+                id: 'dark', 
+                name: 'Dark', 
+                icon: '🌙',
+                colors: {
+                    bg: '#1e1e1e',
+                    text: '#e0e0e0',
+                    primary: '#0553a1',
+                    secondary: '#2d2d2d'
+                }
+            },
+            { 
+                id: 'midnight-ocean', 
+                name: 'Midnight Ocean', 
+                icon: '🌊',
+                colors: {
+                    bg: 'linear-gradient(135deg, #0a192f 0%, #112240 100%)',
+                    text: '#ccd6f6',
+                    primary: '#64ffda',
+                    secondary: '#1d2d50'
+                }
+            },
+            { 
+                id: 'cyberpunk', 
+                name: 'Cyberpunk', 
+                icon: '🎮',
+                colors: {
+                    bg: '#0d0221',
+                    text: '#00ff41',
+                    primary: '#ff006e',
+                    secondary: '#1a0b2e'
+                }
+            },
+            { 
+                id: 'nord', 
+                name: 'Nord', 
+                icon: '❄️',
+                colors: {
+                    bg: '#2e3440',
+                    text: '#d8dee9',
+                    primary: '#88c0d0',
+                    secondary: '#3b4252'
+                }
+            },
+            { 
+                id: 'dracula', 
+                name: 'Dracula', 
+                icon: '🧛',
+                colors: {
+                    bg: '#282a36',
+                    text: '#f8f8f2',
+                    primary: '#ff79c6',
+                    secondary: '#44475a'
+                }
+            },
+            { 
+                id: 'forest', 
+                name: 'Forest', 
+                icon: '🌲',
+                colors: {
+                    bg: 'linear-gradient(135deg, #1a3a2a 0%, #2d4a3e 100%)',
+                    text: '#c9dac8',
+                    primary: '#7fbf7f',
+                    secondary: '#2d4a3e'
+                }
+            },
+            { 
+                id: 'sunset', 
+                name: 'Sunset', 
+                icon: '🌅',
+                colors: {
+                    bg: 'linear-gradient(135deg, #1a1625 0%, #3d1f47 50%, #5e2750 100%)',
+                    text: '#ffd6ba',
+                    primary: '#ff9a76',
+                    secondary: '#3d1f47'
+                }
+            }
+        ];
+        
+        function createPreviewHTML(theme) {
+            return `
+                <div style="background: ${theme.colors.bg}; color: ${theme.colors.text}; min-height: 100vh; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="max-width: 1200px; margin: 0 auto;">
+                        <div style="background: ${theme.colors.secondary}; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <h1 style="color: ${theme.colors.primary}; margin: 0;">${theme.icon} ${theme.name}</h1>
+                        </div>
+                        
+                        <div style="background: ${theme.colors.secondary}; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: ${theme.colors.secondary};">
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid ${theme.colors.primary}; color: ${theme.colors.primary};">Category</th>
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid ${theme.colors.primary}; color: ${theme.colors.primary};">Title</th>
+                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid ${theme.colors.primary}; color: ${theme.colors.primary};">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                        <td style="padding: 12px; color: ${theme.colors.primary};">Movies</td>
+                                        <td style="padding: 12px;"><a href="#" style="color: ${theme.colors.primary}; text-decoration: none;">Example Movie Title 2024</a></td>
+                                        <td style="padding: 12px;">Dec 08, 2025</td>
+                                    </tr>
+                                    <tr style="background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                        <td style="padding: 12px; color: ${theme.colors.primary};">TV</td>
+                                        <td style="padding: 12px;"><a href="#" style="color: ${theme.colors.primary}; text-decoration: none;">TV Show S01E01</a></td>
+                                        <td style="padding: 12px;">Dec 08, 2025</td>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                        <td style="padding: 12px; color: ${theme.colors.primary};">Music</td>
+                                        <td style="padding: 12px;"><a href="#" style="color: ${theme.colors.primary}; text-decoration: none;">Album Name - Artist</a></td>
+                                        <td style="padding: 12px;">Dec 08, 2025</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div style="background: ${theme.colors.secondary}; padding: 20px; border-radius: 8px;">
+                            <h3 style="color: ${theme.colors.primary}; margin-top: 0;">Theme Colors</h3>
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 150px;">
+                                    <div style="background: ${theme.colors.primary}; height: 60px; border-radius: 4px; margin-bottom: 8px;"></div>
+                                    <small>Primary</small>
+                                </div>
+                                <div style="flex: 1; min-width: 150px;">
+                                    <div style="background: ${theme.colors.secondary}; height: 60px; border-radius: 4px; margin-bottom: 8px; border: 1px solid ${theme.colors.primary};"></div>
+                                    <small>Secondary</small>
+                                </div>
+                                <div style="flex: 1; min-width: 150px;">
+                                    <div style="color: ${theme.colors.text}; background: ${theme.colors.bg}; height: 60px; border-radius: 4px; margin-bottom: 8px; border: 1px solid ${theme.colors.primary}; display: flex; align-items: center; justify-content: center;">Text</div>
+                                    <small>Text Color</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderThemes() {
+            const grid = document.getElementById('themeGrid');
+            
+            themes.forEach(theme => {
+                const previewHTML = createPreviewHTML(theme);
+                
+                const themeCard = document.createElement('div');
+                themeCard.className = 'theme-preview';
+                themeCard.innerHTML = `
+                    <div class="theme-header">
+                        <div class="theme-name">
+                            <span>${theme.icon}</span>
+                            <span>${theme.name}</span>
+                        </div>
+                    </div>
+                    <div class="preview-container">
+                        <iframe class="preview-iframe" srcdoc="${previewHTML.replace(/"/g, '&quot;')}"></iframe>
+                    </div>
+                    <div class="theme-actions">
+                        <button class="btn-primary" onclick="downloadPreview('${theme.id}', '${theme.name}')">📸 Download</button>
+                        <button class="btn-secondary" onclick="viewFullsize('${theme.id}')">🔍 View Full</button>
+                    </div>
+                `;
+                
+                grid.appendChild(themeCard);
+            });
+        }
+        
+        function downloadPreview(themeId, themeName) {
+            alert(`Download functionality for ${themeName} would capture the preview as an image here!`);
+            console.log(`Downloading preview for theme: ${themeId}`);
+        }
+        
+        function viewFullsize(themeId) {
+            const theme = themes.find(t => t.id === themeId);
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(createPreviewHTML(theme));
+        }
+        
+        function downloadAllPreviews() {
+            alert('This would generate and download all theme preview images!');
+        }
+        
+        function copyCSS() {
+            alert('This would copy all theme CSS to clipboard!');
+        }
+        
+        // Initialize
+        renderThemes();
+    </script>
+</body>
+</html>
