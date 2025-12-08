@@ -2,19 +2,32 @@
 /* Inspired by Tokyo's neon-lit nights - deep blue with purple and cyan accents */
 
 body.theme-tokyo-night {
-    background: linear-gradient(135deg, #1a1b26 0%, #16161e 100%);
+    background: linear-gradient(135deg, #1a1b26 0%, #16161e 50%, #1a1b26 100%);
     color: #a9b1d6;
+    position: relative;
+}
+
+body.theme-tokyo-night::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(122, 162, 247, 0.05) 0%, transparent 50%);
+    pointer-events: none;
 }
 
 body.theme-tokyo-night a:visited,
 body.theme-tokyo-night a:link {
     color: #7aa2f7;
+    transition: all 0.3s ease;
 }
 
 body.theme-tokyo-night a:hover {
     color: #bb9af7;
     text-decoration: underline;
-    text-shadow: 0 0 8px rgba(187, 154, 247, 0.4);
+    text-shadow: 0 0 12px rgba(187, 154, 247, 0.8), 0 0 20px rgba(187, 154, 247, 0.4);
 }
 
 body.theme-tokyo-night div.container {
@@ -23,11 +36,16 @@ body.theme-tokyo-night div.container {
 
 body.theme-tokyo-night div.logo h1 a {
     color: #7dcfff;
-    text-shadow: 0 0 15px rgba(125, 207, 255, 0.4);
+    text-shadow: 0 0 20px rgba(125, 207, 255, 0.8), 0 0 40px rgba(125, 207, 255, 0.4);
+    font-weight: 700;
+    letter-spacing: 2px;
 }
 
 body.theme-tokyo-night div.filter h4 {
     color: #bb9af7;
+    text-shadow: 0 0 10px rgba(187, 154, 247, 0.6);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
 }
 
 body.theme-tokyo-night ul.mainmenu li a {
@@ -35,17 +53,20 @@ body.theme-tokyo-night ul.mainmenu li a {
 }
 
 body.theme-tokyo-night ul.mainmenu li:hover {
-    background-color: #24283b;
+    background: linear-gradient(90deg, rgba(122, 162, 247, 0.2) 0%, transparent 100%);
+    box-shadow: inset 4px 0 0 #7dcfff, 0 0 15px rgba(125, 207, 255, 0.2);
 }
 
 body.theme-tokyo-night ul.mainmenu li.active {
-    background-color: #292e42;
-    border-left: 3px solid #7aa2f7;
+    background: linear-gradient(90deg, rgba(187, 154, 247, 0.15) 0%, transparent 100%);
+    border-left: 4px solid #bb9af7;
+    box-shadow: inset 0 0 20px rgba(187, 154, 247, 0.3), 0 0 20px rgba(187, 154, 247, 0.2);
 }
 
 body.theme-tokyo-night div#toolbar {
-    background-color: #1f2335;
+    background: linear-gradient(180deg, #1f2335 0%, #1a1b26 100%);
     border-color: #292e42;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(125, 207, 255, 0.1);
 }
 
 body.theme-tokyo-night div.notifications,
@@ -54,22 +75,29 @@ body.theme-tokyo-night div.toolbarButton {
 }
 
 body.theme-tokyo-night div.toolbarButton:hover {
-    background-color: #24283b;
+    background: linear-gradient(135deg, rgba(122, 162, 247, 0.2) 0%, rgba(187, 154, 247, 0.2) 100%);
+    box-shadow: inset 0 0 15px rgba(125, 207, 255, 0.2);
 }
 
 body.theme-tokyo-night div.toolbarButton p a {
     color: #a9b1d6;
 }
 
+/* Neon-lit data table */
 body.theme-tokyo-night table.spots {
     background-color: #1a1b26;
-    border-color: #292e42;
+    border: 2px solid #292e42;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.6), inset 0 0 50px rgba(122, 162, 247, 0.05);
 }
 
 body.theme-tokyo-night table.spots th {
     background: linear-gradient(180deg, #1f2335 0%, #24283b 100%);
     color: #7dcfff;
     border-color: #292e42;
+    text-shadow: 0 0 10px rgba(125, 207, 255, 0.6);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 body.theme-tokyo-night table.spots th a {
@@ -77,11 +105,17 @@ body.theme-tokyo-night table.spots th a {
 }
 
 body.theme-tokyo-night table.spots tr:hover {
-    background-color: #24283b;
+    background: linear-gradient(90deg, rgba(125, 207, 255, 0.1) 0%, transparent 100%);
+    box-shadow: inset 0 0 20px rgba(125, 207, 255, 0.15);
+}
+
+body.theme-tokyo-night table.spots tr.active {
+    background: linear-gradient(90deg, rgba(187, 154, 247, 0.2) 0%, transparent 100%);
+    border-left: 3px solid #bb9af7;
 }
 
 body.theme-tokyo-night table.spots tr:nth-child(even) {
-    background-color: rgba(31, 35, 53, 0.4);
+    background-color: rgba(31, 35, 53, 0.3);
 }
 
 body.theme-tokyo-night table.spots td {
@@ -89,21 +123,70 @@ body.theme-tokyo-night table.spots td {
     border-color: #292e42;
 }
 
+body.theme-tokyo-night table.spots td a {
+    color: #7aa2f7;
+}
+
+body.theme-tokyo-night table.spots td a:hover {
+    color: #bb9af7;
+    text-shadow: 0 0 8px rgba(187, 154, 247, 0.6);
+}
+
+/* Neon category signs */
+body.theme-tokyo-night table.spots tr.spotcat0 td.category {
+    color: #7dcfff;
+    text-shadow: 0 0 10px rgba(125, 207, 255, 0.8), 0 0 20px rgba(125, 207, 255, 0.4);
+    font-weight: 700;
+}
+
+body.theme-tokyo-night table.spots tr.spotcat1 td.category {
+    color: #9ece6a;
+    text-shadow: 0 0 10px rgba(158, 206, 106, 0.8), 0 0 20px rgba(158, 206, 106, 0.4);
+    font-weight: 700;
+}
+
+body.theme-tokyo-night table.spots tr.spotcat2 td.category {
+    color: #e0af68;
+    text-shadow: 0 0 10px rgba(224, 175, 104, 0.8), 0 0 20px rgba(224, 175, 104, 0.4);
+    font-weight: 700;
+}
+
+body.theme-tokyo-night table.spots tr.spotcat3 td.category {
+    color: #bb9af7;
+    text-shadow: 0 0 10px rgba(187, 154, 247, 0.8), 0 0 20px rgba(187, 154, 247, 0.4);
+    font-weight: 700;
+}
+
 body.theme-tokyo-night div.filter {
     background-color: #1a1b26;
-    border-color: #292e42;
+    border: 2px solid #292e42;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(122, 162, 247, 0.05);
+}
+
+body.theme-tokyo-night div.filter ul.filterlist li:hover {
+    background: linear-gradient(90deg, rgba(125, 207, 255, 0.15) 0%, transparent 100%);
+}
+
+body.theme-tokyo-night div.filter ul.filterlist li.active {
+    background: linear-gradient(90deg, rgba(187, 154, 247, 0.2) 0%, transparent 100%);
+    border-left: 3px solid #bb9af7;
+    box-shadow: inset 0 0 15px rgba(187, 154, 247, 0.2);
 }
 
 body.theme-tokyo-night div.paging a {
     color: #7aa2f7;
-    border-color: #292e42;
-    background-color: #1f2335;
+    border: 1px solid #292e42;
+    background: linear-gradient(135deg, #1f2335 0%, #1a1b26 100%);
+    text-shadow: 0 0 6px rgba(122, 162, 247, 0.4);
+    transition: all 0.3s ease;
 }
 
 body.theme-tokyo-night div.paging a:hover {
-    background-color: #24283b;
+    background: linear-gradient(135deg, rgba(125, 207, 255, 0.2) 0%, rgba(187, 154, 247, 0.2) 100%);
     color: #bb9af7;
-    box-shadow: 0 0 10px rgba(122, 162, 247, 0.3);
+    border-color: #7dcfff;
+    box-shadow: 0 0 20px rgba(125, 207, 255, 0.5), inset 0 0 15px rgba(187, 154, 247, 0.2);
+    text-shadow: 0 0 10px rgba(187, 154, 247, 0.8);
 }
 
 body.theme-tokyo-night input[type="text"],
@@ -124,6 +207,7 @@ body.theme-tokyo-night input[type="submit"] {
 
 body.theme-tokyo-night button:hover,
 body.theme-tokyo-night input[type="submit"]:hover {
-    background-color: #89b4fa;
-    box-shadow: 0 0 15px rgba(122, 162, 247, 0.5);
+    background: linear-gradient(135deg, #bb9af7 0%, #7dcfff 100%);
+    box-shadow: 0 0 25px rgba(187, 154, 247, 0.7), 0 0 40px rgba(125, 207, 255, 0.4);
+    transform: translateY(-2px);
 }
