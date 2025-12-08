@@ -5,7 +5,8 @@
 # License: MIT
 # Creates LXC container and installs Spotweb automatically
 
-source <(curl -s https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
+# Note: External build.func not needed for this standalone script
+# source <(curl -s https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
 
 # Colors
 RED='\033[0;31m'
