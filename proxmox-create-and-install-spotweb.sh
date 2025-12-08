@@ -567,78 +567,44 @@ INSTALLER_SCRIPT
 pct exec $CTID -- sed -i "s/WEBSERVER_PLACEHOLDER/${WEBSERVER}/g" /tmp/installer.sh 2>/dev/null || true
 pct exec $CTID -- sed -i "s/THEMES_PLACEHOLDER/${INSTALL_THEMES}/g" /tmp/installer.sh 2>/dev/null || true
 
-# Install themes if requested (run separately to avoid nested heredoc issues)
+# Install themes if requested (download from GitHub)
 if [[ "$INSTALL_THEMES" != "none" ]]; then
     echo ""
     if [[ "$INSTALL_THEMES" == "pack" ]]; then
-        echo -e "${BLUE}Installing complete theme pack (8 themes)...${NC}"
+        echo -e "${BLUE}Installing complete theme pack (8 themes from GitHub)...${NC}"
     else
-        echo -e "${BLUE}Installing dark mode theme...${NC}"
+        echo -e "${BLUE}Installing dark mode theme (from GitHub)...${NC}"
     fi
     
-    # Download and run theme installer from GitHub
-    pct exec $CTID -- bash <<'THEME_INSTALL'
-#!/bin/bash
-SPOTWEB_DIR="/var/www/html/spotweb"
+    # Download themes from GitHub repository
+    pct exec $CTID -- bash -c "
+GITHUB_REPO='https://raw.githubusercontent.com/VenimK/spotweb/themes-only'
+SPOTWEB_DIR='/var/www/html/spotweb'
+INSTALL_THEMES='${INSTALL_THEMES}'
 
-echo "  → Creating dark-mode.css"
-cat > "${SPOTWEB_DIR}/templates/we1rdo/css/dark-mode.css" << 'CSSEOF'
-/* DONKERE MODUS THEMA VOOR SPOTWEB */
-body.dark-mode {background-color:#1e1e1e; color:#d61f1f;}
-body.dark-mode a:visited, body.dark-mode a:link {color:#0553a1;}
-body.dark-mode a:hover {color:#80bfff; text-decoration:underline;}
-body.dark-mode div.container {background:transparent;}
-body.dark-mode div.logo h1 a {color:#e0e0e0;}
-body.dark-mode div.filter h4 {color:#e0e0e0;}
-body.dark-mode ul.mainmenu li a {color:#e0e0e0;}
-body.dark-mode ul.mainmenu li:hover {background-color:#333;}
-body.dark-mode ul.mainmenu li.active {background-color:#444;}
-body.dark-mode div#toolbar {background-color:#333; border-color:#444;}
-body.dark-mode div.notifications, body.dark-mode div.toolbarButton {border-right-color:#444;}
-body.dark-mode div.toolbarButton:hover {background-color:#444;}
-body.dark-mode div.toolbarButton p a {color:#e0e0e0;}
-body.dark-mode table.spots {background-color:#2d2d2d; border-color:#444;}
-body.dark-mode table.spots th {background-color:#333; color:#e0e0e0; border-color:#444;}
-body.dark-mode table.spots th a {color:#e0e0e0;}
-body.dark-mode table.spots tr:hover {background-color:#333;}
-body.dark-mode table.spots td {color:#e0e0e0; border-color:#444;}
-body.dark-mode div.filter {background-color:#2d2d2d; border-color:#444;}
-body.dark-mode div.paging a {color:#e0e0e0; border-color:#444;}
-CSSEOF
+# Create directories
+mkdir -p \"\${SPOTWEB_DIR}/templates/we1rdo/css\"
+mkdir -p \"\${SPOTWEB_DIR}/templates/we1rdo/js\"
 
-echo "  → Creating dark-mode-toggle.js"
-cat > "${SPOTWEB_DIR}/templates/we1rdo/js/dark-mode-toggle.js" << 'JSEOF'
-document.addEventListener('DOMContentLoaded', function() {
-    if (localStorage.getItem('darkMode') === 'enabled') {
-        document.body.classList.add('dark-mode');
-    }
-    function updateButtonText() {
-        const toggleBtn = document.getElementById('dark-mode-toggle');
-        if (toggleBtn) {
-            toggleBtn.textContent = document.body.classList.contains('dark-mode') ? 'Lichte Modus' : 'Donkere Modus';
-        }
-    }
-    const toolbar = document.querySelector('div#toolbar');
-    if (toolbar) {
-        const darkModeButton = document.createElement('div');
-        darkModeButton.className = 'toolbarButton darkmode';
-        darkModeButton.innerHTML = '<p><a id="dark-mode-toggle">Donkere Modus</a></p>';
-        toolbar.appendChild(darkModeButton);
-        updateButtonText();
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        if (darkModeToggle) {
-            darkModeToggle.addEventListener('click', function() {
-                document.body.classList.toggle('dark-mode');
-                localStorage.setItem('darkMode', document.body.classList.contains('dark-mode') ? 'enabled' : 'disabled');
-                updateButtonText();
-            });
-        }
-    }
-});
-JSEOF
-
-echo "  → Creating header.inc.php with dark mode support"
-cat > "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php" << 'PHPEOF'
+# Download theme files from GitHub based on selection
+if [[ \"\$INSTALL_THEMES\" == \"pack\" ]]; then
+    # Download all 7 theme CSS files + switcher
+    themes=(\"dark\" \"midnight-ocean\" \"cyberpunk\" \"nord\" \"dracula\" \"forest\" \"sunset\")
+    for theme in \"\${themes[@]}\"; do
+        echo \"  → Downloading theme-\${theme}.css\"
+        curl -fsSL \"\${GITHUB_REPO}/templates/we1rdo/css/theme-\${theme}.css\" \
+            -o \"\${SPOTWEB_DIR}/templates/we1rdo/css/theme-\${theme}.css\" 2>/dev/null || \
+            echo \"    ⚠ Failed to download theme-\${theme}.css\"
+    done
+    
+    echo \"  → Downloading theme-switcher.js\"
+    curl -fsSL \"\${GITHUB_REPO}/templates/we1rdo/js/theme-switcher.js\" \
+        -o \"\${SPOTWEB_DIR}/templates/we1rdo/js/theme-switcher.js\" 2>/dev/null || \
+        echo \"    ⚠ Failed to download theme-switcher.js\"
+    
+    # Create header for multi-theme support
+    echo "  → Creating header.inc.php with multi-theme support"
+    cat > "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php" << 'PHPEOF'
 <!DOCTYPE HTML PUBLIC "//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 	<head>
@@ -654,22 +620,18 @@ cat > "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php" << 'PHPEOF'
 <?php } ?>
 <?php if ($tplHelper->allowed(SpotSecurity::spotsec_view_statics, '')) { ?>
 		<link rel='stylesheet' type='text/css' href='?page=statics&amp;type=css&amp;mod=<?php echo $tplHelper->getStaticModTime('css'); ?>'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/dark-mode.css' class="dark-mode-stylesheet">
+		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-dark.css'>
+		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-midnight-ocean.css'>
+		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-cyberpunk.css'>
+		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-nord.css'>
+		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-dracula.css'>
+		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-forest.css'>
+		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-sunset.css'>
 		<link rel='shortcut icon' href='?page=statics&amp;type=ico&amp;mod=<?php echo $tplHelper->getStaticModTime('ico'); ?>'>
-		<script type='text/javascript' src='templates/we1rdo/js/dark-mode-toggle.js'></script>
+		<script type='text/javascript' src='templates/we1rdo/js/theme-switcher.js'></script>
 <?php } ?>
 		<style type="text/css" media="screen,handheld,projection">
 			<?php echo $settings->get('customcss'); ?>
-			/* Dark mode button styles */
-			div.toolbarButton.darkmode p a {
-				background: url(templates/we1rdo/img/iconsprite.png) no-repeat 0 -560px;
-				padding: 0 0 0 18px;
-				cursor: pointer;
-				display: block;
-				height: 16px;
-				line-height: 15px;
-				margin: 2px 0 0 0;
-			}
 		</style>		
 <?php if ($tplHelper->allowed(SpotSecurity::spotsec_allow_custom_stylesheet, '')) { ?>
 		<style type="text/css" media="screen,handheld,projection">
@@ -684,18 +646,70 @@ cat > "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php" << 'PHPEOF'
 		<div id='editdialogdiv'></div>
 		<div id="overlay"></div>
 PHPEOF
-
-echo "  → Setting permissions"
-chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
-chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/css/dark-mode.css"
-chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/js/dark-mode-toggle.js"
-chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
-chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/css/dark-mode.css"
-chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/js/dark-mode-toggle.js"
-
-if [[ "$INSTALL_THEMES" == "pack" ]]; then
+    
+    # Set permissions for all theme files
+    echo "  → Setting permissions"
+    chown -R www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/css/theme-*.css" 2>/dev/null || true
+    chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/js/theme-switcher.js" 2>/dev/null || true
+    chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
+    chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/css/theme-"*.css 2>/dev/null || true
+    chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/js/theme-switcher.js" 2>/dev/null || true
+    chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
+    
     echo "✓ Theme pack installed (8 themes) 🎨"
+    
 else
+    # Download only dark theme (backwards compatibility)
+    echo "  → Downloading theme-dark.css"
+    curl -fsSL "${GITHUB_REPO}/templates/we1rdo/css/theme-dark.css" \
+        -o "${SPOTWEB_DIR}/templates/we1rdo/css/dark-mode.css" 2>/dev/null || \
+        echo "    ⚠ Failed to download dark theme"
+    
+    # Create minimal header for dark mode only
+    echo "  → Creating header.inc.php with dark mode support"
+    cat > "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php" << 'PHPEOF'
+<!DOCTYPE HTML PUBLIC "//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+		<title>SpotWeb - <?php echo $pagetitle?></title>
+		<meta name="generator" content="SpotWeb v<?php echo SPOTWEB_VERSION; ?>">
+<?php if ($settings->get('deny_robots')) {
+    echo "\t\t<meta name=\"robots\" content=\"noindex, nofollow\">\r\n";
+} ?>
+		<base href='<?php echo $tplHelper->makeBaseUrl('full'); ?>'>
+<?php if ($tplHelper->allowed(SpotSecurity::spotsec_view_rssfeed, '')) { ?>
+		<link rel='alternate' type='application/rss+xml' href='<?php echo $tplHelper->makeRssUrl(); ?>'>
+<?php } ?>
+<?php if ($tplHelper->allowed(SpotSecurity::spotsec_view_statics, '')) { ?>
+		<link rel='stylesheet' type='text/css' href='?page=statics&amp;type=css&amp;mod=<?php echo $tplHelper->getStaticModTime('css'); ?>'>
+		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/dark-mode.css'>
+		<link rel='shortcut icon' href='?page=statics&amp;type=ico&amp;mod=<?php echo $tplHelper->getStaticModTime('ico'); ?>'>
+<?php } ?>
+		<style type="text/css" media="screen,handheld,projection">
+			<?php echo $settings->get('customcss'); ?>
+		</style>		
+<?php if ($tplHelper->allowed(SpotSecurity::spotsec_allow_custom_stylesheet, '')) { ?>
+		<style type="text/css" media="screen,handheld,projection">
+			<?php echo $tplHelper->getUserCustomCss(); ?>
+		</style>		
+<?php } ?>
+		<script type='text/javascript'>
+			// console.timeEnd("parse-css");
+		</script>
+	</head>
+	<body class="theme-dark">
+		<div id='editdialogdiv'></div>
+		<div id="overlay"></div>
+PHPEOF
+    
+    # Set permissions
+    echo "  → Setting permissions"
+    chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
+    chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/css/dark-mode.css" 2>/dev/null || true
+    chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
+    chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/css/dark-mode.css" 2>/dev/null || true
+    
     echo "✓ Dark mode theme installed 🌙"
 fi
 THEME_INSTALL
