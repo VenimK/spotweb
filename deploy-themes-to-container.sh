@@ -54,7 +54,7 @@ print_info "Deploying theme pack to container $CTID..."
 echo ""
 
 # GitHub repository
-GITHUB_REPO="https://raw.githubusercontent.com/VenimK/spotweb/main"
+GITHUB_REPO="https://raw.githubusercontent.com/VenimK/spotweb/themes-only"
 
 # Create directories and download themes
 print_info "Setting up theme environment..."
@@ -62,7 +62,7 @@ pct exec $CTID -- bash <<'THEME_DOWNLOAD'
 #!/bin/bash
 
 # Configuration
-GITHUB_REPO="https://raw.githubusercontent.com/VenimK/spotweb/main"
+GITHUB_REPO="https://raw.githubusercontent.com/VenimK/spotweb/themes-only"
 SPOTWEB_DIR="/var/www/html/spotweb"
 
 # Create directories
