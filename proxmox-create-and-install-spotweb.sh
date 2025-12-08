@@ -576,31 +576,31 @@ if [[ "$INSTALL_THEMES" != "none" ]]; then
         echo -e "${BLUE}Installing dark mode theme (from GitHub)...${NC}"
     fi
     
-    # Download themes from GitHub repository
-    pct exec $CTID -- bash -c "
+    # Create theme installation script
+    cat > /tmp/install-themes-${CTID}.sh << 'THEME_SCRIPT'
+#!/bin/bash
 GITHUB_REPO='https://raw.githubusercontent.com/VenimK/spotweb/themes-only'
 SPOTWEB_DIR='/var/www/html/spotweb'
-INSTALL_THEMES='${INSTALL_THEMES}'
 
 # Create directories
-mkdir -p \"\${SPOTWEB_DIR}/templates/we1rdo/css\"
-mkdir -p \"\${SPOTWEB_DIR}/templates/we1rdo/js\"
+mkdir -p "${SPOTWEB_DIR}/templates/we1rdo/css"
+mkdir -p "${SPOTWEB_DIR}/templates/we1rdo/js"
 
 # Download theme files from GitHub based on selection
-if [[ \"\$INSTALL_THEMES\" == \"pack\" ]]; then
+if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
     # Download all 7 theme CSS files + switcher
-    themes=(\"dark\" \"midnight-ocean\" \"cyberpunk\" \"nord\" \"dracula\" \"forest\" \"sunset\")
-    for theme in \"\${themes[@]}\"; do
-        echo \"  → Downloading theme-\${theme}.css\"
-        curl -fsSL \"\${GITHUB_REPO}/templates/we1rdo/css/theme-\${theme}.css\" \
-            -o \"\${SPOTWEB_DIR}/templates/we1rdo/css/theme-\${theme}.css\" 2>/dev/null || \
-            echo \"    ⚠ Failed to download theme-\${theme}.css\"
+    themes=("dark" "midnight-ocean" "cyberpunk" "nord" "dracula" "forest" "sunset")
+    for theme in "${themes[@]}"; do
+        echo "  → Downloading theme-${theme}.css"
+        curl -fsSL "${GITHUB_REPO}/templates/we1rdo/css/theme-${theme}.css" \
+            -o "${SPOTWEB_DIR}/templates/we1rdo/css/theme-${theme}.css" 2>/dev/null || \
+            echo "    ⚠ Failed to download theme-${theme}.css"
     done
     
-    echo \"  → Downloading theme-switcher.js\"
-    curl -fsSL \"\${GITHUB_REPO}/templates/we1rdo/js/theme-switcher.js\" \
-        -o \"\${SPOTWEB_DIR}/templates/we1rdo/js/theme-switcher.js\" 2>/dev/null || \
-        echo \"    ⚠ Failed to download theme-switcher.js\"
+    echo "  → Downloading theme-switcher.js"
+    curl -fsSL "${GITHUB_REPO}/templates/we1rdo/js/theme-switcher.js" \
+        -o "${SPOTWEB_DIR}/templates/we1rdo/js/theme-switcher.js" 2>/dev/null || \
+        echo "    ⚠ Failed to download theme-switcher.js"
     
     # Create header for multi-theme support
     echo "  → Creating header.inc.php with multi-theme support"
@@ -712,7 +712,19 @@ PHPEOF
     
     echo "✓ Dark mode theme installed 🌙"
 fi
-THEME_INSTALL
+THEME_SCRIPT
+
+    # Replace placeholder with actual theme choice
+    sed -i "s/INSTALL_THEMES_PLACEHOLDER/${INSTALL_THEMES}/g" /tmp/install-themes-${CTID}.sh
+    
+    # Copy script to container and execute
+    pct push $CTID /tmp/install-themes-${CTID}.sh /tmp/install-themes.sh
+    pct exec $CTID -- chmod +x /tmp/install-themes.sh
+    pct exec $CTID -- bash /tmp/install-themes.sh
+    pct exec $CTID -- rm /tmp/install-themes.sh
+    
+    # Cleanup local temp file
+    rm /tmp/install-themes-${CTID}.sh
 fi
 
 # Get the credentials
