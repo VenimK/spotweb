@@ -589,8 +589,8 @@ mkdir -p "${SPOTWEB_DIR}/templates/we1rdo/js"
 
 # Download theme files from GitHub based on selection
 if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
-    # Download all 12 theme CSS files + switcher
-    themes=("dark" "midnight-ocean" "cyberpunk" "nord" "dracula" "forest" "sunset" "monokai" "tokyo-night" "gruvbox" "solarized-dark" "onedark")
+    # Download all 7 theme CSS files + switcher
+    themes=("dark" "midnight-ocean" "cyberpunk" "nord" "dracula" "forest" "sunset")
     for theme in "${themes[@]}"; do
         echo "  → Downloading theme-${theme}.css"
         curl -fsSL "${GITHUB_REPO}/templates/we1rdo/css/theme-${theme}.css" \
@@ -628,11 +628,6 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
 		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-dracula.css'>
 		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-forest.css'>
 		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-sunset.css'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-monokai.css'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-tokyo-night.css'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-gruvbox.css'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-solarized-dark.css'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-onedark.css'>
 		<link rel='shortcut icon' href='?page=statics&amp;type=ico&amp;mod=<?php echo $tplHelper->getStaticModTime('ico'); ?>'>
 		<script type='text/javascript' src='templates/we1rdo/js/theme-switcher.js'></script>
 <?php } ?>

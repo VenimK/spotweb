@@ -11,12 +11,7 @@ const themes = [
     { id: 'nord', name: 'Nord', icon: '❄️' },
     { id: 'dracula', name: 'Dracula', icon: '🧛' },
     { id: 'forest', name: 'Forest', icon: '🌲' },
-    { id: 'sunset', name: 'Sunset', icon: '🌅' },
-    { id: 'monokai', name: 'Monokai', icon: '🎨' },
-    { id: 'tokyo-night', name: 'Tokyo Night', icon: '🗼' },
-    { id: 'gruvbox', name: 'Gruvbox', icon: '🍂' },
-    { id: 'solarized-dark', name: 'Solarized Dark', icon: '🔬' },
-    { id: 'onedark', name: 'One Dark', icon: '⚛️' }
+    { id: 'sunset', name: 'Sunset', icon: '🌅' }
 ];
 
 document.addEventListener('DOMContentLoaded', function() {

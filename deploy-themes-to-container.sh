@@ -73,7 +73,7 @@ echo "  → Directories created"
 
 # Download theme CSS files
 echo "  → Downloading theme CSS files..."
-themes=("dark" "midnight-ocean" "cyberpunk" "nord" "dracula" "forest" "sunset" "monokai" "tokyo-night" "gruvbox" "solarized-dark" "onedark")
+themes=("dark" "midnight-ocean" "cyberpunk" "nord" "dracula" "forest" "sunset")
 for theme in "${themes[@]}"; do
     echo "    • theme-${theme}.css"
     curl -fsSL "${GITHUB_REPO}/templates/we1rdo/css/theme-${theme}.css" \
