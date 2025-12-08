@@ -1,0 +1,127 @@
+/* SOLARIZED DARK THEME FOR SPOTWEB */
+/* Scientific precision with carefully balanced contrast - easy on the eyes */
+
+body.theme-solarized-dark {
+    background: linear-gradient(135deg, #002b36 0%, #001f28 100%);
+    color: #839496;
+}
+
+body.theme-solarized-dark a:visited,
+body.theme-solarized-dark a:link {
+    color: #268bd2;
+}
+
+body.theme-solarized-dark a:hover {
+    color: #2aa198;
+    text-decoration: underline;
+}
+
+body.theme-solarized-dark div.container {
+    background: transparent;
+}
+
+body.theme-solarized-dark div.logo h1 a {
+    color: #b58900;
+    text-shadow: 0 0 10px rgba(181, 137, 0, 0.3);
+}
+
+body.theme-solarized-dark div.filter h4 {
+    color: #cb4b16;
+}
+
+body.theme-solarized-dark ul.mainmenu li a {
+    color: #839496;
+}
+
+body.theme-solarized-dark ul.mainmenu li:hover {
+    background-color: #073642;
+}
+
+body.theme-solarized-dark ul.mainmenu li.active {
+    background-color: #094653;
+    border-left: 3px solid #268bd2;
+}
+
+body.theme-solarized-dark div#toolbar {
+    background-color: #073642;
+    border-color: #094653;
+}
+
+body.theme-solarized-dark div.notifications,
+body.theme-solarized-dark div.toolbarButton {
+    border-right-color: #094653;
+}
+
+body.theme-solarized-dark div.toolbarButton:hover {
+    background-color: #094653;
+}
+
+body.theme-solarized-dark div.toolbarButton p a {
+    color: #839496;
+}
+
+body.theme-solarized-dark table.spots {
+    background-color: #002b36;
+    border-color: #094653;
+}
+
+body.theme-solarized-dark table.spots th {
+    background: linear-gradient(180deg, #073642 0%, #094653 100%);
+    color: #b58900;
+    border-color: #094653;
+}
+
+body.theme-solarized-dark table.spots th a {
+    color: #b58900;
+}
+
+body.theme-solarized-dark table.spots tr:hover {
+    background-color: #073642;
+}
+
+body.theme-solarized-dark table.spots tr:nth-child(even) {
+    background-color: rgba(7, 54, 66, 0.4);
+}
+
+body.theme-solarized-dark table.spots td {
+    color: #839496;
+    border-color: #094653;
+}
+
+body.theme-solarized-dark div.filter {
+    background-color: #002b36;
+    border-color: #094653;
+}
+
+body.theme-solarized-dark div.paging a {
+    color: #268bd2;
+    border-color: #094653;
+    background-color: #073642;
+}
+
+body.theme-solarized-dark div.paging a:hover {
+    background-color: #094653;
+    color: #2aa198;
+}
+
+body.theme-solarized-dark input[type="text"],
+body.theme-solarized-dark input[type="password"],
+body.theme-solarized-dark select,
+body.theme-solarized-dark textarea {
+    background-color: #073642;
+    color: #839496;
+    border-color: #094653;
+}
+
+body.theme-solarized-dark button,
+body.theme-solarized-dark input[type="submit"] {
+    background-color: #268bd2;
+    color: #fdf6e3;
+    border-color: #268bd2;
+}
+
+body.theme-solarized-dark button:hover,
+body.theme-solarized-dark input[type="submit"]:hover {
+    background-color: #2aa198;
+    box-shadow: 0 0 15px rgba(38, 139, 210, 0.4);
+}

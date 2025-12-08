@@ -1,0 +1,127 @@
+/* GRUVBOX THEME FOR SPOTWEB */
+/* Retro groove with warm earthy tones - perfect for cozy browsing */
+
+body.theme-gruvbox {
+    background: linear-gradient(135deg, #282828 0%, #1d2021 100%);
+    color: #ebdbb2;
+}
+
+body.theme-gruvbox a:visited,
+body.theme-gruvbox a:link {
+    color: #83a598;
+}
+
+body.theme-gruvbox a:hover {
+    color: #8ec07c;
+    text-decoration: underline;
+}
+
+body.theme-gruvbox div.container {
+    background: transparent;
+}
+
+body.theme-gruvbox div.logo h1 a {
+    color: #fabd2f;
+    text-shadow: 0 0 10px rgba(250, 189, 47, 0.3);
+}
+
+body.theme-gruvbox div.filter h4 {
+    color: #fe8019;
+}
+
+body.theme-gruvbox ul.mainmenu li a {
+    color: #ebdbb2;
+}
+
+body.theme-gruvbox ul.mainmenu li:hover {
+    background-color: #3c3836;
+}
+
+body.theme-gruvbox ul.mainmenu li.active {
+    background-color: #504945;
+    border-left: 3px solid #fabd2f;
+}
+
+body.theme-gruvbox div#toolbar {
+    background-color: #3c3836;
+    border-color: #504945;
+}
+
+body.theme-gruvbox div.notifications,
+body.theme-gruvbox div.toolbarButton {
+    border-right-color: #504945;
+}
+
+body.theme-gruvbox div.toolbarButton:hover {
+    background-color: #504945;
+}
+
+body.theme-gruvbox div.toolbarButton p a {
+    color: #ebdbb2;
+}
+
+body.theme-gruvbox table.spots {
+    background-color: #282828;
+    border-color: #504945;
+}
+
+body.theme-gruvbox table.spots th {
+    background: linear-gradient(180deg, #3c3836 0%, #504945 100%);
+    color: #fabd2f;
+    border-color: #504945;
+}
+
+body.theme-gruvbox table.spots th a {
+    color: #fabd2f;
+}
+
+body.theme-gruvbox table.spots tr:hover {
+    background-color: #3c3836;
+}
+
+body.theme-gruvbox table.spots tr:nth-child(even) {
+    background-color: rgba(60, 56, 54, 0.3);
+}
+
+body.theme-gruvbox table.spots td {
+    color: #ebdbb2;
+    border-color: #504945;
+}
+
+body.theme-gruvbox div.filter {
+    background-color: #282828;
+    border-color: #504945;
+}
+
+body.theme-gruvbox div.paging a {
+    color: #83a598;
+    border-color: #504945;
+    background-color: #3c3836;
+}
+
+body.theme-gruvbox div.paging a:hover {
+    background-color: #504945;
+    color: #8ec07c;
+}
+
+body.theme-gruvbox input[type="text"],
+body.theme-gruvbox input[type="password"],
+body.theme-gruvbox select,
+body.theme-gruvbox textarea {
+    background-color: #3c3836;
+    color: #ebdbb2;
+    border-color: #504945;
+}
+
+body.theme-gruvbox button,
+body.theme-gruvbox input[type="submit"] {
+    background-color: #fabd2f;
+    color: #282828;
+    border-color: #fabd2f;
+}
+
+body.theme-gruvbox button:hover,
+body.theme-gruvbox input[type="submit"]:hover {
+    background-color: #fe8019;
+    box-shadow: 0 0 15px rgba(250, 189, 47, 0.4);
+}

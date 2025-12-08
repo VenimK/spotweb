@@ -1,0 +1,129 @@
+/* ONE DARK THEME FOR SPOTWEB */
+/* Atom's iconic theme - modern, clean, and professional */
+
+body.theme-onedark {
+    background: linear-gradient(135deg, #282c34 0%, #21252b 100%);
+    color: #abb2bf;
+}
+
+body.theme-onedark a:visited,
+body.theme-onedark a:link {
+    color: #61afef;
+}
+
+body.theme-onedark a:hover {
+    color: #98c379;
+    text-decoration: underline;
+    text-shadow: 0 0 8px rgba(152, 195, 121, 0.3);
+}
+
+body.theme-onedark div.container {
+    background: transparent;
+}
+
+body.theme-onedark div.logo h1 a {
+    color: #e5c07b;
+    text-shadow: 0 0 12px rgba(229, 192, 123, 0.3);
+}
+
+body.theme-onedark div.filter h4 {
+    color: #c678dd;
+}
+
+body.theme-onedark ul.mainmenu li a {
+    color: #abb2bf;
+}
+
+body.theme-onedark ul.mainmenu li:hover {
+    background-color: #2c313a;
+}
+
+body.theme-onedark ul.mainmenu li.active {
+    background-color: #353b45;
+    border-left: 3px solid #61afef;
+}
+
+body.theme-onedark div#toolbar {
+    background-color: #2c313a;
+    border-color: #353b45;
+}
+
+body.theme-onedark div.notifications,
+body.theme-onedark div.toolbarButton {
+    border-right-color: #353b45;
+}
+
+body.theme-onedark div.toolbarButton:hover {
+    background-color: #353b45;
+}
+
+body.theme-onedark div.toolbarButton p a {
+    color: #abb2bf;
+}
+
+body.theme-onedark table.spots {
+    background-color: #282c34;
+    border-color: #353b45;
+}
+
+body.theme-onedark table.spots th {
+    background: linear-gradient(180deg, #2c313a 0%, #353b45 100%);
+    color: #e5c07b;
+    border-color: #353b45;
+}
+
+body.theme-onedark table.spots th a {
+    color: #e5c07b;
+}
+
+body.theme-onedark table.spots tr:hover {
+    background-color: #2c313a;
+}
+
+body.theme-onedark table.spots tr:nth-child(even) {
+    background-color: rgba(44, 49, 58, 0.4);
+}
+
+body.theme-onedark table.spots td {
+    color: #abb2bf;
+    border-color: #353b45;
+}
+
+body.theme-onedark div.filter {
+    background-color: #282c34;
+    border-color: #353b45;
+}
+
+body.theme-onedark div.paging a {
+    color: #61afef;
+    border-color: #353b45;
+    background-color: #2c313a;
+}
+
+body.theme-onedark div.paging a:hover {
+    background-color: #353b45;
+    color: #98c379;
+    box-shadow: 0 0 10px rgba(97, 175, 239, 0.3);
+}
+
+body.theme-onedark input[type="text"],
+body.theme-onedark input[type="password"],
+body.theme-onedark select,
+body.theme-onedark textarea {
+    background-color: #2c313a;
+    color: #abb2bf;
+    border-color: #353b45;
+}
+
+body.theme-onedark button,
+body.theme-onedark input[type="submit"] {
+    background-color: #61afef;
+    color: #282c34;
+    border-color: #61afef;
+}
+
+body.theme-onedark button:hover,
+body.theme-onedark input[type="submit"]:hover {
+    background-color: #528bff;
+    box-shadow: 0 0 15px rgba(97, 175, 239, 0.5);
+}

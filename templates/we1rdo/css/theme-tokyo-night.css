@@ -1,0 +1,129 @@
+/* TOKYO NIGHT THEME FOR SPOTWEB */
+/* Inspired by Tokyo's neon-lit nights - deep blue with purple and cyan accents */
+
+body.theme-tokyo-night {
+    background: linear-gradient(135deg, #1a1b26 0%, #16161e 100%);
+    color: #a9b1d6;
+}
+
+body.theme-tokyo-night a:visited,
+body.theme-tokyo-night a:link {
+    color: #7aa2f7;
+}
+
+body.theme-tokyo-night a:hover {
+    color: #bb9af7;
+    text-decoration: underline;
+    text-shadow: 0 0 8px rgba(187, 154, 247, 0.4);
+}
+
+body.theme-tokyo-night div.container {
+    background: transparent;
+}
+
+body.theme-tokyo-night div.logo h1 a {
+    color: #7dcfff;
+    text-shadow: 0 0 15px rgba(125, 207, 255, 0.4);
+}
+
+body.theme-tokyo-night div.filter h4 {
+    color: #bb9af7;
+}
+
+body.theme-tokyo-night ul.mainmenu li a {
+    color: #a9b1d6;
+}
+
+body.theme-tokyo-night ul.mainmenu li:hover {
+    background-color: #24283b;
+}
+
+body.theme-tokyo-night ul.mainmenu li.active {
+    background-color: #292e42;
+    border-left: 3px solid #7aa2f7;
+}
+
+body.theme-tokyo-night div#toolbar {
+    background-color: #1f2335;
+    border-color: #292e42;
+}
+
+body.theme-tokyo-night div.notifications,
+body.theme-tokyo-night div.toolbarButton {
+    border-right-color: #292e42;
+}
+
+body.theme-tokyo-night div.toolbarButton:hover {
+    background-color: #24283b;
+}
+
+body.theme-tokyo-night div.toolbarButton p a {
+    color: #a9b1d6;
+}
+
+body.theme-tokyo-night table.spots {
+    background-color: #1a1b26;
+    border-color: #292e42;
+}
+
+body.theme-tokyo-night table.spots th {
+    background: linear-gradient(180deg, #1f2335 0%, #24283b 100%);
+    color: #7dcfff;
+    border-color: #292e42;
+}
+
+body.theme-tokyo-night table.spots th a {
+    color: #7dcfff;
+}
+
+body.theme-tokyo-night table.spots tr:hover {
+    background-color: #24283b;
+}
+
+body.theme-tokyo-night table.spots tr:nth-child(even) {
+    background-color: rgba(31, 35, 53, 0.4);
+}
+
+body.theme-tokyo-night table.spots td {
+    color: #a9b1d6;
+    border-color: #292e42;
+}
+
+body.theme-tokyo-night div.filter {
+    background-color: #1a1b26;
+    border-color: #292e42;
+}
+
+body.theme-tokyo-night div.paging a {
+    color: #7aa2f7;
+    border-color: #292e42;
+    background-color: #1f2335;
+}
+
+body.theme-tokyo-night div.paging a:hover {
+    background-color: #24283b;
+    color: #bb9af7;
+    box-shadow: 0 0 10px rgba(122, 162, 247, 0.3);
+}
+
+body.theme-tokyo-night input[type="text"],
+body.theme-tokyo-night input[type="password"],
+body.theme-tokyo-night select,
+body.theme-tokyo-night textarea {
+    background-color: #1f2335;
+    color: #a9b1d6;
+    border-color: #292e42;
+}
+
+body.theme-tokyo-night button,
+body.theme-tokyo-night input[type="submit"] {
+    background-color: #7aa2f7;
+    color: #1a1b26;
+    border-color: #7aa2f7;
+}
+
+body.theme-tokyo-night button:hover,
+body.theme-tokyo-night input[type="submit"]:hover {
+    background-color: #89b4fa;
+    box-shadow: 0 0 15px rgba(122, 162, 247, 0.5);
+}

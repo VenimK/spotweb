@@ -1,0 +1,127 @@
+/* MONOKAI THEME FOR SPOTWEB */
+/* Inspired by the classic code editor theme - warm browns with vibrant accents */
+
+body.theme-monokai {
+    background: linear-gradient(135deg, #272822 0%, #1e1f1c 100%);
+    color: #f8f8f2;
+}
+
+body.theme-monokai a:visited,
+body.theme-monokai a:link {
+    color: #66d9ef;
+}
+
+body.theme-monokai a:hover {
+    color: #a6e22e;
+    text-decoration: underline;
+}
+
+body.theme-monokai div.container {
+    background: transparent;
+}
+
+body.theme-monokai div.logo h1 a {
+    color: #f92672;
+    text-shadow: 0 0 10px rgba(249, 38, 114, 0.3);
+}
+
+body.theme-monokai div.filter h4 {
+    color: #e6db74;
+}
+
+body.theme-monokai ul.mainmenu li a {
+    color: #f8f8f2;
+}
+
+body.theme-monokai ul.mainmenu li:hover {
+    background-color: #3e3d32;
+}
+
+body.theme-monokai ul.mainmenu li.active {
+    background-color: #49483e;
+    border-left: 3px solid #f92672;
+}
+
+body.theme-monokai div#toolbar {
+    background-color: #3e3d32;
+    border-color: #49483e;
+}
+
+body.theme-monokai div.notifications,
+body.theme-monokai div.toolbarButton {
+    border-right-color: #49483e;
+}
+
+body.theme-monokai div.toolbarButton:hover {
+    background-color: #49483e;
+}
+
+body.theme-monokai div.toolbarButton p a {
+    color: #f8f8f2;
+}
+
+body.theme-monokai table.spots {
+    background-color: #272822;
+    border-color: #49483e;
+}
+
+body.theme-monokai table.spots th {
+    background: linear-gradient(180deg, #3e3d32 0%, #49483e 100%);
+    color: #e6db74;
+    border-color: #49483e;
+}
+
+body.theme-monokai table.spots th a {
+    color: #e6db74;
+}
+
+body.theme-monokai table.spots tr:hover {
+    background-color: #3e3d32;
+}
+
+body.theme-monokai table.spots tr:nth-child(even) {
+    background-color: rgba(62, 61, 50, 0.3);
+}
+
+body.theme-monokai table.spots td {
+    color: #f8f8f2;
+    border-color: #49483e;
+}
+
+body.theme-monokai div.filter {
+    background-color: #272822;
+    border-color: #49483e;
+}
+
+body.theme-monokai div.paging a {
+    color: #66d9ef;
+    border-color: #49483e;
+    background-color: #3e3d32;
+}
+
+body.theme-monokai div.paging a:hover {
+    background-color: #49483e;
+    color: #a6e22e;
+}
+
+body.theme-monokai input[type="text"],
+body.theme-monokai input[type="password"],
+body.theme-monokai select,
+body.theme-monokai textarea {
+    background-color: #3e3d32;
+    color: #f8f8f2;
+    border-color: #49483e;
+}
+
+body.theme-monokai button,
+body.theme-monokai input[type="submit"] {
+    background-color: #f92672;
+    color: #f8f8f2;
+    border-color: #f92672;
+}
+
+body.theme-monokai button:hover,
+body.theme-monokai input[type="submit"]:hover {
+    background-color: #ff1f85;
+    box-shadow: 0 0 15px rgba(249, 38, 114, 0.5);
+}
