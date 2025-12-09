@@ -625,12 +625,15 @@ body.theme-${themeName} div.filter {
         function adjustBrightness(color, percent) {
             const num = parseInt(color.replace('#', ''), 16);
             const amt = Math.round(2.55 * percent);
-            const R = (num >> 16) + amt;
-            const G = (num >> 8 & 0x00FF) + amt;
-            const B = (num & 0x0000FF) + amt;
-            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
-                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
-                (B < 255 ? B < 1 ? 0 : B : 255))
+            const red = (num >> 16) + amt;
+            const green = (num >> 8 & 0x00FF) + amt;
+            const blue = (num & 0x0000FF) + amt;
+            
+            const clampedRed = red < 255 ? (red < 1 ? 0 : red) : 255;
+            const clampedGreen = green < 255 ? (green < 1 ? 0 : green) : 255;
+            const clampedBlue = blue < 255 ? (blue < 1 ? 0 : blue) : 255;
+            
+            return '#' + (0x1000000 + clampedRed * 0x10000 + clampedGreen * 0x100 + clampedBlue)
                 .toString(16).slice(1);
         }
     </script>
