@@ -111,49 +111,40 @@ function updateThemeSwitcher($themeName, $themeLabel, $themeIcon) {
         return true; // Already exists
     }
     
-    // Find the closing bracket of the themes array and insert before it
-    // This pattern finds "];  " at the end of the themes array
-    $pattern = '/^(\];)$/m';
-    $replacement = "    { id: '{$themeName}', name: '{$themeLabel}', icon: '{$themeIcon}' }\n$1";
+    // Find ]; that closes the themes array and insert new theme before it
+    // Use negative lookbehind to avoid matching other ]; in the file
+    $newTheme = "    { id: '{$themeName}', name: '{$themeLabel}', icon: '{$themeIcon}' }";
     
-    // First, check if we need to add a comma to the last existing theme
-    $lines = explode("\n", $content);
-    $newLines = [];
-    $foundArray = false;
-    $arrayStartLine = -1;
+    // Pattern: Find the closing of themes array (];)
+    // Replace it with: comma + newline + new theme + newline + ];
+    // But only if the previous line doesn't already end with a comma
     
-    for ($i = 0; $i < count($lines); $i++) {
-        $line = $lines[$i];
-        
-        // Find the themes array declaration
-        if (strpos($line, 'const themes = [') !== false) {
-            $foundArray = true;
-            $arrayStartLine = $i;
-        }
-        
-        // Find the closing bracket and insert new theme before it
-        if ($foundArray && preg_match('/^\];$/', trim($line))) {
-            // Check if previous line needs a comma
-            $prevLine = trim($lines[$i - 1]);
-            if (!empty($prevLine) && substr($prevLine, -1) !== ',') {
-                $newLines[$i - 1] .= ',';
-            }
-            // Add the new theme
-            $newLines[] = "    { id: '{$themeName}', name: '{$themeLabel}', icon: '{$themeIcon}' }";
-            $newLines[] = $line;
-            $foundArray = false;
-            continue;
-        }
-        
-        $newLines[] = $line;
+    // First, find position of themes array closing
+    $arrayPos = strpos($content, 'const themes = [');
+    if ($arrayPos === false) {
+        return false;
     }
     
-    if (count($newLines) > 0) {
-        $newContent = implode("\n", $newLines);
-        return file_put_contents(JS_FILE, $newContent) !== false;
+    // Find the matching ]; after the themes array starts
+    $closingPos = strpos($content, '];', $arrayPos);
+    if ($closingPos === false) {
+        return false;
     }
     
-    return false;
+    // Get the part before ];
+    $beforeClosing = substr($content, 0, $closingPos);
+    $afterClosing = substr($content, $closingPos);
+    
+    // Check if we need to add a comma to the last line
+    $beforeClosing = rtrim($beforeClosing);
+    if (substr($beforeClosing, -1) !== ',') {
+        $beforeClosing .= ',';
+    }
+    
+    // Rebuild the file
+    $newContent = $beforeClosing . "\n" . $newTheme . "\n" . $afterClosing;
+    
+    return file_put_contents(JS_FILE, $newContent) !== false;
 }
 
 function removeFromThemeSwitcher($themeName) {
