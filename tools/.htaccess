@@ -1,0 +1,12 @@
+# Force HTML files to be served with correct content-type
+<FilesMatch "\.(html|htm)$">
+    Header set Content-Type "text/html; charset=UTF-8"
+    Header set X-UA-Compatible "IE=edge"
+</FilesMatch>
+
+# Disable ETags
+FileETag None
+
+# Set proper MIME types
+AddType text/html .html .htm
+AddDefaultCharset UTF-8
