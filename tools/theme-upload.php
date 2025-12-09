@@ -10,7 +10,7 @@ define('UPLOAD_PASSWORD', 'spotweb123');
 // Paths
 define('THEME_DIR', __DIR__ . '/../templates/we1rdo/css');
 define('JS_FILE', __DIR__ . '/../templates/we1rdo/js/theme-switcher.js');
-define('HEADER_FILE', __DIR__ . '/../templates/we1rdo/header.inc.php');
+define('HEADER_FILE', __DIR__ . '/../templates/we1rdo/includes/header.inc.php');
 
 $message = '';
 $messageType = '';
