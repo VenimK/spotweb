@@ -111,13 +111,45 @@ function updateThemeSwitcher($themeName, $themeLabel, $themeIcon) {
         return true; // Already exists
     }
     
-    // Find the themes array and add new theme before the closing bracket
-    $pattern = '/(const themes = \[[\s\S]*?\n)(\];)/';
-    $replacement = "$1    { id: '{$themeName}', name: '{$themeLabel}', icon: '{$themeIcon}' },\n$2";
+    // Find the closing bracket of the themes array and insert before it
+    // This pattern finds "];  " at the end of the themes array
+    $pattern = '/^(\];)$/m';
+    $replacement = "    { id: '{$themeName}', name: '{$themeLabel}', icon: '{$themeIcon}' }\n$1";
     
-    $newContent = preg_replace($pattern, $replacement, $content);
+    // First, check if we need to add a comma to the last existing theme
+    $lines = explode("\n", $content);
+    $newLines = [];
+    $foundArray = false;
+    $arrayStartLine = -1;
     
-    if ($newContent && $newContent !== $content) {
+    for ($i = 0; $i < count($lines); $i++) {
+        $line = $lines[$i];
+        
+        // Find the themes array declaration
+        if (strpos($line, 'const themes = [') !== false) {
+            $foundArray = true;
+            $arrayStartLine = $i;
+        }
+        
+        // Find the closing bracket and insert new theme before it
+        if ($foundArray && preg_match('/^\];$/', trim($line))) {
+            // Check if previous line needs a comma
+            $prevLine = trim($lines[$i - 1]);
+            if (!empty($prevLine) && substr($prevLine, -1) !== ',') {
+                $newLines[$i - 1] .= ',';
+            }
+            // Add the new theme
+            $newLines[] = "    { id: '{$themeName}', name: '{$themeLabel}', icon: '{$themeIcon}' }";
+            $newLines[] = $line;
+            $foundArray = false;
+            continue;
+        }
+        
+        $newLines[] = $line;
+    }
+    
+    if (count($newLines) > 0) {
+        $newContent = implode("\n", $newLines);
         return file_put_contents(JS_FILE, $newContent) !== false;
     }
     
