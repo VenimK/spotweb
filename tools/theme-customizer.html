@@ -553,47 +553,280 @@
         
         function generateFullCSS() {
             const themeName = 'custom';
-            return `/* Custom Spotweb Theme */
+            const bgGradient = useGradients ? 
+                `linear-gradient(135deg, ${currentColors.bg} 0%, ${adjustBrightness(currentColors.bg, 15)} 50%, ${adjustBrightness(currentColors.bg, 25)} 100%)` : 
+                currentColors.bg;
+            const toolbarGradient = useGradients ?
+                `linear-gradient(180deg, ${currentColors.secondary} 0%, ${currentColors.hover} 100%)` :
+                currentColors.secondary;
+            const thGradient = useGradients ?
+                `linear-gradient(180deg, ${currentColors.secondary} 0%, ${currentColors.hover} 100%)` :
+                currentColors.hover;
+            const glow = useGlow ? `text-shadow: 0 0 10px ${hexToRgba(currentColors.primary, 0.5)};` : '';
+            const glowStrong = useGlow ? `text-shadow: 0 0 15px ${hexToRgba(currentColors.primary, 0.7)};` : '';
+            const boxGlow = useGlow ? `box-shadow: 0 0 30px ${hexToRgba(currentColors.primary, 0.3)};` : '';
+            
+            return `/* CUSTOM SPOTWEB THEME */
+/* Generated with Theme Customizer */
+
+/* GENERAL */
 body.theme-${themeName} {
-    background-color: ${currentColors.bg};
+    background: ${bgGradient};
     color: ${currentColors.text};
 }
 
 body.theme-${themeName} a:visited,
 body.theme-${themeName} a:link {
     color: ${currentColors.primary};
+    ${useGradients ? 'transition: all 0.3s ease;' : ''}
 }
 
+body.theme-${themeName} a:hover {
+    color: ${adjustBrightness(currentColors.primary, 20)};
+    text-decoration: underline;
+    ${glow}
+}
+
+/* HEADER */
+body.theme-${themeName} div.container {
+    background: transparent;
+}
+
+body.theme-${themeName} div.logo h1 a {
+    color: ${adjustBrightness(currentColors.primary, 15)};
+    ${glowStrong}
+}
+
+body.theme-${themeName} div.filter h4 {
+    color: ${currentColors.text};
+}
+
+/* MENU */
+body.theme-${themeName} ul.mainmenu li a {
+    color: ${currentColors.text};
+}
+
+body.theme-${themeName} ul.mainmenu li:hover {
+    ${useGradients ? `background: linear-gradient(90deg, ${hexToRgba(currentColors.primary, 0.2)} 0%, transparent 100%);` : `background-color: ${currentColors.hover};`}
+}
+
+body.theme-${themeName} ul.mainmenu li.active {
+    ${useGradients ? `background: linear-gradient(90deg, ${hexToRgba(currentColors.primary, 0.3)} 0%, transparent 100%);` : `background-color: ${currentColors.hover};`}
+    border-left: 3px solid ${currentColors.primary};
+}
+
+/* TOOLBAR */
 body.theme-${themeName} div#toolbar {
-    background-color: ${currentColors.secondary};
-    border-color: ${currentColors.border};
+    background: ${toolbarGradient};
+    border-color: ${hexToRgba(currentColors.primary, 0.3)};
 }
 
+body.theme-${themeName} div.notifications,
+body.theme-${themeName} div.toolbarButton {
+    border-right-color: ${hexToRgba(currentColors.primary, 0.2)};
+}
+
+body.theme-${themeName} div.toolbarButton:hover {
+    background-color: ${hexToRgba(currentColors.primary, 0.15)};
+}
+
+body.theme-${themeName} div.toolbarButton p a {
+    color: ${adjustBrightness(currentColors.primary, 15)};
+}
+
+/* SPOTS LIST */
 body.theme-${themeName} table.spots {
     background-color: ${currentColors.bg};
-    border-color: ${currentColors.border};
+    border-color: ${hexToRgba(currentColors.primary, 0.2)};
 }
 
 body.theme-${themeName} table.spots th {
-    background-color: ${currentColors.hover};
+    background: ${thGradient};
+    color: ${adjustBrightness(currentColors.primary, 15)};
+    border-color: ${hexToRgba(currentColors.primary, 0.2)};
+    font-weight: 600;
+    ${glow}
+}
+
+body.theme-${themeName} table.spots th a {
+    color: ${adjustBrightness(currentColors.primary, 15)};
+}
+
+body.theme-${themeName} table.spots th.sorted a {
     color: ${currentColors.primary};
-    border-color: ${currentColors.border};
+}
+
+body.theme-${themeName} table.spots tr.even {
+    background-color: ${currentColors.bg};
+}
+
+body.theme-${themeName} table.spots tr.odd {
+    background-color: ${adjustBrightness(currentColors.bg, 5)};
 }
 
 body.theme-${themeName} table.spots tr:hover {
-    background-color: ${currentColors.hover};
+    ${useGradients ? `background: linear-gradient(90deg, ${hexToRgba(currentColors.primary, 0.1)} 0%, transparent 100%);` : `background-color: ${currentColors.hover};`}
+}
+
+body.theme-${themeName} table.spots tr.active {
+    ${useGradients ? `background: linear-gradient(90deg, ${hexToRgba(currentColors.primary, 0.2)} 0%, transparent 100%);` : `background-color: ${currentColors.hover};`}
+    border-left: 3px solid ${currentColors.primary};
 }
 
 body.theme-${themeName} table.spots td {
     color: ${currentColors.text};
+    border-color: ${hexToRgba(currentColors.primary, 0.1)};
+}
+
+body.theme-${themeName} table.spots td a {
+    color: ${currentColors.primary};
+}
+
+body.theme-${themeName} table.spots td.category {
+    color: ${adjustBrightness(currentColors.primary, 15)};
+}
+
+/* CATEGORY COLORS */
+body.theme-${themeName} table.spots tr.spotcat0 td.category {
+    color: ${adjustHue(currentColors.primary, 0)};
+}
+
+body.theme-${themeName} table.spots tr.spotcat1 td.category {
+    color: ${adjustHue(currentColors.primary, 30)};
+}
+
+body.theme-${themeName} table.spots tr.spotcat2 td.category {
+    color: ${adjustHue(currentColors.primary, 60)};
+}
+
+body.theme-${themeName} table.spots tr.spotcat3 td.category {
+    color: ${adjustHue(currentColors.primary, 90)};
+}
+
+/* DETAILS PANEL */
+body.theme-${themeName} div.details {
+    background-color: ${currentColors.bg};
+    border: 2px solid ${currentColors.primary};
+    ${boxGlow}
+}
+
+body.theme-${themeName} div.details a.closeDetails {
+    background-color: ${currentColors.hover};
+    color: ${adjustBrightness(currentColors.primary, 15)};
+}
+
+body.theme-${themeName} div.details a.closeDetails:hover {
+    background-color: ${currentColors.secondary};
+}
+
+body.theme-${themeName} div.details div.spotinfo h1 {
+    color: ${adjustBrightness(currentColors.primary, 15)};
+    border-bottom: 2px solid ${hexToRgba(currentColors.primary, 0.3)};
+    ${glow}
+}
+
+body.theme-${themeName} div.details table th {
+    color: ${adjustBrightness(currentColors.primary, 15)};
+    background-color: ${currentColors.hover};
+    border-color: ${hexToRgba(currentColors.primary, 0.2)};
+}
+
+body.theme-${themeName} div.details table td {
+    color: ${currentColors.text};
+    background-color: ${adjustBrightness(currentColors.bg, 5)};
+    border-color: ${hexToRgba(currentColors.primary, 0.1)};
+}
+
+/* FILTERS */
+body.theme-${themeName} div.filter {
+    background-color: ${adjustBrightness(currentColors.bg, 5)};
+    border-color: ${hexToRgba(currentColors.primary, 0.2)};
+}
+
+body.theme-${themeName} div.filter h4 {
+    background: ${thGradient};
+    border-color: ${hexToRgba(currentColors.primary, 0.2)};
+    color: ${adjustBrightness(currentColors.primary, 15)};
+}
+
+body.theme-${themeName} div.filter ul.filterlist li {
+    border-color: ${hexToRgba(currentColors.primary, 0.1)};
+}
+
+body.theme-${themeName} div.filter ul.filterlist li:hover {
+    ${useGradients ? `background: linear-gradient(90deg, ${hexToRgba(currentColors.primary, 0.15)} 0%, transparent 100%);` : `background-color: ${currentColors.hover};`}
+}
+
+body.theme-${themeName} div.filter ul.filterlist li a {
+    color: ${currentColors.primary};
+}
+
+body.theme-${themeName} div.filter ul.filterlist li.active {
+    ${useGradients ? `background: linear-gradient(90deg, ${hexToRgba(currentColors.primary, 0.3)} 0%, transparent 100%);` : `background-color: ${currentColors.hover};`}
+    border-left: 3px solid ${currentColors.primary};
+}
+
+/* PAGING */
+body.theme-${themeName} div.paging a {
+    color: ${adjustBrightness(currentColors.primary, 15)};
+    border-color: ${hexToRgba(currentColors.primary, 0.2)};
+    background-color: ${currentColors.hover};
+}
+
+body.theme-${themeName} div.paging a:hover {
+    ${useGradients ? `background: linear-gradient(135deg, ${hexToRgba(currentColors.primary, 0.3)} 0%, ${hexToRgba(adjustHue(currentColors.primary, 30), 0.3)} 100%);` : `background-color: ${currentColors.secondary};`}
+    border-color: ${currentColors.primary};
+    ${boxGlow}
+}
+
+/* FORMS */
+body.theme-${themeName} input[type="text"],
+body.theme-${themeName} input[type="password"],
+body.theme-${themeName} select,
+body.theme-${themeName} textarea {
+    background-color: ${currentColors.secondary};
+    color: ${currentColors.text};
     border-color: ${currentColors.border};
 }
 
-body.theme-${themeName} div.filter {
-    background-color: ${currentColors.secondary};
-    border-color: ${currentColors.border};
+body.theme-${themeName} button,
+body.theme-${themeName} input[type="submit"] {
+    background-color: ${currentColors.primary};
+    color: ${currentColors.bg};
+    border-color: ${currentColors.primary};
+}
+
+body.theme-${themeName} button:hover,
+body.theme-${themeName} input[type="submit"]:hover {
+    background-color: ${adjustBrightness(currentColors.primary, 20)};
+    ${boxGlow}
 }
 `;
+        }
+        
+        function hexToRgba(hex, alpha) {
+            const num = parseInt(hex.replace('#', ''), 16);
+            const r = (num >> 16);
+            const g = (num >> 8 & 0x00FF);
+            const b = (num & 0x0000FF);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+        
+        function adjustHue(hex, degrees) {
+            // Simple hue shift by adjusting RGB channels
+            const num = parseInt(hex.replace('#', ''), 16);
+            let r = (num >> 16);
+            let g = (num >> 8 & 0x00FF);
+            let b = (num & 0x0000FF);
+            
+            // Rotate colors based on degrees
+            const shift = Math.floor(degrees / 60);
+            const temp = [r, g, b];
+            r = temp[shift % 3];
+            g = temp[(shift + 1) % 3];
+            b = temp[(shift + 2) % 3];
+            
+            return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
         }
         
         function downloadCSS() {
