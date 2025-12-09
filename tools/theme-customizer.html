@@ -342,13 +342,35 @@
     
     <script>
         const presets = [
-            { id: 'dark', name: '🌙 Dark', colors: { bg: '#1e1e1e', text: '#e0e0e0', primary: '#0553a1', secondary: '#2d2d2d', hover: '#333333', border: '#444444' }},
-            { id: 'midnight', name: '🌊 Midnight', colors: { bg: '#0a192f', text: '#ccd6f6', primary: '#64ffda', secondary: '#1d2d50', hover: '#233554', border: '#233554' }},
-            { id: 'cyberpunk', name: '🎮 Cyberpunk', colors: { bg: '#0d0221', text: '#00ff41', primary: '#ff006e', secondary: '#1a0b2e', hover: '#2d1b3d', border: '#ff006e' }},
-            { id: 'nord', name: '❄️ Nord', colors: { bg: '#2e3440', text: '#d8dee9', primary: '#88c0d0', secondary: '#3b4252', hover: '#434c5e', border: '#434c5e' }},
-            { id: 'dracula', name: '🧛 Dracula', colors: { bg: '#282a36', text: '#f8f8f2', primary: '#ff79c6', secondary: '#44475a', hover: '#6272a4', border: '#6272a4' }},
-            { id: 'forest', name: '🌲 Forest', colors: { bg: '#1a3a2a', text: '#c9dac8', primary: '#7fbf7f', secondary: '#2d4a3e', hover: '#3a5f4e', border: '#2d4a3e' }},
-            { id: 'sunset', name: '🌅 Sunset', colors: { bg: '#1a1625', text: '#ffd6ba', primary: '#ff9a76', secondary: '#3d1f47', hover: '#5e2750', border: '#5e2750' }},
+            { id: 'dark', name: '🌙 Dark', colors: { 
+                bg: '#1e1e1e', text: '#e0e0e0', primary: '#0553a1', secondary: '#2d2d2d', hover: '#333333', border: '#444444',
+                link: '#0553a1', linkHover: '#3886d4', accent: '#0553a1', oddRow: '#252525', thBg: '#333333'
+            }},
+            { id: 'midnight', name: '🌊 Midnight', colors: { 
+                bg: '#0a192f', text: '#ccd6f6', primary: '#64ffda', secondary: '#1d2d50', hover: '#233554', border: '#233554',
+                link: '#64ffda', linkHover: '#8cffee', accent: '#64ffda', oddRow: '#0f2138', thBg: '#1d2d50'
+            }},
+            { id: 'cyberpunk', name: '🎮 Cyberpunk', colors: { 
+                bg: '#0d0221', text: '#00ff41', primary: '#ff006e', secondary: '#1a0b2e', hover: '#2d1b3d', border: '#ff006e',
+                link: '#00d4ff', linkHover: '#00ff41', accent: '#ffbe0b', oddRow: '#120828', thBg: '#2d1b3d'
+            }},
+            { id: 'nord', name: '❄️ Nord', colors: { 
+                bg: '#2e3440', text: '#d8dee9', primary: '#88c0d0', secondary: '#3b4252', hover: '#434c5e', border: '#434c5e',
+                link: '#88c0d0', linkHover: '#8fbcbb', accent: '#81a1c1', oddRow: '#353a47', thBg: '#3b4252'
+            }},
+            { id: 'dracula', name: '🧛 Dracula', colors: { 
+                bg: '#282a36', text: '#f8f8f2', primary: '#ff79c6', secondary: '#44475a', hover: '#6272a4', border: '#6272a4',
+                link: '#8be9fd', linkHover: '#50fa7b', accent: '#bd93f9', oddRow: '#21222c', thBg: '#44475a',
+                cat0: '#8be9fd', cat1: '#50fa7b', cat2: '#f1fa8c', cat3: '#ffb86c'
+            }},
+            { id: 'forest', name: '🌲 Forest', colors: { 
+                bg: '#1a3a2a', text: '#c9dac8', primary: '#7fbf7f', secondary: '#2d4a3e', hover: '#3a5f4e', border: '#2d4a3e',
+                link: '#7fbf7f', linkHover: '#a4d4a4', accent: '#5a9e5a', oddRow: '#1f3f2f', thBg: '#2d4a3e'
+            }},
+            { id: 'sunset', name: '🌅 Sunset', colors: { 
+                bg: '#1a1625', text: '#ffd6ba', primary: '#ff9a76', secondary: '#3d1f47', hover: '#5e2750', border: '#5e2750',
+                link: '#ff9a76', linkHover: '#ffb699', accent: '#ffb0a1', oddRow: '#211829', thBg: '#3d1f47'
+            }},
             { id: 'custom', name: '✨ Custom', colors: null }
         ];
         
@@ -558,6 +580,20 @@
         
         function generateFullCSS() {
             const themeName = 'custom';
+            
+            // Use preset-specific colors if available, otherwise derive from base colors
+            const link = currentColors.link || currentColors.primary;
+            const linkHover = currentColors.linkHover || adjustBrightness(link, 20);
+            const accent = currentColors.accent || currentColors.primary;
+            const oddRow = currentColors.oddRow || adjustBrightness(currentColors.bg, 5);
+            const thBg = currentColors.thBg || currentColors.secondary;
+            
+            // Category colors - use specific ones if available (like Dracula), otherwise derive
+            const cat0 = currentColors.cat0 || adjustHue(currentColors.primary, 0);
+            const cat1 = currentColors.cat1 || adjustHue(currentColors.primary, 30);
+            const cat2 = currentColors.cat2 || adjustHue(currentColors.primary, 60);
+            const cat3 = currentColors.cat3 || adjustHue(currentColors.primary, 90);
+            
             const bgGradient = useGradients ? 
                 `linear-gradient(135deg, ${currentColors.bg} 0%, ${adjustBrightness(currentColors.bg, 15)} 50%, ${adjustBrightness(currentColors.bg, 25)} 100%)` : 
                 currentColors.bg;
@@ -565,8 +601,8 @@
                 `linear-gradient(180deg, ${currentColors.secondary} 0%, ${currentColors.hover} 100%)` :
                 currentColors.secondary;
             const thGradient = useGradients ?
-                `linear-gradient(180deg, ${currentColors.secondary} 0%, ${currentColors.hover} 100%)` :
-                currentColors.hover;
+                `linear-gradient(180deg, ${thBg} 0%, ${currentColors.hover} 100%)` :
+                thBg;
             const glow = useGlow ? `text-shadow: 0 0 10px ${hexToRgba(currentColors.primary, 0.5)};` : '';
             const glowStrong = useGlow ? `text-shadow: 0 0 15px ${hexToRgba(currentColors.primary, 0.7)};` : '';
             const boxGlow = useGlow ? `box-shadow: 0 0 30px ${hexToRgba(currentColors.primary, 0.3)};` : '';
@@ -582,12 +618,12 @@ body.theme-${themeName} {
 
 body.theme-${themeName} a:visited,
 body.theme-${themeName} a:link {
-    color: ${currentColors.primary};
+    color: ${link};
     ${useGradients ? 'transition: all 0.3s ease;' : ''}
 }
 
 body.theme-${themeName} a:hover {
-    color: ${adjustBrightness(currentColors.primary, 20)};
+    color: ${linkHover};
     text-decoration: underline;
     ${glow}
 }
@@ -598,7 +634,7 @@ body.theme-${themeName} div.container {
 }
 
 body.theme-${themeName} div.logo h1 a {
-    color: ${adjustBrightness(currentColors.primary, 15)};
+    color: ${currentColors.primary};
     ${glowStrong}
 }
 
@@ -646,7 +682,7 @@ body.theme-${themeName} table.spots {
 }
 
 body.theme-${themeName} table.spots th {
-    background: ${thGradient};
+    background: ${useGradients ? thGradient : thBg};
     color: ${adjustBrightness(currentColors.primary, 15)};
     border-color: ${hexToRgba(currentColors.primary, 0.2)};
     font-weight: 600;
@@ -654,11 +690,11 @@ body.theme-${themeName} table.spots th {
 }
 
 body.theme-${themeName} table.spots th a {
-    color: ${adjustBrightness(currentColors.primary, 15)};
+    color: ${currentColors.primary};
 }
 
 body.theme-${themeName} table.spots th.sorted a {
-    color: ${currentColors.primary};
+    color: ${accent};
 }
 
 body.theme-${themeName} table.spots tr.even {
@@ -666,7 +702,7 @@ body.theme-${themeName} table.spots tr.even {
 }
 
 body.theme-${themeName} table.spots tr.odd {
-    background-color: ${adjustBrightness(currentColors.bg, 5)};
+    background-color: ${oddRow};
 }
 
 body.theme-${themeName} table.spots tr:hover {
@@ -684,7 +720,7 @@ body.theme-${themeName} table.spots td {
 }
 
 body.theme-${themeName} table.spots td a {
-    color: ${currentColors.primary};
+    color: ${link};
 }
 
 body.theme-${themeName} table.spots td.category {
@@ -693,19 +729,19 @@ body.theme-${themeName} table.spots td.category {
 
 /* CATEGORY COLORS */
 body.theme-${themeName} table.spots tr.spotcat0 td.category {
-    color: ${adjustHue(currentColors.primary, 0)};
+    color: ${cat0};
 }
 
 body.theme-${themeName} table.spots tr.spotcat1 td.category {
-    color: ${adjustHue(currentColors.primary, 30)};
+    color: ${cat1};
 }
 
 body.theme-${themeName} table.spots tr.spotcat2 td.category {
-    color: ${adjustHue(currentColors.primary, 60)};
+    color: ${cat2};
 }
 
 body.theme-${themeName} table.spots tr.spotcat3 td.category {
-    color: ${adjustHue(currentColors.primary, 90)};
+    color: ${cat3};
 }
 
 /* DETAILS PANEL */
@@ -731,25 +767,25 @@ body.theme-${themeName} div.details div.spotinfo h1 {
 }
 
 body.theme-${themeName} div.details table th {
-    color: ${adjustBrightness(currentColors.primary, 15)};
-    background-color: ${currentColors.hover};
+    color: ${accent};
+    background-color: ${thBg};
     border-color: ${hexToRgba(currentColors.primary, 0.2)};
 }
 
 body.theme-${themeName} div.details table td {
     color: ${currentColors.text};
-    background-color: ${adjustBrightness(currentColors.bg, 5)};
+    background-color: ${oddRow};
     border-color: ${hexToRgba(currentColors.primary, 0.1)};
 }
 
 /* FILTERS */
 body.theme-${themeName} div.filter {
-    background-color: ${adjustBrightness(currentColors.bg, 5)};
+    background-color: ${oddRow};
     border-color: ${hexToRgba(currentColors.primary, 0.2)};
 }
 
 body.theme-${themeName} div.filter h4 {
-    background: ${thGradient};
+    background: ${useGradients ? thGradient : thBg};
     border-color: ${hexToRgba(currentColors.primary, 0.2)};
     color: ${adjustBrightness(currentColors.primary, 15)};
 }
@@ -763,7 +799,7 @@ body.theme-${themeName} div.filter ul.filterlist li:hover {
 }
 
 body.theme-${themeName} div.filter ul.filterlist li a {
-    color: ${currentColors.primary};
+    color: ${link};
 }
 
 body.theme-${themeName} div.filter ul.filterlist li.active {
@@ -773,13 +809,13 @@ body.theme-${themeName} div.filter ul.filterlist li.active {
 
 /* PAGING */
 body.theme-${themeName} div.paging a {
-    color: ${adjustBrightness(currentColors.primary, 15)};
+    color: ${currentColors.text};
     border-color: ${hexToRgba(currentColors.primary, 0.2)};
     background-color: ${currentColors.hover};
 }
 
 body.theme-${themeName} div.paging a:hover {
-    ${useGradients ? `background: linear-gradient(135deg, ${hexToRgba(currentColors.primary, 0.3)} 0%, ${hexToRgba(adjustHue(currentColors.primary, 30), 0.3)} 100%);` : `background-color: ${currentColors.secondary};`}
+    ${useGradients ? `background: linear-gradient(135deg, ${hexToRgba(currentColors.primary, 0.3)} 0%, ${hexToRgba(accent, 0.3)} 100%);` : `background-color: ${currentColors.hover};`}
     border-color: ${currentColors.primary};
     ${boxGlow}
 }
