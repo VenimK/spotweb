@@ -578,8 +578,7 @@
             `;
         }
         
-        function generateFullCSS() {
-            const themeName = 'custom';
+        function generateFullCSS(themeName = 'custom') {
             
             // Use preset-specific colors if available, otherwise derive from base colors
             const link = currentColors.link || currentColors.primary;
@@ -871,19 +870,41 @@ body.theme-${themeName} input[type="submit"]:hover {
         }
         
         function downloadCSS() {
-            const css = generateFullCSS();
+            // Prompt for theme name
+            const themeName = prompt('Enter theme name (lowercase, hyphens only):\nExample: my-custom-theme', 'custom');
+            if (!themeName) return; // User cancelled
+            
+            // Sanitize theme name
+            const sanitizedName = themeName.toLowerCase().replace(/[^a-z0-9\-]/g, '');
+            if (!sanitizedName) {
+                alert('Invalid theme name! Use only lowercase letters, numbers, and hyphens.');
+                return;
+            }
+            
+            const css = generateFullCSS(sanitizedName);
             const blob = new Blob([css], { type: 'text/css' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'theme-custom.css';
+            a.download = 'theme-' + sanitizedName + '.css';
             a.click();
         }
         
         function copyToClipboard() {
-            const css = generateFullCSS();
+            // Prompt for theme name
+            const themeName = prompt('Enter theme name (lowercase, hyphens only):\nExample: my-custom-theme', 'custom');
+            if (!themeName) return; // User cancelled
+            
+            // Sanitize theme name
+            const sanitizedName = themeName.toLowerCase().replace(/[^a-z0-9\-]/g, '');
+            if (!sanitizedName) {
+                alert('Invalid theme name! Use only lowercase letters, numbers, and hyphens.');
+                return;
+            }
+            
+            const css = generateFullCSS(sanitizedName);
             navigator.clipboard.writeText(css).then(() => {
-                alert('✓ CSS copied to clipboard!');
+                alert('✓ CSS copied to clipboard!\nTheme name: ' + sanitizedName);
             });
         }
         
