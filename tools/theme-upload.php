@@ -10,6 +10,7 @@ define('UPLOAD_PASSWORD', 'spotweb123');
 // Paths
 define('THEME_DIR', __DIR__ . '/../templates/we1rdo/css');
 define('JS_FILE', __DIR__ . '/../templates/we1rdo/js/theme-switcher.js');
+define('HEADER_FILE', __DIR__ . '/../templates/we1rdo/header.inc.php');
 
 $message = '';
 $messageType = '';
@@ -61,16 +62,24 @@ if ($isAuthenticated && isset($_POST['upload']) && isset($_FILES['theme_file']))
         if (move_uploaded_file($file['tmp_name'], $targetFile)) {
             chmod($targetFile, 0644);
             
-            // Update theme-switcher.js
-            if (updateThemeSwitcher($themeName, $themeLabel, $themeIcon)) {
+            // Update theme-switcher.js and header.inc.php
+            $switcherUpdated = updateThemeSwitcher($themeName, $themeLabel, $themeIcon);
+            $headerUpdated = updateHeaderFile($themeName);
+            
+            if ($switcherUpdated && $headerUpdated) {
                 $message = "✓ Theme '{$themeLabel}' uploaded successfully!<br>";
                 $message .= "✓ Theme switcher updated automatically!<br>";
+                $message .= "✓ Header CSS link added automatically!<br>";
                 $message .= "Refresh your Spotweb page and select your theme from the 🎨 menu.";
                 $messageType = 'success';
+            } elseif ($switcherUpdated && !$headerUpdated) {
+                $message = "✓ Theme uploaded and added to switcher!<br>";
+                $message .= "⚠ Could not auto-update header.inc.php. Add this line manually:<br>";
+                $message .= "<code>&lt;link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-{$themeName}.css'&gt;</code>";
+                $messageType = 'warning';
             } else {
                 $message = "✓ Theme uploaded to: {$targetFile}<br>";
-                $message .= "⚠ Could not auto-update theme switcher. Add manually:<br>";
-                $message .= "{ id: '{$themeName}', name: '{$themeLabel}', icon: '{$themeIcon}' }";
+                $message .= "⚠ Could not auto-update theme switcher and header. Add manually.";
                 $messageType = 'warning';
             }
         } else {
@@ -87,6 +96,7 @@ if ($isAuthenticated && isset($_POST['delete_theme'])) {
     
     if (file_exists($themeFile) && unlink($themeFile)) {
         removeFromThemeSwitcher($themeToDelete);
+        removeFromHeaderFile($themeToDelete);
         $message = "✓ Theme deleted: {$themeToDelete}";
         $messageType = 'success';
     } else {
@@ -158,6 +168,59 @@ function removeFromThemeSwitcher($themeName) {
     
     if ($newContent && $newContent !== $content) {
         file_put_contents(JS_FILE, $newContent);
+        return true;
+    }
+    
+    return false;
+}
+
+function updateHeaderFile($themeName) {
+    if (!file_exists(HEADER_FILE) || !is_writable(HEADER_FILE)) {
+        return false;
+    }
+    
+    $content = file_get_contents(HEADER_FILE);
+    
+    // Check if link already exists
+    if (strpos($content, "theme-{$themeName}.css") !== false) {
+        return true; // Already exists
+    }
+    
+    // Find the last theme CSS link and add after it
+    // Look for pattern: <link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-*.css'>
+    $newLink = "<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-{$themeName}.css'>";
+    
+    // Find the last occurrence of a theme CSS link
+    $pattern = "/<link rel='stylesheet' type='text\/css' href='templates\/we1rdo\/css\/theme-[^']+\.css'>/";
+    preg_match_all($pattern, $content, $matches, PREG_OFFSET_CAPTURE);
+    
+    if (!empty($matches[0])) {
+        // Get the last match
+        $lastMatch = end($matches[0]);
+        $insertPos = $lastMatch[1] + strlen($lastMatch[0]);
+        
+        // Insert new link after the last theme link
+        $newContent = substr($content, 0, $insertPos) . "\n" . $newLink . substr($content, $insertPos);
+        
+        return file_put_contents(HEADER_FILE, $newContent) !== false;
+    }
+    
+    return false;
+}
+
+function removeFromHeaderFile($themeName) {
+    if (!file_exists(HEADER_FILE) || !is_writable(HEADER_FILE)) {
+        return false;
+    }
+    
+    $content = file_get_contents(HEADER_FILE);
+    
+    // Remove the CSS link line for this theme
+    $pattern = "/\n?<link rel='stylesheet' type='text\/css' href='templates\/we1rdo\/css\/theme-" . preg_quote($themeName, '/') . "\.css'>/";
+    $newContent = preg_replace($pattern, '', $content);
+    
+    if ($newContent && $newContent !== $content) {
+        file_put_contents(HEADER_FILE, $newContent);
         return true;
     }
     
