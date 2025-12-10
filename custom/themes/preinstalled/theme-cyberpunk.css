@@ -1,0 +1,56 @@
+/* CYBERPUNK THEME - Neon future vibes */
+body.theme-cyberpunk {background: #0d0221; color:#00ff41;}
+body.theme-cyberpunk a:visited, body.theme-cyberpunk a:link {color:#ff006e;}
+body.theme-cyberpunk a:hover {color:#ff1b8d; text-decoration:underline; text-shadow:0 0 8px rgba(255,0,110,0.6);}
+
+/* Header with neon glow */
+body.theme-cyberpunk div.container {background:transparent;}
+body.theme-cyberpunk div.logo h1 a {color:#00ff41; text-shadow: 0 0 20px rgba(0,255,65,0.8), 0 0 40px rgba(0,255,65,0.4);}
+body.theme-cyberpunk div.filter h4 {color:#b967ff;}
+body.theme-cyberpunk ul.mainmenu li a {color:#00ff41;}
+body.theme-cyberpunk ul.mainmenu li:hover {background: linear-gradient(90deg, rgba(255,0,110,0.2) 0%, transparent 100%);}
+body.theme-cyberpunk ul.mainmenu li.active {background: linear-gradient(90deg, rgba(255,0,110,0.4) 0%, transparent 100%); border-left:3px solid #ff006e;}
+
+/* Toolbar with cyber aesthetic */
+body.theme-cyberpunk div#toolbar {background: linear-gradient(180deg, #1a0b2e 0%, #0d0221 100%); border:1px solid #ff006e; box-shadow:0 0 20px rgba(255,0,110,0.3);}
+body.theme-cyberpunk div.notifications, body.theme-cyberpunk div.toolbarButton {border-right:1px solid rgba(255,0,110,0.3);}
+body.theme-cyberpunk div.toolbarButton:hover {background-color:rgba(255,0,110,0.2);}
+body.theme-cyberpunk div.toolbarButton p a {color:#00ff41; text-shadow:0 0 5px rgba(0,255,65,0.5);}
+
+/* Spots with neon borders */
+body.theme-cyberpunk table.spots {background-color:#0d0221; border:1px solid #ff006e;}
+body.theme-cyberpunk table.spots th {background: linear-gradient(180deg, #1a0b2e 0%, #0d0221 100%); color:#ff006e; border:1px solid rgba(255,0,110,0.3); font-weight:700; text-transform:uppercase; letter-spacing:1px;}
+body.theme-cyberpunk table.spots th a {color:#ff006e; text-shadow:0 0 8px rgba(255,0,110,0.5);}
+body.theme-cyberpunk table.spots tr.even {background-color:#0a0116;}
+body.theme-cyberpunk table.spots tr.odd {background-color:#0d0221;}
+body.theme-cyberpunk table.spots tr:hover {background: linear-gradient(90deg, rgba(255,0,110,0.1) 0%, transparent 100%); box-shadow:inset 0 0 20px rgba(255,0,110,0.2);}
+body.theme-cyberpunk table.spots tr.active {background: linear-gradient(90deg, rgba(255,0,110,0.3) 0%, transparent 100%); border-left:3px solid #00ff41;}
+body.theme-cyberpunk table.spots td {color:#00ff41; border-color:rgba(255,0,110,0.2);}
+body.theme-cyberpunk table.spots td a {color:#ff006e;}
+body.theme-cyberpunk table.spots td.category {font-weight:700; text-transform:uppercase; letter-spacing:0.5px;}
+
+/* Neon category colors */
+body.theme-cyberpunk table.spots tr.spotcat0 td.category {color:#00d9ff; text-shadow:0 0 8px rgba(0,217,255,0.6);}
+body.theme-cyberpunk table.spots tr.spotcat1 td.category {color:#00ff41; text-shadow:0 0 8px rgba(0,255,65,0.6);}
+body.theme-cyberpunk table.spots tr.spotcat2 td.category {color:#ffd000; text-shadow:0 0 8px rgba(255,208,0,0.6);}
+body.theme-cyberpunk table.spots tr.spotcat3 td.category {color:#ff006e; text-shadow:0 0 8px rgba(255,0,110,0.6);}
+
+/* Details with holographic effect */
+body.theme-cyberpunk div.details {background:#0d0221; border:2px solid #ff006e; box-shadow:0 0 30px rgba(255,0,110,0.4), inset 0 0 30px rgba(255,0,110,0.1);}
+body.theme-cyberpunk div.details a.closeDetails {background-color:#1a0b2e; color:#ff006e;}
+body.theme-cyberpunk div.details a.closeDetails:hover {background-color:#ff006e; color:#0d0221;}
+body.theme-cyberpunk div.details div.spotinfo h1 {color:#ff006e; border-bottom:2px solid #b967ff; text-shadow:0 0 10px rgba(255,0,110,0.5);}
+body.theme-cyberpunk div.details table th {color:#b967ff; background-color:#1a0b2e; border-color:rgba(255,0,110,0.3);}
+body.theme-cyberpunk div.details table td {color:#00ff41; background-color:#0a0116; border-color:rgba(255,0,110,0.2);}
+
+/* Filters */
+body.theme-cyberpunk div.filter {background-color:#0a0116; border:1px solid rgba(255,0,110,0.4);}
+body.theme-cyberpunk div.filter h4 {background: linear-gradient(180deg, #1a0b2e 0%, #0d0221 100%); border-color:rgba(255,0,110,0.3); color:#ff006e;}
+body.theme-cyberpunk div.filter ul.filterlist li {border-color:rgba(255,0,110,0.2);}
+body.theme-cyberpunk div.filter ul.filterlist li:hover {background: linear-gradient(90deg, rgba(255,0,110,0.2) 0%, transparent 100%);}
+body.theme-cyberpunk div.filter ul.filterlist li a {color:#00ff41;}
+body.theme-cyberpunk div.filter ul.filterlist li.active {background: linear-gradient(90deg, rgba(255,0,110,0.4) 0%, transparent 100%); border-left:3px solid #ff006e;}
+
+/* Paging with glow */
+body.theme-cyberpunk div.paging a {color:#ff006e; border:1px solid rgba(255,0,110,0.4); background-color:#0a0116;}
+body.theme-cyberpunk div.paging a:hover {background: linear-gradient(135deg, rgba(255,0,110,0.3) 0%, rgba(185,103,255,0.3) 100%); border-color:#ff006e; box-shadow:0 0 10px rgba(255,0,110,0.4);}

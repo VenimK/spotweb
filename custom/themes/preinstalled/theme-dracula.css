@@ -1,0 +1,57 @@
+/* DRACULA THEME - Popular purple dark theme */
+body.theme-dracula {background:#282a36; color:#f8f8f2;}
+body.theme-dracula a:visited, body.theme-dracula a:link {color:#8be9fd;}
+body.theme-dracula a:hover {color:#50fa7b; text-decoration:underline;}
+
+/* Header */
+body.theme-dracula div.container {background:transparent;}
+body.theme-dracula div.logo h1 a {color:#ff79c6;}
+body.theme-dracula div.filter h4 {color:#f8f8f2;}
+body.theme-dracula ul.mainmenu li a {color:#f8f8f2;}
+body.theme-dracula ul.mainmenu li:hover {background-color:#44475a;}
+body.theme-dracula ul.mainmenu li.active {background-color:#6272a4; border-left:3px solid #ff79c6;}
+
+/* Toolbar */
+body.theme-dracula div#toolbar {background:#44475a; border-color:#6272a4;}
+body.theme-dracula div.notifications, body.theme-dracula div.toolbarButton {border-right-color:#6272a4;}
+body.theme-dracula div.toolbarButton:hover {background-color:#6272a4;}
+body.theme-dracula div.toolbarButton p a {color:#f8f8f2;}
+
+/* Spots */
+body.theme-dracula table.spots {background-color:#282a36; border-color:#44475a;}
+body.theme-dracula table.spots th {background-color:#44475a; color:#ff79c6; border-color:#6272a4; font-weight:600;}
+body.theme-dracula table.spots th a {color:#ff79c6;}
+body.theme-dracula table.spots th.sorted a {color:#bd93f9;}
+body.theme-dracula table.spots tr.even {background-color:#282a36;}
+body.theme-dracula table.spots tr.odd {background-color:#21222c;}
+body.theme-dracula table.spots tr:hover {background-color:#44475a;}
+body.theme-dracula table.spots tr.active {background-color:#6272a4; border-left:3px solid #ff79c6;}
+body.theme-dracula table.spots td {color:#f8f8f2; border-color:#44475a;}
+body.theme-dracula table.spots td a {color:#8be9fd;}
+body.theme-dracula table.spots td.category {color:#f8f8f2;}
+
+/* Dracula rainbow colors for categories */
+body.theme-dracula table.spots tr.spotcat0 td.category {color:#8be9fd;}
+body.theme-dracula table.spots tr.spotcat1 td.category {color:#50fa7b;}
+body.theme-dracula table.spots tr.spotcat2 td.category {color:#f1fa8c;}
+body.theme-dracula table.spots tr.spotcat3 td.category {color:#ffb86c;}
+
+/* Details */
+body.theme-dracula div.details {background-color:#282a36; border:2px solid #bd93f9;}
+body.theme-dracula div.details a.closeDetails {background-color:#44475a; color:#ff79c6;}
+body.theme-dracula div.details a.closeDetails:hover {background-color:#6272a4;}
+body.theme-dracula div.details div.spotinfo h1 {color:#ff79c6; border-bottom-color:#6272a4;}
+body.theme-dracula div.details table th {color:#bd93f9; background-color:#44475a; border-color:#6272a4;}
+body.theme-dracula div.details table td {color:#f8f8f2; background-color:#21222c; border-color:#44475a;}
+
+/* Filters */
+body.theme-dracula div.filter {background-color:#282a36; border-color:#44475a;}
+body.theme-dracula div.filter h4 {background-color:#44475a; border-color:#6272a4; color:#ff79c6;}
+body.theme-dracula div.filter ul.filterlist li {border-color:#44475a;}
+body.theme-dracula div.filter ul.filterlist li:hover {background-color:#44475a;}
+body.theme-dracula div.filter ul.filterlist li a {color:#8be9fd;}
+body.theme-dracula div.filter ul.filterlist li.active {background-color:#6272a4; border-left:3px solid #ff79c6;}
+
+/* Paging */
+body.theme-dracula div.paging a {color:#f8f8f2; border-color:#44475a; background-color:#44475a;}
+body.theme-dracula div.paging a:hover {background-color:#6272a4; border-color:#bd93f9;}
