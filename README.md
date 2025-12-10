@@ -11,6 +11,7 @@ Transform your Spotweb interface with professionally designed themes featuring a
 [![License](https://img.shields.io/badge/license-MIT-orange)](LICENSE.md)
 
 ![Last Commit](https://img.shields.io/github/last-commit/VenimK/spotweb/themes-only)
+[![Downloads](https://img.shields.io/github/downloads/VenimK/spotweb/total?color=success&label=downloads)](https://github.com/VenimK/spotweb/releases)
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=VenimK.spotweb-themes)
 [![Hits](https://hits.sh/github.com/VenimK/spotweb/tree/themes-only.svg?style=flat&label=views&color=007ec6)](https://hits.sh/github.com/VenimK/spotweb/tree/themes-only/)
 
