@@ -10,7 +10,7 @@
  */
 
 // Base paths
-$customBase = realpath(__DIR__ . '/../..');
+$customBase = realpath(__DIR__ . '/..');
 $preinstalledThemesPath = $customBase . '/themes/preinstalled';
 $customThemesPath = $customBase . '/themes';
 $jsPath = $customBase . '/js';
