@@ -7,7 +7,12 @@ Transform your Spotweb interface with professionally designed themes featuring a
 [![Themes](https://img.shields.io/badge/themes-8_preinstalled-blue)](#-available-themes)
 [![Install](https://img.shields.io/badge/install-one--command-green)](#-installation)
 [![Update Safe](https://img.shields.io/badge/updates-100%25_safe-brightgreen)](#-update-safe-design)
+[![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/VenimK)
 [![License](https://img.shields.io/badge/license-MIT-orange)](LICENSE.md)
+
+![Last Commit](https://img.shields.io/github/last-commit/VenimK/spotweb/themes-only)
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=VenimK.spotweb-themes)
+[![Hits](https://hits.sh/github.com/VenimK/spotweb/tree/themes-only.svg?style=flat&label=views&color=007ec6)](https://hits.sh/github.com/VenimK/spotweb/tree/themes-only/)
 
 ---
 
@@ -64,7 +69,7 @@ Already have Spotweb? See **[MIGRATION-GUIDE.md](MIGRATION-GUIDE.md)** for insta
 
 ---
 
-## �� What You Get
+## 🎯 What You Get
 
 ### With Complete Theme Pack:
 
