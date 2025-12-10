@@ -626,6 +626,11 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
     curl -fsSL "${GITHUB_REPO}/custom/README.md" \
         -o "${SPOTWEB_DIR}/custom/README.md" 2>/dev/null || true
     
+    echo "  → Downloading update-themes.sh (theme updater script)"
+    curl -fsSL "${GITHUB_REPO}/custom/update-themes.sh" \
+        -o "${SPOTWEB_DIR}/custom/update-themes.sh" 2>/dev/null || true
+    chmod +x "${SPOTWEB_DIR}/custom/update-themes.sh" 2>/dev/null || true
+    
     # Create header with NEW update-safe integration
     echo "  → Creating header.inc.php with update-safe theme integration"
     cat > "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php" << 'PHPEOF'
@@ -684,6 +689,7 @@ PHPEOF
     echo "  → Tools: custom/tools/"
     echo "  → Customizer: http://YOUR_IP/custom/tools/theme-customizer.html"
     echo "  → Upload: http://YOUR_IP/custom/tools/theme-upload.php"
+    echo "  → Update themes: cd /var/www/html/spotweb/custom && ./update-themes.sh"
     
 else
     # Download only dark theme (simplified - no switcher)
