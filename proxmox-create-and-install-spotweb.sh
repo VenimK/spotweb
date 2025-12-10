@@ -136,7 +136,7 @@ echo ""
 echo -e "${CYAN}Theme Options:${NC}"
 echo "  1) No themes (Light only)"
 echo "  2) Dark mode only"
-echo "  3) Complete theme pack (8 themes)"
+echo "  3) Complete theme pack (7 dark themes + switcher + tools)"
 echo ""
 read -p "Select theme option [1]: " INPUT_THEME
 INSTALL_THEMES="none"
@@ -577,34 +577,57 @@ if [[ "$INSTALL_THEMES" != "none" ]]; then
         echo -e "${BLUE}Installing dark mode theme (from GitHub)...${NC}"
     fi
     
-    # Create theme installation script
+    # Create theme installation script (NEW UPDATE-SAFE ARCHITECTURE)
     cat > /tmp/install-themes-${CTID}.sh << 'THEME_SCRIPT'
 #!/bin/bash
 GITHUB_REPO='https://raw.githubusercontent.com/VenimK/spotweb/themes-only'
 SPOTWEB_DIR='/var/www/html/spotweb'
 
-# Create directories
-mkdir -p "${SPOTWEB_DIR}/templates/we1rdo/css"
-mkdir -p "${SPOTWEB_DIR}/templates/we1rdo/js"
+# Create NEW /custom/ folder structure (update-safe!)
+echo "  → Creating /custom/ folder structure..."
+mkdir -p "${SPOTWEB_DIR}/custom/themes/preinstalled"
+mkdir -p "${SPOTWEB_DIR}/custom/js"
+mkdir -p "${SPOTWEB_DIR}/custom/tools"
+mkdir -p "${SPOTWEB_DIR}/custom/includes"
 
 # Download theme files from GitHub based on selection
 if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
-    # Download all 7 theme CSS files + switcher
+    # Download all 7 theme CSS files to custom/themes/preinstalled/
     themes=("dark" "midnight-ocean" "cyberpunk" "nord" "dracula" "forest" "sunset")
     for theme in "${themes[@]}"; do
         echo "  → Downloading theme-${theme}.css"
-        curl -fsSL "${GITHUB_REPO}/templates/we1rdo/css/theme-${theme}.css" \
-            -o "${SPOTWEB_DIR}/templates/we1rdo/css/theme-${theme}.css" 2>/dev/null || \
+        curl -fsSL "${GITHUB_REPO}/custom/themes/preinstalled/theme-${theme}.css" \
+            -o "${SPOTWEB_DIR}/custom/themes/preinstalled/theme-${theme}.css" 2>/dev/null || \
             echo "    ⚠ Failed to download theme-${theme}.css"
     done
     
     echo "  → Downloading theme-switcher.js"
-    curl -fsSL "${GITHUB_REPO}/templates/we1rdo/js/theme-switcher.js" \
-        -o "${SPOTWEB_DIR}/templates/we1rdo/js/theme-switcher.js" 2>/dev/null || \
+    curl -fsSL "${GITHUB_REPO}/custom/js/theme-switcher.js" \
+        -o "${SPOTWEB_DIR}/custom/js/theme-switcher.js" 2>/dev/null || \
         echo "    ⚠ Failed to download theme-switcher.js"
     
-    # Create header for multi-theme support
-    echo "  → Creating header.inc.php with multi-theme support"
+    echo "  → Downloading theme tools"
+    curl -fsSL "${GITHUB_REPO}/custom/tools/theme-customizer.html" \
+        -o "${SPOTWEB_DIR}/custom/tools/theme-customizer.html" 2>/dev/null || \
+        echo "    ⚠ Failed to download theme-customizer.html"
+    curl -fsSL "${GITHUB_REPO}/custom/tools/theme-upload.php" \
+        -o "${SPOTWEB_DIR}/custom/tools/theme-upload.php" 2>/dev/null || \
+        echo "    ⚠ Failed to download theme-upload.php"
+    curl -fsSL "${GITHUB_REPO}/custom/tools/.htaccess" \
+        -o "${SPOTWEB_DIR}/custom/tools/.htaccess" 2>/dev/null || \
+        echo "    ⚠ Failed to download .htaccess"
+    
+    echo "  → Downloading theme-loader.inc.php (integration hook)"
+    curl -fsSL "${GITHUB_REPO}/custom/includes/theme-loader.inc.php" \
+        -o "${SPOTWEB_DIR}/custom/includes/theme-loader.inc.php" 2>/dev/null || \
+        echo "    ⚠ Failed to download theme-loader.inc.php"
+    
+    echo "  → Downloading README"
+    curl -fsSL "${GITHUB_REPO}/custom/README.md" \
+        -o "${SPOTWEB_DIR}/custom/README.md" 2>/dev/null || true
+    
+    # Create header with NEW update-safe integration
+    echo "  → Creating header.inc.php with update-safe theme integration"
     cat > "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php" << 'PHPEOF'
 <!DOCTYPE HTML PUBLIC "//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
@@ -621,15 +644,7 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
 <?php } ?>
 <?php if ($tplHelper->allowed(SpotSecurity::spotsec_view_statics, '')) { ?>
 		<link rel='stylesheet' type='text/css' href='?page=statics&amp;type=css&amp;mod=<?php echo $tplHelper->getStaticModTime('css'); ?>'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-dark.css'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-midnight-ocean.css'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-cyberpunk.css'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-nord.css'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-dracula.css'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-forest.css'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/theme-sunset.css'>
 		<link rel='shortcut icon' href='?page=statics&amp;type=ico&amp;mod=<?php echo $tplHelper->getStaticModTime('ico'); ?>'>
-		<script type='text/javascript' src='templates/we1rdo/js/theme-switcher.js'></script>
 <?php } ?>
 		<style type="text/css" media="screen,handheld,projection">
 			<?php echo $settings->get('customcss'); ?>
@@ -646,28 +661,40 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
 	<body>
 		<div id='editdialogdiv'></div>
 		<div id="overlay"></div>
+<?php
+// Custom Theme System Integration (Update-Safe)
+if (file_exists(__DIR__ . '/../../../custom/includes/theme-loader.inc.php')) {
+    include_once(__DIR__ . '/../../../custom/includes/theme-loader.inc.php');
+}
+?>
 PHPEOF
     
-    # Set permissions for all theme files
+    # Set permissions for /custom/ folder
     echo "  → Setting permissions"
-    chown -R www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/css/theme-*.css" 2>/dev/null || true
-    chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/js/theme-switcher.js" 2>/dev/null || true
-    chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
-    chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/css/theme-"*.css 2>/dev/null || true
-    chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/js/theme-switcher.js" 2>/dev/null || true
+    chown -R www-data:www-data "${SPOTWEB_DIR}/custom/"
+    chmod 755 "${SPOTWEB_DIR}/custom/themes" "${SPOTWEB_DIR}/custom/themes/preinstalled" "${SPOTWEB_DIR}/custom/js" "${SPOTWEB_DIR}/custom/tools" "${SPOTWEB_DIR}/custom/includes"
+    chmod 664 "${SPOTWEB_DIR}/custom/themes/preinstalled/"*.css 2>/dev/null || true
+    chmod 644 "${SPOTWEB_DIR}/custom/js/"*.js 2>/dev/null || true
+    chmod 644 "${SPOTWEB_DIR}/custom/tools/"* 2>/dev/null || true
+    chmod 644 "${SPOTWEB_DIR}/custom/includes/"*.php 2>/dev/null || true
     chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
     
-    echo "✓ Theme pack installed (8 themes) 🎨"
+    echo "✓ Theme pack installed (7 themes + tools) 🎨"
+    echo "  → Themes: custom/themes/preinstalled/"
+    echo "  → Tools: custom/tools/"
+    echo "  → Customizer: http://YOUR_IP/custom/tools/theme-customizer.html"
+    echo "  → Upload: http://YOUR_IP/custom/tools/theme-upload.php"
     
 else
-    # Download only dark theme (backwards compatibility)
+    # Download only dark theme (simplified - no switcher)
     echo "  → Downloading theme-dark.css"
-    curl -fsSL "${GITHUB_REPO}/templates/we1rdo/css/theme-dark.css" \
-        -o "${SPOTWEB_DIR}/templates/we1rdo/css/dark-mode.css" 2>/dev/null || \
+    mkdir -p "${SPOTWEB_DIR}/custom/themes/preinstalled"
+    curl -fsSL "${GITHUB_REPO}/custom/themes/preinstalled/theme-dark.css" \
+        -o "${SPOTWEB_DIR}/custom/themes/preinstalled/theme-dark.css" 2>/dev/null || \
         echo "    ⚠ Failed to download dark theme"
     
-    # Create minimal header for dark mode only
-    echo "  → Creating header.inc.php with dark mode support"
+    # Create minimal header for dark mode only (no switcher)
+    echo "  → Creating header.inc.php with dark mode (no theme switcher)"
     cat > "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php" << 'PHPEOF'
 <!DOCTYPE HTML PUBLIC "//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
@@ -684,7 +711,7 @@ else
 <?php } ?>
 <?php if ($tplHelper->allowed(SpotSecurity::spotsec_view_statics, '')) { ?>
 		<link rel='stylesheet' type='text/css' href='?page=statics&amp;type=css&amp;mod=<?php echo $tplHelper->getStaticModTime('css'); ?>'>
-		<link rel='stylesheet' type='text/css' href='templates/we1rdo/css/dark-mode.css'>
+		<link rel='stylesheet' type='text/css' href='custom/themes/preinstalled/theme-dark.css'>
 		<link rel='shortcut icon' href='?page=statics&amp;type=ico&amp;mod=<?php echo $tplHelper->getStaticModTime('ico'); ?>'>
 <?php } ?>
 		<style type="text/css" media="screen,handheld,projection">
@@ -706,12 +733,14 @@ PHPEOF
     
     # Set permissions
     echo "  → Setting permissions"
+    chown -R www-data:www-data "${SPOTWEB_DIR}/custom/" 2>/dev/null || true
+    chmod 755 "${SPOTWEB_DIR}/custom/themes" "${SPOTWEB_DIR}/custom/themes/preinstalled" 2>/dev/null || true
+    chmod 664 "${SPOTWEB_DIR}/custom/themes/preinstalled/theme-dark.css" 2>/dev/null || true
     chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
-    chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/css/dark-mode.css" 2>/dev/null || true
     chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
-    chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/css/dark-mode.css" 2>/dev/null || true
     
-    echo "✓ Dark mode theme installed 🌙"
+    echo "✓ Dark mode installed 🌙"
+    echo "  → Theme: custom/themes/preinstalled/theme-dark.css"
 fi
 THEME_SCRIPT
 
