@@ -1,18 +1,54 @@
 /**
  * Multi-Theme Switcher for Spotweb
  * Supports multiple beautiful themes with smooth transitions
+ * Auto-detects all available themes from loaded CSS files
  */
 
-const themes = [
-    { id: 'light', name: 'Light (Default)', icon: '☀️' },
-    { id: 'dark', name: 'Dark', icon: '🌙' },
-    { id: 'midnight-ocean', name: 'Midnight Ocean', icon: '🌊' },
-    { id: 'cyberpunk', name: 'Cyberpunk', icon: '🎮' },
-    { id: 'nord', name: 'Nord', icon: '❄️' },
-    { id: 'dracula', name: 'Dracula', icon: '🧛' },
-    { id: 'forest', name: 'Forest', icon: '🌲' },
-    { id: 'sunset', name: 'Sunset', icon: '🌅' }
-];
+// Theme metadata (icons and display names)
+const themeMetadata = {
+    'light': { name: 'Light (Default)', icon: '☀️' },
+    'dark': { name: 'Dark', icon: '🌙' },
+    'midnight-ocean': { name: 'Midnight Ocean', icon: '🌊' },
+    'cyberpunk': { name: 'Cyberpunk', icon: '🎮' },
+    'nord': { name: 'Nord', icon: '❄️' },
+    'dracula': { name: 'Dracula', icon: '🧛' },
+    'forest': { name: 'Forest', icon: '🌲' },
+    'sunset': { name: 'Sunset', icon: '🌅' }
+};
+
+// Auto-detect available themes from loaded CSS files
+function detectAvailableThemes() {
+    const themes = [{ id: 'light', name: 'Light (Default)', icon: '☀️' }]; // Always include light
+    
+    // Scan all <link> tags for theme CSS files
+    document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && href.includes('theme-') && href.endsWith('.css')) {
+            // Extract theme ID from filename: theme-dark.css -> dark
+            const match = href.match(/theme-([^\/]+)\.css$/);
+            if (match) {
+                const themeId = match[1];
+                // Skip if already added
+                if (!themes.find(t => t.id === themeId)) {
+                    // Use metadata if available, otherwise generate nice name
+                    const metadata = themeMetadata[themeId] || {
+                        name: themeId.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+                        icon: '🎨'
+                    };
+                    themes.push({
+                        id: themeId,
+                        name: metadata.name,
+                        icon: metadata.icon
+                    });
+                }
+            }
+        }
+    });
+    
+    return themes;
+}
+
+const themes = detectAvailableThemes();
 
 document.addEventListener('DOMContentLoaded', function() {
     // Add smooth transition to body
