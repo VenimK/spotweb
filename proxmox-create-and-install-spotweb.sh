@@ -646,6 +646,12 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
 		<link rel='stylesheet' type='text/css' href='?page=statics&amp;type=css&amp;mod=<?php echo $tplHelper->getStaticModTime('css'); ?>'>
 		<link rel='shortcut icon' href='?page=statics&amp;type=ico&amp;mod=<?php echo $tplHelper->getStaticModTime('ico'); ?>'>
 <?php } ?>
+<?php
+// Custom Theme System Integration (Update-Safe)
+if (file_exists(__DIR__ . '/../../../custom/includes/theme-loader.inc.php')) {
+    include_once(__DIR__ . '/../../../custom/includes/theme-loader.inc.php');
+}
+?>
 		<style type="text/css" media="screen,handheld,projection">
 			<?php echo $settings->get('customcss'); ?>
 		</style>		
@@ -661,12 +667,6 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
 	<body>
 		<div id='editdialogdiv'></div>
 		<div id="overlay"></div>
-<?php
-// Custom Theme System Integration (Update-Safe)
-if (file_exists(__DIR__ . '/../../../custom/includes/theme-loader.inc.php')) {
-    include_once(__DIR__ . '/../../../custom/includes/theme-loader.inc.php');
-}
-?>
 PHPEOF
     
     # Set permissions for /custom/ folder
