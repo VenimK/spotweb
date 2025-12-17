@@ -43,6 +43,7 @@ DISK_SIZE="20"
 CORES="2"
 MEMORY="2048"
 BRIDGE="vmbr0"
+VLAN_TAG=""
 OSTYPE="debian"
 OSVERSION="12"
 WEBSERVER="apache"  # or nginx
@@ -104,6 +105,8 @@ echo -e "  Disk: ${DISK_SIZE}GB"
 echo -e "  Storage: ${STORAGE}"
 echo -e "  OS: Debian ${OSVERSION}"
 echo -e "  Web Server: ${WEBSERVER}"
+echo -e "  Network Bridge: ${BRIDGE}"
+echo -e "  VLAN Tag: ${VLAN_TAG:-none}"
 echo ""
 
 read -p "Container hostname [${HOSTNAME}]: " INPUT_HOST
@@ -124,6 +127,20 @@ fi
 read -p "RAM in MB [${MEMORY}]: " INPUT_MEM
 if [[ -n "${INPUT_MEM}" && "${INPUT_MEM}" =~ ^[0-9]+$ && "${INPUT_MEM}" -gt 0 ]]; then
   MEMORY="${INPUT_MEM}"
+fi
+
+read -p "Proxmox bridge interface [${BRIDGE}]: " INPUT_BRIDGE
+if [[ -n "${INPUT_BRIDGE}" ]]; then
+  BRIDGE="${INPUT_BRIDGE}"
+fi
+
+read -p "VLAN tag (leave empty for none) [${VLAN_TAG}]: " INPUT_VLAN
+if [[ -n "${INPUT_VLAN}" ]]; then
+  if ! [[ "${INPUT_VLAN}" =~ ^[0-9]+$ ]] || [ "${INPUT_VLAN}" -lt 1 ] || [ "${INPUT_VLAN}" -gt 4094 ]; then
+    echo -e "${RED}Invalid VLAN tag. Must be 1-4094 (or empty for none). Aborting.${NC}"
+    exit 1
+  fi
+  VLAN_TAG="${INPUT_VLAN}"
 fi
 
 read -p "Web server (apache/nginx) [${WEBSERVER}]: " INPUT_WEB
@@ -157,6 +174,8 @@ echo -e "  Storage: ${STORAGE}"
 echo -e "  OS: Debian ${OSVERSION}"
 echo -e "  Web Server: ${WEBSERVER}"
 echo -e "  Themes: ${INSTALL_THEMES}"
+echo -e "  Network Bridge: ${BRIDGE}"
+echo -e "  VLAN Tag: ${VLAN_TAG:-none}"
 echo ""
 
 read -p "Press Enter to create the container and install Spotweb, or Ctrl+C to cancel: "
@@ -190,12 +209,17 @@ if [ ! -f "$TEMPLATE_PATH" ]; then
 fi
 
 # Create container (unprivileged for better security)
+NET0="name=eth0,bridge=${BRIDGE},ip=dhcp"
+if [[ -n "${VLAN_TAG}" ]]; then
+    NET0="${NET0},tag=${VLAN_TAG}"
+fi
+
 pct create $CTID $TEMPLATE_PATH \
     --hostname $HOSTNAME \
     --cores $CORES \
     --memory $MEMORY \
     --rootfs ${STORAGE}:${DISK_SIZE} \
-    --net0 name=eth0,bridge=${BRIDGE},ip=dhcp \
+    --net0 ${NET0} \
     --unprivileged 1 \
     --features nesting=1 \
     --onboot 1 \
