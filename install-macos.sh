@@ -128,6 +128,9 @@ mysql_exec() {
 install_spotweb() {
   local spotweb_dir="$1"
   print_info "Downloading Spotweb (${SPOTWEB_GIT_BRANCH})..."
+  # Change to home dir to avoid "Unable to read current working directory" if
+  # the target directory is also the shell's CWD (which rm -rf would delete)
+  cd ~ || cd /tmp
   rm -rf "${spotweb_dir}"
   mkdir -p "$(dirname "${spotweb_dir}")"
   if git clone -b "${SPOTWEB_GIT_BRANCH}" --depth 1 "${SPOTWEB_GIT_REPO}" "${spotweb_dir}"; then
