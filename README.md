@@ -64,7 +64,26 @@ chmod +x install-spotweb.sh
 - Option 2: **Dark mode only** (simple dark theme)
 - Option 3: **Complete theme pack** (8 themes + switcher + tools) ⭐ Recommended
 
-### Option 2: Add to Existing Spotweb
+### Option 2: Native macOS (Homebrew)
+
+You can also install Spotweb + the theme system locally on macOS using Homebrew (PHP + MariaDB).
+
+```bash
+# Download macOS installer
+curl -fsSL https://raw.githubusercontent.com/VenimK/spotweb/themes-only/install-macos.sh -o install-macos.sh
+chmod +x install-macos.sh
+
+# Run installer
+./install-macos.sh
+```
+
+After installation, start Spotweb locally (the installer will print the exact command):
+
+```bash
+/opt/homebrew/opt/php@8.2/bin/php -S 127.0.0.1:8080 -t "$HOME/Sites/spotweb"
+```
+
+### Option 3: Add to Existing Spotweb
 
 Already have Spotweb? See **[MIGRATION-GUIDE.md](MIGRATION-GUIDE.md)** for installation steps.
 
