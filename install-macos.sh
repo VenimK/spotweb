@@ -7,6 +7,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+# Start timer
+START_TIME=$(date +%s)
+
 GITHUB_RAW_BASE="https://raw.githubusercontent.com/VenimK/spotweb/themes-only"
 SPOTWEB_GIT_REPO="https://github.com/spotweb/spotweb.git"
 SPOTWEB_GIT_BRANCH="master"
@@ -439,6 +442,17 @@ main() {
     echo "  Customizer: http://127.0.0.1:${port}/custom/tools/theme-customizer.html"
     echo "  Upload:     http://127.0.0.1:${port}/custom/tools/theme-upload.php"
   fi
+
+  # Calculate elapsed time
+  END_TIME=$(date +%s)
+  ELAPSED=$((END_TIME - START_TIME))
+  MINUTES=$((ELAPSED / 60))
+  SECONDS_LEFT=$((ELAPSED % 60))
+
+  echo ""
+  echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${GREEN}✓ Installation completed in ${MINUTES}m ${SECONDS_LEFT}s${NC}"
+  echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 }
 
 main "$@"
