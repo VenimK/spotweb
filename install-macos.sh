@@ -348,9 +348,26 @@ main() {
   require_cmd curl
 
   if ! command -v brew >/dev/null 2>&1; then
-    echo "Homebrew is required." >&2
-    echo "Install it from: https://brew.sh" >&2
-    exit 1
+    echo ""
+    print_warn "Homebrew is not installed."
+    echo ""
+    read -r -p "Would you like to install Homebrew now? [Y/n]: " install_brew
+    if [[ "${install_brew,,}" == "n" || "${install_brew,,}" == "no" ]]; then
+      echo "Install Homebrew manually from: https://brew.sh"
+      exit 1
+    fi
+    print_info "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    # Reload shell environment to pick up brew
+    if [[ -x "/opt/homebrew/bin/brew" ]]; then
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -x "/usr/local/bin/brew" ]]; then
+      eval "$(/usr/local/bin/brew shellenv)"
+    fi
+    if ! command -v brew >/dev/null 2>&1; then
+      die "Homebrew installation failed. Please install manually from https://brew.sh"
+    fi
+    print_success "Homebrew installed"
   fi
 
   local spotweb_dir="${DEFAULT_SPOTWEB_DIR}"
