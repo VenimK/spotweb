@@ -48,6 +48,12 @@ OSTYPE="debian"
 OSVERSION="12"
 WEBSERVER="apache"  # or nginx
 
+HOST_TIMEZONE="$(timedatectl show -p Timezone --value 2>/dev/null || true)"
+if [[ -z "${HOST_TIMEZONE}" && -f /etc/timezone ]]; then
+    HOST_TIMEZONE="$(cat /etc/timezone 2>/dev/null || true)"
+fi
+TIMEZONE="${HOST_TIMEZONE:-UTC}"
+
 # Get next available CTID
 NEXTID=$(pvesh get /cluster/nextid)
 
@@ -107,6 +113,7 @@ echo -e "  OS: Debian ${OSVERSION}"
 echo -e "  Web Server: ${WEBSERVER}"
 echo -e "  Network Bridge: ${BRIDGE}"
 echo -e "  VLAN Tag: ${VLAN_TAG:-none}"
+echo -e "  Timezone: ${TIMEZONE}"
 echo ""
 
 read -p "Container hostname [${HOSTNAME}]: " INPUT_HOST
@@ -143,6 +150,15 @@ if [[ -n "${INPUT_VLAN}" ]]; then
   VLAN_TAG="${INPUT_VLAN}"
 fi
 
+read -p "Timezone [${TIMEZONE}]: " INPUT_TZ
+if [[ -n "${INPUT_TZ}" ]]; then
+  if [[ ! -f "/usr/share/zoneinfo/${INPUT_TZ}" ]]; then
+    echo -e "${RED}Invalid timezone. Example: Europe/Brussels. Aborting.${NC}"
+    exit 1
+  fi
+  TIMEZONE="${INPUT_TZ}"
+fi
+
 read -p "Web server (apache/nginx) [${WEBSERVER}]: " INPUT_WEB
 if [[ -n "${INPUT_WEB}" && ("${INPUT_WEB}" == "apache" || "${INPUT_WEB}" == "nginx") ]]; then
   WEBSERVER="${INPUT_WEB}"
@@ -176,6 +192,7 @@ echo -e "  Web Server: ${WEBSERVER}"
 echo -e "  Themes: ${INSTALL_THEMES}"
 echo -e "  Network Bridge: ${BRIDGE}"
 echo -e "  VLAN Tag: ${VLAN_TAG:-none}"
+echo -e "  Timezone: ${TIMEZONE}"
 echo ""
 
 read -p "Press Enter to create the container and install Spotweb, or Ctrl+C to cancel: "
@@ -245,6 +262,9 @@ done
 IP=$(pct exec $CTID -- hostname -I | awk '{print $1}')
 echo -e "${GREEN}✓ Container IP: $IP${NC}"
 echo ""
+
+echo -e "${BLUE}Configuring container timezone...${NC}"
+pct exec $CTID -- bash -lc "timedatectl set-timezone '${TIMEZONE}' 2>/dev/null || (ln -sf '/usr/share/zoneinfo/${TIMEZONE}' /etc/localtime && echo '${TIMEZONE}' > /etc/timezone)" >/dev/null 2>&1 || true
 
 # Run installation inside container
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
@@ -587,6 +607,11 @@ echo -e "${BLUE}Credentials saved to: /root/spotweb-credentials.txt${NC}"
 echo ""
 
 INSTALLER_SCRIPT
+
+if [[ "${WEBSERVER}" == "apache" ]]; then
+    echo -e "${BLUE}Configuring PHP timezone...${NC}"
+    pct exec $CTID -- bash -lc "TZVAL='${TIMEZONE}'; PHPINI=\$(ls -1 /etc/php/*/apache2/php.ini 2>/dev/null | head -n1); if [ -n \"\$PHPINI\" ]; then if grep -qE '^[; ]*date\\.timezone' \"\$PHPINI\"; then sed -i \"s~^[; ]*date\\.timezone[[:space:]]*=.*~date.timezone = \$TZVAL~\" \"\$PHPINI\"; else echo \"date.timezone = \$TZVAL\" >> \"\$PHPINI\"; fi; fi; systemctl restart apache2 >/dev/null 2>&1 || true" || true
+fi
 
 # Replace placeholders in the script
 pct exec $CTID -- sed -i "s/WEBSERVER_PLACEHOLDER/${WEBSERVER}/g" /tmp/installer.sh 2>/dev/null || true
