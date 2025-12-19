@@ -59,9 +59,11 @@ document.addEventListener('DOMContentLoaded', function() {
     applyTheme(savedTheme);
     
     // Create theme switcher in toolbar
-    const toolbar = document.querySelector('div#toolbar');
+    const toolbar = document.querySelector('div#toolbar') || document.querySelector('#toolbar');
     if (toolbar) {
         createThemeSwitcher(toolbar, savedTheme);
+    } else {
+        createThemeSwitcher(document.body, savedTheme);
     }
     
     // Handle AJAX navigation
@@ -96,7 +98,12 @@ function createThemeSwitcher(toolbar, currentTheme) {
     addThemeSwitcherStyles();
     
     // Insert before other toolbar buttons
-    toolbar.insertBefore(themeSwitcher, toolbar.firstChild);
+    if (toolbar === document.body) {
+        themeSwitcher.classList.add('theme-switcher-fallback');
+        toolbar.appendChild(themeSwitcher);
+    } else {
+        toolbar.insertBefore(themeSwitcher, toolbar.firstChild);
+    }
     
     // Setup event listeners
     setupThemeSwitcherEvents(currentTheme);
@@ -195,6 +202,13 @@ function addThemeSwitcherStyles() {
         .theme-switcher {
             position: relative;
             z-index: 1000;
+        }
+
+        .theme-switcher.theme-switcher-fallback {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
         }
         
         .theme-dropdown {

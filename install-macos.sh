@@ -185,6 +185,29 @@ init_spotweb_db() {
   print_success "Admin password set"
 }
 
+patch_template_headers() {
+  local spotweb_dir="$1"
+  local hook="<?php\nif (file_exists(__DIR__ . '/../../../custom/includes/theme-loader.inc.php')) {\n    include_once(__DIR__ . '/../../../custom/includes/theme-loader.inc.php');\n}\n?>\n"
+
+  local header
+  while IFS= read -r -d '' header; do
+    if grep -q "custom/includes/theme-loader.inc.php" "${header}"; then
+      continue
+    fi
+    perl -0777 -i -pe "s|</head>|${hook}</head>|s" "${header}" || true
+  done < <(find "${spotweb_dir}/templates" -maxdepth 3 -type f -path "*/includes/header.inc.php" -print0 2>/dev/null || true)
+}
+
+ensure_master_template_compat() {
+  local db_name="$1"
+  local db_user="$2"
+  local db_pass="$3"
+
+  mysql --user="${db_user}" --password="${db_pass}" "${db_name}" \
+    -e "UPDATE usersettings SET otherprefs = REPLACE(otherprefs, 's:6:\"modern\"', 's:6:\"we1rdo\"');" \
+    >/dev/null 2>&1 || true
+}
+
 install_themes() {
   local spotweb_dir="$1"
   local mode="$2"  # none|dark|pack
@@ -280,6 +303,8 @@ PHPEOF
 
     chmod 644 "${spotweb_dir}/templates/we1rdo/includes/header.inc.php" || true
 
+    patch_template_headers "${spotweb_dir}"
+
     print_success "Theme pack installed"
     return 0
   fi
@@ -328,6 +353,8 @@ PHPEOF
 PHPEOF
 
     chmod 644 "${spotweb_dir}/templates/we1rdo/includes/header.inc.php" || true
+
+    patch_template_headers "${spotweb_dir}"
 
     print_success "Dark theme installed"
     return 0
@@ -451,6 +478,11 @@ main() {
   install_themes "${spotweb_dir}" "${theme_mode}"
 
   init_spotweb_db "${spotweb_dir}"
+
+  if [[ "${SPOTWEB_GIT_BRANCH}" == "master" ]]; then
+    print_info "Ensuring Spotweb template is compatible with master"
+    ensure_master_template_compat "${db_name}" "${db_user}" "${db_pass}"
+  fi
 
   echo ""
   print_success "Installation complete"
