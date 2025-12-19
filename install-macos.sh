@@ -409,6 +409,17 @@ main() {
   read -r -p "Local web port for PHP built-in server [${port}]: " input_port
   if [[ -n "${input_port}" ]]; then port="${input_port}"; fi
 
+  echo ""
+  echo "Spotweb Version:"
+  echo "  1) master (stable)"
+  echo "  2) develop (development)"
+  read -r -p "Select Spotweb version [1]: " input_ref_choice
+  case "${input_ref_choice:-1}" in
+    1) SPOTWEB_GIT_BRANCH="master";;
+    2) SPOTWEB_GIT_BRANCH="develop";;
+    *) die "Invalid selection";;
+  esac
+
   print_info "Installing dependencies via Homebrew..."
   brew_install_if_missing "${DEFAULT_PHP_FORMULA}"
   brew_install_if_missing mariadb

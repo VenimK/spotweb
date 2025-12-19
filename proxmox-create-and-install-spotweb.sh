@@ -47,6 +47,7 @@ VLAN_TAG=""
 OSTYPE="debian"
 OSVERSION="12"
 WEBSERVER="apache"  # or nginx
+SPOTWEB_REF="master"
 
 HOST_TIMEZONE="$(timedatectl show -p Timezone --value 2>/dev/null || true)"
 if [[ -z "${HOST_TIMEZONE}" && -f /etc/timezone ]]; then
@@ -57,7 +58,34 @@ TIMEZONE="${HOST_TIMEZONE:-UTC}"
 # Get next available CTID
 NEXTID=$(pvesh get /cluster/nextid)
 
+echo ""
+echo -e "${CYAN}Container Mode:${NC}"
+echo "  1) Create new container (default)"
+echo "  2) Use existing container"
+read -r -p "Select option [1]: " CT_MODE_CHOICE
+CT_MODE="new"
+DISPLAY_CTID="${NEXTID}"
+if [[ "${CT_MODE_CHOICE:-1}" == "2" ]]; then
+    CT_MODE="existing"
+    read -r -p "Existing Container ID: " INPUT_CTID
+    if ! [[ "${INPUT_CTID}" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}Invalid Container ID. Aborting.${NC}"
+        exit 1
+    fi
+    if ! pct status "${INPUT_CTID}" >/dev/null 2>&1; then
+        echo -e "${RED}Container ID ${INPUT_CTID} not found. Aborting.${NC}"
+        exit 1
+    fi
+    CTID="${INPUT_CTID}"
+    DISPLAY_CTID="${CTID}"
+    HOSTNAME="$(pct config "${CTID}" 2>/dev/null | awk '/^hostname:/ {print $2}')"
+    CORES="$(pct config "${CTID}" 2>/dev/null | awk '/^cores:/ {print $2}')"
+    MEMORY="$(pct config "${CTID}" 2>/dev/null | awk '/^memory:/ {print $2}')"
+    DISK_SIZE="(existing)"
+fi
+
 # Detect available storage for containers
+if [[ "${CT_MODE}" == "new" ]]; then
 echo -e "${BLUE}Detecting available storage...${NC}"
 
 # Prefer storages that explicitly support rootdir (containers)
@@ -97,25 +125,34 @@ fi
 STORAGE=${STORAGE_OPTIONS[$((STORAGE_CHOICE-1))]}
 
 echo -e "${GREEN}✓ Using storage: ${STORAGE}${NC}"
+else
+STORAGE="(existing)"
+fi
 
 echo -e "${CYAN}Spotweb LXC Container Setup${NC}"
 echo ""
 echo -e "${YELLOW}This will create a Debian 12 LXC container and install Spotweb${NC}"
 echo ""
 echo -e "${GREEN}Default settings:${NC}"
-echo -e "  Container ID: ${NEXTID}"
+echo -e "  Container ID: ${DISPLAY_CTID}"
 echo -e "  Hostname: ${HOSTNAME}"
 echo -e "  CPU Cores: ${CORES}"
 echo -e "  RAM: ${MEMORY}MB"
+if [[ "${CT_MODE}" == "new" ]]; then
 echo -e "  Disk: ${DISK_SIZE}GB"
+else
+echo -e "  Disk: ${DISK_SIZE}"
+fi
 echo -e "  Storage: ${STORAGE}"
 echo -e "  OS: Debian ${OSVERSION}"
 echo -e "  Web Server: ${WEBSERVER}"
 echo -e "  Network Bridge: ${BRIDGE}"
 echo -e "  VLAN Tag: ${VLAN_TAG:-none}"
 echo -e "  Timezone: ${TIMEZONE}"
+echo -e "  Spotweb Version: ${SPOTWEB_REF}"
 echo ""
 
+if [[ "${CT_MODE}" == "new" ]]; then
 read -p "Container hostname [${HOSTNAME}]: " INPUT_HOST
 if [[ -n "${INPUT_HOST}" ]]; then
   HOSTNAME="${INPUT_HOST}"
@@ -149,6 +186,7 @@ if [[ -n "${INPUT_VLAN}" ]]; then
   fi
   VLAN_TAG="${INPUT_VLAN}"
 fi
+fi
 
 read -p "Timezone [${TIMEZONE}]: " INPUT_TZ
 if [[ -n "${INPUT_TZ}" ]]; then
@@ -158,6 +196,17 @@ if [[ -n "${INPUT_TZ}" ]]; then
   fi
   TIMEZONE="${INPUT_TZ}"
 fi
+
+echo ""
+echo -e "${CYAN}Spotweb Version:${NC}"
+echo "  1) master (stable)"
+echo "  2) develop (development)"
+read -r -p "Select Spotweb version [1]: " INPUT_REF_CHOICE
+case "${INPUT_REF_CHOICE:-1}" in
+  1) SPOTWEB_REF="master" ;;
+  2) SPOTWEB_REF="develop" ;;
+  *) echo -e "${RED}Invalid selection. Aborting.${NC}"; exit 1 ;;
+esac
 
 read -p "Web server (apache/nginx) [${WEBSERVER}]: " INPUT_WEB
 if [[ -n "${INPUT_WEB}" && ("${INPUT_WEB}" == "apache" || "${INPUT_WEB}" == "nginx") ]]; then
@@ -181,11 +230,15 @@ esac
 
 echo ""
 echo -e "${CYAN}Final settings:${NC}"
-echo -e "  Container ID: ${NEXTID}"
+echo -e "  Container ID: ${DISPLAY_CTID}"
 echo -e "  Hostname: ${HOSTNAME}"
 echo -e "  CPU Cores: ${CORES}"
 echo -e "  RAM: ${MEMORY}MB"
+if [[ "${CT_MODE}" == "new" ]]; then
 echo -e "  Disk: ${DISK_SIZE}GB"
+else
+echo -e "  Disk: ${DISK_SIZE}"
+fi
 echo -e "  Storage: ${STORAGE}"
 echo -e "  OS: Debian ${OSVERSION}"
 echo -e "  Web Server: ${WEBSERVER}"
@@ -193,13 +246,21 @@ echo -e "  Themes: ${INSTALL_THEMES}"
 echo -e "  Network Bridge: ${BRIDGE}"
 echo -e "  VLAN Tag: ${VLAN_TAG:-none}"
 echo -e "  Timezone: ${TIMEZONE}"
+echo -e "  Spotweb Version: ${SPOTWEB_REF}"
 echo ""
 
+if [[ "${CT_MODE}" == "new" ]]; then
 read -p "Press Enter to create the container and install Spotweb, or Ctrl+C to cancel: "
+else
+read -p "Press Enter to install Spotweb in the existing container, or Ctrl+C to cancel: "
+fi
 
+if [[ "${CT_MODE}" == "new" ]]; then
 CTID=$NEXTID
+fi
 
 echo ""
+if [[ "${CT_MODE}" == "new" ]]; then
 echo -e "${BLUE}Creating LXC container...${NC}"
 
 # Find the latest Debian 12 template
@@ -243,6 +304,12 @@ pct create $CTID $TEMPLATE_PATH \
     --start 1
 
 echo -e "${GREEN}✓ Container created (ID: $CTID)${NC}"
+else
+echo -e "${BLUE}Using existing LXC container (ID: $CTID)...${NC}"
+if ! pct status $CTID 2>/dev/null | grep -qi running; then
+    pct start $CTID >/dev/null 2>&1 || true
+fi
+fi
 
 # Wait for container to start
 echo -e "${BLUE}Waiting for container to start...${NC}"
@@ -274,7 +341,7 @@ echo -e "${BLUE}╚════════════════════�
 echo ""
 
 # Create installation script inside container
-pct exec $CTID -- bash <<'INSTALLER_SCRIPT'
+pct exec $CTID -- env WEBSERVER="${WEBSERVER}" SPOTWEB_REF="${SPOTWEB_REF}" bash <<'INSTALLER_SCRIPT'
 #!/bin/bash
 set -e
 
@@ -350,8 +417,8 @@ apt-get install -y \
     php${PHP_VERSION}-intl \
     php${PHP_VERSION}-opcache
 
-WEBSERVER="WEBSERVER_PLACEHOLDER"
-INSTALL_THEMES="THEMES_PLACEHOLDER"
+WEBSERVER="${WEBSERVER:-apache}"
+SPOTWEB_REF="${SPOTWEB_REF:-master}"
 
 if [ "$WEBSERVER" == "nginx" ]; then
     echo "  → Installing PHP-FPM for Nginx"
@@ -463,9 +530,9 @@ fi
 
 # Download Spotweb
 print_info "Downloading Spotweb from GitHub..."
-echo "  → Cloning repository (master branch)"
+echo "  → Cloning repository (${SPOTWEB_REF} branch)"
 rm -rf "$SPOTWEB_DIR"
-if git clone -b master --depth 1 https://github.com/spotweb/spotweb.git "$SPOTWEB_DIR"; then
+if git clone -b "$SPOTWEB_REF" --depth 1 https://github.com/spotweb/spotweb.git "$SPOTWEB_DIR"; then
     print_success "Spotweb downloaded"
 else
     echo -e "${RED}✗ Failed to download Spotweb${NC}"
