@@ -597,6 +597,12 @@ echo "  → Resetting admin user password to default"
 php ${SPOTWEB_DIR}/bin/upgrade-db.php --reset-password admin
 print_success "Admin password set to: spotweb"
 
+if [[ "${SPOTWEB_REF}" == "master" ]]; then
+    mysql --user="${DB_USER}" --password="${DB_PASS}" "${DB_NAME}" \
+        -e "UPDATE usersettings SET otherprefs = REPLACE(otherprefs, 's:6:\"modern\"', 's:6:\"we1rdo\"');" \
+        >/dev/null 2>&1 || true
+fi
+
 # Setup systemd timer
 print_info "Configuring automatic spot retrieval..."
 echo "  → Creating systemd service"
@@ -699,6 +705,18 @@ if [[ "$INSTALL_THEMES" != "none" ]]; then
 GITHUB_REPO='https://raw.githubusercontent.com/VenimK/spotweb/themes-only'
 SPOTWEB_DIR='/var/www/html/spotweb'
 
+patch_template_headers() {
+    local hook="<?php\nif (file_exists(__DIR__ . '/../../../custom/includes/theme-loader.inc.php')) {\n    include_once(__DIR__ . '/../../../custom/includes/theme-loader.inc.php');\n}\n?>\n"
+
+    local header
+    while IFS= read -r -d '' header; do
+        if grep -q "custom/includes/theme-loader.inc.php" "${header}"; then
+            continue
+        fi
+        perl -0777 -i -pe "s|</head>|${hook}</head>|s" "${header}" || true
+    done < <(find "${SPOTWEB_DIR}/templates" -maxdepth 3 -type f -path "*/includes/header.inc.php" -print0 2>/dev/null || true)
+}
+
 # Create NEW /custom/ folder structure (update-safe!)
 echo "  → Creating /custom/ folder structure..."
 mkdir -p "${SPOTWEB_DIR}/custom/themes/preinstalled"
@@ -799,6 +817,8 @@ PHPEOF
     chmod 644 "${SPOTWEB_DIR}/custom/tools/"* 2>/dev/null || true
     chmod 644 "${SPOTWEB_DIR}/custom/includes/"*.php 2>/dev/null || true
     chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
+
+    patch_template_headers
     
     echo "✓ Theme pack installed (7 themes + tools) 🎨"
     echo "  → Themes: custom/themes/preinstalled/"
@@ -860,6 +880,8 @@ PHPEOF
     chmod 664 "${SPOTWEB_DIR}/custom/themes/preinstalled/theme-dark.css" 2>/dev/null || true
     chown www-data:www-data "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
     chmod 644 "${SPOTWEB_DIR}/templates/we1rdo/includes/header.inc.php"
+
+    patch_template_headers
     
     echo "✓ Dark mode installed 🌙"
     echo "  → Theme: custom/themes/preinstalled/theme-dark.css"
