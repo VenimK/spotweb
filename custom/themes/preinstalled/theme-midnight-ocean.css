@@ -4,9 +4,17 @@
   --color-surface-2: #172a45;
   --color-border: #233554;
   --color-text: #ccd6f6;
+  --color-bg: #0a192f;
+  --color-muted: #8892b0;
   --color-accent: #64ffda;
   --sw-strip-gradient: linear-gradient(180deg, #172a45 0%, #1d2d50 100%);
+  --sw-strip-border: #0d1728;
   --sw-strip-text: #64ffda;
+
+  --sw-cat0: #64ffda;
+  --sw-cat1: #ffd479;
+  --sw-cat2: #7dd3c0;
+  --sw-cat3: #ff6b9d;
 }
 
 body.theme-midnight-ocean {background: linear-gradient(135deg, #0a192f 0%, #112240 100%); color:#ccd6f6;}

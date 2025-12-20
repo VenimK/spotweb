@@ -4,9 +4,17 @@
   --color-surface-2: #3b4252;
   --color-border: #434c5e;
   --color-text: #d8dee9;
+  --color-bg: #2b303b;
+  --color-muted: #aab3c2;
   --color-accent: #88c0d0;
   --sw-strip-gradient: linear-gradient(120deg, #3b4252, #434c5e);
+  --sw-strip-border: #232831;
   --sw-strip-text: #eceff4;
+
+  --sw-cat0: #88c0d0;
+  --sw-cat1: #ebcb8b;
+  --sw-cat2: #a3be8c;
+  --sw-cat3: #bf616a;
 }
 
 body.theme-nord {background:#2e3440; color:#d8dee9;}

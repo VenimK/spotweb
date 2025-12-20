@@ -6,9 +6,17 @@
   --color-surface-2: #333;
   --color-border: #444;
   --color-text: #e0e0e0;
+  --color-bg: #1e1e1e;
+  --color-muted: #b8b8b8;
   --color-accent: #4da6ff;
   --sw-strip-gradient: linear-gradient(120deg, #333, #2d2d2d);
+  --sw-strip-border: #111;
   --sw-strip-text: #e0e0e0;
+
+  --sw-cat0: #4da6ff;
+  --sw-cat1: #66cc66;
+  --sw-cat2: #ffcc00;
+  --sw-cat3: #ff6666;
 }
 
 /* GENERAL */

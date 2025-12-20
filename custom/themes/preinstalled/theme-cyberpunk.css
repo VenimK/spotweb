@@ -4,9 +4,17 @@
   --color-surface-2: #1a0b2e;
   --color-border: rgba(255, 0, 110, 0.35);
   --color-text: #e9e9e9;
+  --color-bg: #05010f;
+  --color-muted: rgba(0, 217, 255, 0.85);
   --color-accent: #ff006e;
   --sw-strip-gradient: linear-gradient(180deg, #1a0b2e 0%, #0d0221 100%);
+  --sw-strip-border: rgba(0, 217, 255, 0.25);
   --sw-strip-text: #00ff41;
+
+  --sw-cat0: #00d9ff;
+  --sw-cat1: #ffd000;
+  --sw-cat2: #00ff41;
+  --sw-cat3: #ff006e;
 }
 
 body.theme-cyberpunk {background: radial-gradient(circle at top, #1a0b2e 0%, #0d0221 60%, #000 100%); color:#e9e9e9;}

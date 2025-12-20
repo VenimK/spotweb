@@ -4,9 +4,17 @@
   --color-surface-2: #44475a;
   --color-border: #6272a4;
   --color-text: #f8f8f2;
+  --color-bg: #1f202a;
+  --color-muted: #bd93f9;
   --color-accent: #ff79c6;
   --sw-strip-gradient: linear-gradient(120deg, #44475a, #282a36);
+  --sw-strip-border: #1a1b22;
   --sw-strip-text: #f8f8f2;
+
+  --sw-cat0: #8be9fd;
+  --sw-cat1: #f1fa8c;
+  --sw-cat2: #50fa7b;
+  --sw-cat3: #ffb86c;
 }
 
 body.theme-dracula {background:#282a36; color:#f8f8f2;}

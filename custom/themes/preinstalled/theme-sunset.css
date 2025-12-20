@@ -4,9 +4,17 @@
   --color-surface-2: #2d1b3d;
   --color-border: rgba(255, 154, 118, 0.35);
   --color-text: #ffe6dc;
+  --color-bg: #130f1c;
+  --color-muted: #ffd6ba;
   --color-accent: #ff9a76;
   --sw-strip-gradient: linear-gradient(180deg, #2d1b3d 0%, #3d1f47 100%);
+  --sw-strip-border: rgba(255, 154, 118, 0.22);
   --sw-strip-text: #ffb08a;
+
+  --sw-cat0: #ffa07a;
+  --sw-cat1: #ffb6c1;
+  --sw-cat2: #ffd700;
+  --sw-cat3: #ff6b6b;
 }
 
 body.theme-sunset {background: linear-gradient(135deg, #2d1b3d 0%, #1a1625 100%); color:#ffe6dc;}

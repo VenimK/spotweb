@@ -4,9 +4,17 @@
   --color-surface-2: #1f4a37;
   --color-border: rgba(127, 191, 127, 0.25);
   --color-text: #c9dac8;
+  --color-bg: #0f2a1c;
+  --color-muted: #a8d5a8;
   --color-accent: #7fbf7f;
   --sw-strip-gradient: linear-gradient(180deg, #1f4a37 0%, #2d4a3e 100%);
+  --sw-strip-border: rgba(127, 191, 127, 0.18);
   --sw-strip-text: #a8d5a8;
+
+  --sw-cat0: #6fb3d2;
+  --sw-cat1: #7fbf7f;
+  --sw-cat2: #daa520;
+  --sw-cat3: #cd853f;
 }
 
 body.theme-forest {background: linear-gradient(135deg, #1a3a2a 0%, #2d4a3e 100%); color:#c9dac8;}
