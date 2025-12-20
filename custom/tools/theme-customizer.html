@@ -609,6 +609,24 @@
             return `/* CUSTOM SPOTWEB THEME */
 /* Generated with Theme Customizer */
 
+:root[data-sw-theme="${themeName}"] {
+    --color-bg: ${currentColors.bg};
+    --color-surface: ${oddRow};
+    --color-surface-2: ${thBg};
+    --color-border: ${hexToRgba(currentColors.primary, 0.22)};
+    --color-text: ${currentColors.text};
+    --color-muted: ${hexToRgba(currentColors.text, 0.75)};
+    --color-accent: ${accent};
+    --sw-strip-gradient: ${toolbarGradient};
+    --sw-strip-border: ${hexToRgba(currentColors.primary, 0.25)};
+    --sw-strip-text: ${adjustBrightness(currentColors.text, 10)};
+
+    --sw-cat0: ${cat0};
+    --sw-cat1: ${cat1};
+    --sw-cat2: ${cat2};
+    --sw-cat3: ${cat3};
+}
+
 /* GENERAL */
 body.theme-${themeName} {
     background: ${bgGradient};

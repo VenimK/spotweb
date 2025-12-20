@@ -61,24 +61,14 @@ if ($isAuthenticated && isset($_POST['upload']) && isset($_FILES['theme_file']))
         
         if (move_uploaded_file($file['tmp_name'], $targetFile)) {
             chmod($targetFile, 0644);
-            
-            // Update theme-switcher.js
-            // Note: No need to update header.inc.php anymore!
-            // theme-loader.inc.php automatically loads all themes from custom/themes/
-            $switcherUpdated = updateThemeSwitcher($themeName, $themeLabel, $themeIcon);
-            
-            if ($switcherUpdated) {
-                $message = "✓ Theme '{$themeLabel}' uploaded successfully!<br>";
-                $message .= "✓ Theme switcher updated automatically!<br>";
-                $message .= "✓ CSS file auto-loaded by theme-loader.inc.php!<br>";
-                $message .= "Refresh your Spotweb page and select your theme from the 🎨 menu.";
-                $messageType = 'success';
-            } else {
-                $message = "✓ Theme uploaded to: {$targetFile}<br>";
-                $message .= "⚠ Could not auto-update theme switcher. Add manually:<br>";
-                $message .= "{ id: '{$themeName}', name: '{$themeLabel}', icon: '{$themeIcon}' }";
-                $messageType = 'warning';
-            }
+
+            // theme-switcher.js auto-detects themes by scanning loaded CSS <link> tags.
+            // theme-loader.inc.php automatically loads all themes from custom/themes/.
+            // No JS modification needed.
+            $message = "✓ Theme '{$themeLabel}' uploaded successfully!<br>";
+            $message .= "✓ CSS file auto-loaded by theme-loader.inc.php!<br>";
+            $message .= "Refresh your Spotweb page and select your theme from the 🎨 menu.";
+            $messageType = 'success';
         } else {
             $message = 'Failed to save theme file. Check permissions on ' . THEME_DIR;
             $messageType = 'error';
@@ -92,8 +82,7 @@ if ($isAuthenticated && isset($_POST['delete_theme'])) {
     $themeFile = THEME_DIR . '/theme-' . $themeToDelete . '.css';
     
     if (file_exists($themeFile) && unlink($themeFile)) {
-        removeFromThemeSwitcher($themeToDelete);
-        // No need to remove from header.inc.php - theme-loader.inc.php handles it automatically
+        // No need to update JS - theme-switcher.js auto-detects and theme-loader auto-loads.
         $message = "✓ Theme deleted: {$themeToDelete}";
         $messageType = 'success';
     } else {
@@ -106,74 +95,9 @@ function sanitizeThemeName($name) {
     return preg_replace('/[^a-z0-9\-]/', '', strtolower($name));
 }
 
-function updateThemeSwitcher($themeName, $themeLabel, $themeIcon) {
-    if (!file_exists(JS_FILE) || !is_writable(JS_FILE)) {
-        return false;
-    }
-    
-    $content = file_get_contents(JS_FILE);
-    
-    // Check if theme already exists
-    if (strpos($content, "id: '{$themeName}'") !== false) {
-        return true; // Already exists
-    }
-    
-    // Find ]; that closes the themes array and insert new theme before it
-    // Use negative lookbehind to avoid matching other ]; in the file
-    $newTheme = "    { id: '{$themeName}', name: '{$themeLabel}', icon: '{$themeIcon}' }";
-    
-    // Pattern: Find the closing of themes array (];)
-    // Replace it with: comma + newline + new theme + newline + ];
-    // But only if the previous line doesn't already end with a comma
-    
-    // First, find position of themes array closing
-    $arrayPos = strpos($content, 'const themes = [');
-    if ($arrayPos === false) {
-        return false;
-    }
-    
-    // Find the matching ]; after the themes array starts
-    $closingPos = strpos($content, '];', $arrayPos);
-    if ($closingPos === false) {
-        return false;
-    }
-    
-    // Get the part before ];
-    $beforeClosing = substr($content, 0, $closingPos);
-    $afterClosing = substr($content, $closingPos);
-    
-    // Check if we need to add a comma to the last line
-    $beforeClosing = rtrim($beforeClosing);
-    if (substr($beforeClosing, -1) !== ',') {
-        $beforeClosing .= ',';
-    }
-    
-    // Rebuild the file
-    $newContent = $beforeClosing . "\n" . $newTheme . "\n" . $afterClosing;
-    
-    return file_put_contents(JS_FILE, $newContent) !== false;
-}
-
-function removeFromThemeSwitcher($themeName) {
-    if (!file_exists(JS_FILE) || !is_writable(JS_FILE)) {
-        return false;
-    }
-    
-    $content = file_get_contents(JS_FILE);
-    $pattern = "/\\s*\\{[^}]*id:\\s*['\"]" . preg_quote($themeName, '/') . "['\"][^}]*\\},?\\n?/";
-    $newContent = preg_replace($pattern, '', $content);
-    
-    if ($newContent && $newContent !== $content) {
-        file_put_contents(JS_FILE, $newContent);
-        return true;
-    }
-    
-    return false;
-}
-
-// Note: updateHeaderFile() and removeFromHeaderFile() functions removed
-// theme-loader.inc.php now automatically loads all themes from custom/themes/
-// No manual header modification needed!
+// Note: theme-switcher.js auto-detects themes from loaded CSS links.
+// theme-loader.inc.php auto-loads themes from custom/themes/.
+// Therefore we no longer modify JS or templates here.
 
 function getInstalledThemes() {
     $themes = [];
