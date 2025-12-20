@@ -159,6 +159,18 @@ function applyTheme(themeId) {
     if (themeId !== 'light') {
         document.body.classList.add(`theme-${themeId}`);
     }
+
+    // Modern template uses html[data-theme] (dark/light) for its CSS variables.
+    // For custom themes we treat anything except 'light' as dark-mode.
+    try {
+        const html = document.documentElement;
+        const mode = (themeId === 'light') ? 'light' : 'dark';
+        html.setAttribute('data-theme', mode);
+        html.setAttribute('data-sw-theme', themeId);
+        localStorage.setItem('spotweb_theme', mode);
+    } catch (e) {
+        // ignore
+    }
 }
 
 function updateThemeSwitcherUI(themeId) {

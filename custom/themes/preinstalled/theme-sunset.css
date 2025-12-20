@@ -1,7 +1,17 @@
 /* SUNSET THEME - Warm sunset gradient vibes */
-body.theme-sunset {background: linear-gradient(135deg, #1a1625 0%, #3d1f47 50%, #5e2750 100%); color:#ffd6ba;}
+:root[data-sw-theme="sunset"] {
+  --color-surface: #1a1625;
+  --color-surface-2: #2d1b3d;
+  --color-border: rgba(255, 154, 118, 0.35);
+  --color-text: #ffe6dc;
+  --color-accent: #ff9a76;
+  --sw-strip-gradient: linear-gradient(180deg, #2d1b3d 0%, #3d1f47 100%);
+  --sw-strip-text: #ffb08a;
+}
+
+body.theme-sunset {background: linear-gradient(135deg, #2d1b3d 0%, #1a1625 100%); color:#ffe6dc;}
 body.theme-sunset a:visited, body.theme-sunset a:link {color:#ff9a76;}
-body.theme-sunset a:hover {color:#ffb08a; text-decoration:underline;}
+body.theme-sunset a:hover {color:#ffd1b8; text-decoration:underline;}
 
 /* Header with sunset glow */
 body.theme-sunset div.container {background:transparent;}

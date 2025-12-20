@@ -1,7 +1,17 @@
-/* DRACULA THEME - Popular purple dark theme */
+/* DRACULA THEME - Classic vampire vibes */
+:root[data-sw-theme="dracula"] {
+  --color-surface: #282a36;
+  --color-surface-2: #44475a;
+  --color-border: #6272a4;
+  --color-text: #f8f8f2;
+  --color-accent: #ff79c6;
+  --sw-strip-gradient: linear-gradient(120deg, #44475a, #282a36);
+  --sw-strip-text: #f8f8f2;
+}
+
 body.theme-dracula {background:#282a36; color:#f8f8f2;}
 body.theme-dracula a:visited, body.theme-dracula a:link {color:#8be9fd;}
-body.theme-dracula a:hover {color:#50fa7b; text-decoration:underline;}
+body.theme-dracula a:hover {color:#ff79c6; text-decoration:underline;}
 
 /* Header */
 body.theme-dracula div.container {background:transparent;}

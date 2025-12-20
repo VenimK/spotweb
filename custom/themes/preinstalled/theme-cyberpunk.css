@@ -1,7 +1,17 @@
 /* CYBERPUNK THEME - Neon future vibes */
-body.theme-cyberpunk {background: #0d0221; color:#00ff41;}
-body.theme-cyberpunk a:visited, body.theme-cyberpunk a:link {color:#ff006e;}
-body.theme-cyberpunk a:hover {color:#ff1b8d; text-decoration:underline; text-shadow:0 0 8px rgba(255,0,110,0.6);}
+:root[data-sw-theme="cyberpunk"] {
+  --color-surface: #0d0221;
+  --color-surface-2: #1a0b2e;
+  --color-border: rgba(255, 0, 110, 0.35);
+  --color-text: #e9e9e9;
+  --color-accent: #ff006e;
+  --sw-strip-gradient: linear-gradient(180deg, #1a0b2e 0%, #0d0221 100%);
+  --sw-strip-text: #00ff41;
+}
+
+body.theme-cyberpunk {background: radial-gradient(circle at top, #1a0b2e 0%, #0d0221 60%, #000 100%); color:#e9e9e9;}
+body.theme-cyberpunk a:visited, body.theme-cyberpunk a:link {color:#00d9ff;}
+body.theme-cyberpunk a:hover {color:#00ff41; text-decoration:underline; text-shadow:0 0 8px rgba(255,0,110,0.6);}
 
 /* Header with neon glow */
 body.theme-cyberpunk div.container {background:transparent;}

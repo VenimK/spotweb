@@ -1,6 +1,16 @@
 /* DONKERE MODUS THEMA VOOR SPOTWEB */
 /* Gebaseerd op het originele we1rdo thema */
 
+:root[data-sw-theme="dark"] {
+  --color-surface: #2d2d2d;
+  --color-surface-2: #333;
+  --color-border: #444;
+  --color-text: #e0e0e0;
+  --color-accent: #4da6ff;
+  --sw-strip-gradient: linear-gradient(120deg, #333, #2d2d2d);
+  --sw-strip-text: #e0e0e0;
+}
+
 /* GENERAL */
 body.theme-dark {background-color:#1e1e1e; color:#d61f1f;}
 body.theme-dark a:visited,
@@ -74,7 +84,7 @@ body.theme-dark div.details div.comments ul li p.user {color:#ccc;}
 
 /* QUICKLINKS */
 body.theme-dark div.filter ul.quicklinks li {margin:0 0 2px 0;}
-body.theme-dark div.filter ul.quicklinks li a {}
+body.theme-dark div.filter ul.quicklinks li a {color:#e0e0e0;}
 
 
 /* FILTERS */

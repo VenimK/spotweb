@@ -1,4 +1,14 @@
 /* NORD THEME - Minimalist Arctic color palette */
+:root[data-sw-theme="nord"] {
+  --color-surface: #2e3440;
+  --color-surface-2: #3b4252;
+  --color-border: #434c5e;
+  --color-text: #d8dee9;
+  --color-accent: #88c0d0;
+  --sw-strip-gradient: linear-gradient(120deg, #3b4252, #434c5e);
+  --sw-strip-text: #eceff4;
+}
+
 body.theme-nord {background:#2e3440; color:#d8dee9;}
 body.theme-nord a:visited, body.theme-nord a:link {color:#88c0d0;}
 body.theme-nord a:hover {color:#8fbcbb; text-decoration:underline;}

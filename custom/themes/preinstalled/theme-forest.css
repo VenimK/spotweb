@@ -1,4 +1,14 @@
 /* FOREST THEME - Nature-inspired earth tones */
+:root[data-sw-theme="forest"] {
+  --color-surface: #1a3a2a;
+  --color-surface-2: #1f4a37;
+  --color-border: rgba(127, 191, 127, 0.25);
+  --color-text: #c9dac8;
+  --color-accent: #7fbf7f;
+  --sw-strip-gradient: linear-gradient(180deg, #1f4a37 0%, #2d4a3e 100%);
+  --sw-strip-text: #a8d5a8;
+}
+
 body.theme-forest {background: linear-gradient(135deg, #1a3a2a 0%, #2d4a3e 100%); color:#c9dac8;}
 body.theme-forest a:visited, body.theme-forest a:link {color:#7fbf7f;}
 body.theme-forest a:hover {color:#a8d5a8; text-decoration:underline;}

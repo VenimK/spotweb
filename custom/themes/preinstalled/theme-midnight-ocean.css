@@ -1,4 +1,14 @@
 /* MIDNIGHT OCEAN THEME - Deep blue oceanic vibes */
+:root[data-sw-theme="midnight-ocean"] {
+  --color-surface: #112240;
+  --color-surface-2: #172a45;
+  --color-border: #233554;
+  --color-text: #ccd6f6;
+  --color-accent: #64ffda;
+  --sw-strip-gradient: linear-gradient(180deg, #172a45 0%, #1d2d50 100%);
+  --sw-strip-text: #64ffda;
+}
+
 body.theme-midnight-ocean {background: linear-gradient(135deg, #0a192f 0%, #112240 100%); color:#ccd6f6;}
 body.theme-midnight-ocean a:visited, body.theme-midnight-ocean a:link {color:#64ffda;}
 body.theme-midnight-ocean a:hover {color:#5eead4; text-decoration:underline;}
