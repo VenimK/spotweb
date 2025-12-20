@@ -176,6 +176,20 @@ if (file_exists($themeSwitcherJs)) {
     color: var(--sw-strip-text, #f4f5f7) !important;
 }
 
+:root[data-sw-theme] .toolbarButton.dropdown ul ul {
+    background: var(--color-surface, rgba(33, 38, 45, 0.96)) !important;
+    border-color: var(--color-border, rgba(63, 70, 80, 0.9)) !important;
+}
+
+:root[data-sw-theme] .toolbarButton.dropdown ul ul li a {
+    color: var(--color-text, #e3e7ef) !important;
+}
+
+:root[data-sw-theme] .toolbarButton.dropdown ul ul li a:hover {
+    background: rgba(59, 130, 246, 0.18) !important;
+    background: color-mix(in srgb, var(--color-accent, #3b82f6) 18%, transparent) !important;
+}
+
 :root[data-sw-theme] div#filter {
     background: var(--color-surface, #111) !important;
 }
@@ -228,6 +242,20 @@ if (file_exists($themeSwitcherJs)) {
 :root[data-sw-theme] .spotCard.spotcat2 .badge { background: var(--sw-cat2, #22c55e) !important; }
 :root[data-sw-theme] .spotCard.spotcat3 .badge { background: var(--sw-cat3, #ef4444) !important; }
 
+:root[data-sw-theme] .cardsNotice {
+    background: rgba(59, 130, 246, 0.12) !important;
+    border-color: rgba(59, 130, 246, 0.45) !important;
+    background: color-mix(in srgb, var(--color-accent, #3b82f6) 12%, transparent) !important;
+    border-color: color-mix(in srgb, var(--color-accent, #3b82f6) 45%, transparent) !important;
+    color: var(--color-text, #a57900) !important;
+}
+
+:root[data-sw-theme] .cardsPager a:focus,
+:root[data-sw-theme] .tablePager a:focus {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.28) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent, #3b82f6) 28%, transparent) !important;
+}
+
 :root[data-sw-theme] table.spots tr.head th {
     background: var(--sw-strip-gradient, linear-gradient(180deg, #262b34 0%, #191d22 100%)) !important;
     color: var(--sw-strip-text, #f4f5f7) !important;
@@ -247,6 +275,19 @@ if (file_exists($themeSwitcherJs)) {
     background: var(--color-surface-2, rgba(255, 255, 255, 0.06)) !important;
 }
 
+:root[data-sw-theme] table.spots tr.spotcat0 td { background: rgba(59, 130, 246, 0.18) !important; background: color-mix(in srgb, var(--sw-cat0, var(--color-accent, #3b82f6)) 18%, transparent) !important; }
+:root[data-sw-theme] table.spots tr.spotcat1 td { background: rgba(245, 158, 11, 0.18) !important; background: color-mix(in srgb, var(--sw-cat1, #f59e0b) 18%, transparent) !important; }
+:root[data-sw-theme] table.spots tr.spotcat2 td { background: rgba(34, 197, 94, 0.18) !important; background: color-mix(in srgb, var(--sw-cat2, #22c55e) 18%, transparent) !important; }
+:root[data-sw-theme] table.spots tr.spotcat3 td { background: rgba(239, 68, 68, 0.18) !important; background: color-mix(in srgb, var(--sw-cat3, #ef4444) 18%, transparent) !important; }
+
+:root[data-sw-theme] table.spots td.watch a::before {
+    color: var(--sw-cat1, var(--color-accent, #fbbf24)) !important;
+}
+
+:root[data-sw-theme] table.spots td.watch a.add::before {
+    color: var(--sw-cat3, var(--color-accent, #f87171)) !important;
+}
+
 :root[data-sw-theme] div.details {
     background: var(--color-surface, #111) !important;
     border-color: var(--color-border, rgba(255, 255, 255, 0.16)) !important;
@@ -255,6 +296,50 @@ if (file_exists($themeSwitcherJs)) {
 :root[data-sw-theme] div.details table th,
 :root[data-sw-theme] div.details table td {
     border-color: var(--color-border, rgba(255, 255, 255, 0.16)) !important;
+}
+
+:root[data-sw-theme] div.details table.spotheader th.nzb a.nzb,
+:root[data-sw-theme] div.details table.spotheader th.nzb a.nzb.downloaded {
+    background: var(--color-accent, var(--color-surface-2, #111)) !important;
+    border-color: var(--color-accent, var(--color-border, rgba(255,255,255,0.16))) !important;
+}
+
+:root[data-sw-theme] div.details table.spotheader th.nzb a.nzb::before {
+    color: #fff !important;
+}
+
+:root[data-sw-theme] div.sidebarPanel.advancedSearch,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch::before {
+    background: var(--color-surface, #ffffff) !important;
+    border-color: var(--color-border, rgba(209, 213, 219, 0.9)) !important;
+    color: var(--color-text, #111827) !important;
+}
+
+:root[data-sw-theme] div.sidebarPanel.advancedSearch h4,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch h4 a {
+    background: var(--color-surface-2, #f4f5f7) !important;
+    border-color: var(--color-border, rgba(209, 213, 219, 0.9)) !important;
+    color: var(--color-text, #111827) !important;
+}
+
+:root[data-sw-theme] div.sidebarPanel.advancedSearch div.search,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch ul.search li input+label,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch ul.search select,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch table.search tr,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch table.search th,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch table.search td,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch ul.dynatree-container,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch .ui-slider,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch .ui-slider-range,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch a.greyButton.addFilter {
+    background: var(--color-surface-2, #f9fafb) !important;
+    border-color: var(--color-border, rgba(226, 232, 240, 0.9)) !important;
+    color: var(--color-text, #111827) !important;
+}
+
+:root[data-sw-theme] div.sidebarPanel.advancedSearch ul.dynatree-container a,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch ul.dynatree-container span {
+    color: var(--color-text, #111827) !important;
 }
 </style>
 <?php
