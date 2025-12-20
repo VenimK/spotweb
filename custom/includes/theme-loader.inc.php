@@ -9,6 +9,10 @@
  * <?php include_once(__DIR__ . '/../../../custom/includes/theme-loader.inc.php'); ?>
  */
 
+if (ob_get_level() === 0) {
+    ob_start();
+}
+
 // Base paths
 $customBase = realpath(__DIR__ . '/..');
 $preinstalledThemesPath = $customBase . '/themes/preinstalled';
