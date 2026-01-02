@@ -421,7 +421,7 @@ main() {
   echo "Theme Options:"
   echo "  1) No themes (Light only)"
   echo "  2) Dark mode only"
-  echo "  3) Complete theme pack (7 dark themes + switcher + tools)"
+  echo "  3) Complete theme pack (11 themes + switcher + tools)"
   echo ""
   local theme_mode="none"
   read -r -p "Select theme option [3]: " input_theme
