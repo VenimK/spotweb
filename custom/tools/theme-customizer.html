@@ -299,6 +299,42 @@
         </div>
         
         <div class="section">
+            <div class="section-title">🏷️ Category Colors</div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 0</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat0Color" value="#e65100">
+                    <input type="text" id="cat0ColorText" value="#e65100">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 1</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat1Color" value="#8d6e63">
+                    <input type="text" id="cat1ColorText" value="#8d6e63">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 2</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat2Color" value="#ffa726">
+                    <input type="text" id="cat2ColorText" value="#ffa726">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 3</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat3Color" value="#d32f2f">
+                    <input type="text" id="cat3ColorText" value="#d32f2f">
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
             <div class="section-title">⚙️ Options</div>
             
             <div class="toggle-switch">
@@ -395,6 +431,15 @@
         let useGlow = false;
         let useRounded = true;
         
+        // Set default category colors
+        currentColors = {
+            ...currentColors,
+            cat0: currentColors.cat0 || '#e65100',
+            cat1: currentColors.cat1 || '#8d6e63',
+            cat2: currentColors.cat2 || '#ffa726',
+            cat3: currentColors.cat3 || '#d32f2f'
+        };
+        
         // Initialize
         renderPresets();
         setupColorInputs();
@@ -416,6 +461,12 @@
             if (!preset.colors) return;
             
             currentColors = {...preset.colors};
+            
+            // Set category colors
+            currentColors.cat0 = preset.colors.cat0 || '#e65100';
+            currentColors.cat1 = preset.colors.cat1 || '#8d6e63';
+            currentColors.cat2 = preset.colors.cat2 || '#ffa726';
+            currentColors.cat3 = preset.colors.cat3 || '#d32f2f';
             
             // Update color pickers
             Object.keys(currentColors).forEach(key => {
@@ -440,6 +491,24 @@
             const colorKeys = ['bg', 'text', 'primary', 'secondary', 'hover', 'border'];
             
             colorKeys.forEach(key => {
+                const picker = document.getElementById(key + 'Color');
+                const text = document.getElementById(key + 'ColorText');
+                
+                picker.addEventListener('input', (e) => {
+                    currentColors[key] = e.target.value;
+                    text.value = e.target.value;
+                    updatePreview();
+                });
+                
+                text.addEventListener('input', (e) => {
+                    currentColors[key] = e.target.value;
+                    picker.value = e.target.value;
+                    updatePreview();
+                });
+            });
+            
+            // Category colors
+            ['cat0', 'cat1', 'cat2', 'cat3'].forEach(key => {
                 const picker = document.getElementById(key + 'Color');
                 const text = document.getElementById(key + 'ColorText');
                 
