@@ -626,11 +626,11 @@ EOF
 echo "  → Creating systemd timer (hourly execution)"
 cat > /etc/systemd/system/spotweb-retrieve.timer <<'EOF'
 [Unit]
-Description=Run Spotweb Retrieval Hourly
+Description=Run Spotweb Retrieval Daily
 
 [Timer]
 OnBootSec=5min
-OnUnitActiveSec=1h
+OnUnitActiveSec=1d
 Persistent=true
 
 [Install]
@@ -642,7 +642,7 @@ systemctl daemon-reload
 systemctl enable spotweb-retrieve.timer
 systemctl start spotweb-retrieve.timer
 
-print_success "Automatic retrieval configured (runs every hour)"
+print_success "Automatic retrieval configured (runs every day)"
 
 # Save credentials to file for easy access
 print_info "Saving credentials..."
