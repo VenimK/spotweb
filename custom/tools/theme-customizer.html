@@ -296,38 +296,119 @@
                     <input type="text" id="borderColorText" value="#444444">
                 </div>
             </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">🔗 Link Colors</div>
             
             <div class="color-control">
-                <label class="color-label">Category 0 Color</label>
+                <label class="color-label">Link Color</label>
                 <div class="color-input-group">
-                    <input type="color" id="cat0Color" value="#3b82f6">
-                    <input type="text" id="cat0ColorText" value="#3b82f6">
+                    <input type="color" id="linkColor" value="#0553a1">
+                    <input type="text" id="linkColorText" value="#0553a1">
                 </div>
             </div>
             
             <div class="color-control">
-                <label class="color-label">Category 1 Color</label>
+                <label class="color-label">Link Hover Color</label>
                 <div class="color-input-group">
-                    <input type="color" id="cat1Color" value="#f59e0b">
-                    <input type="text" id="cat1ColorText" value="#f59e0b">
+                    <input type="color" id="linkHoverColor" value="#3886d4">
+                    <input type="text" id="linkHoverColorText" value="#3886d4">
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📊 Table Colors</div>
+            
+            <div class="color-control">
+                <label class="color-label">Table Header Background</label>
+                <div class="color-input-group">
+                    <input type="color" id="thBgColor" value="#333333">
+                    <input type="text" id="thBgColorText" value="#333333">
                 </div>
             </div>
             
             <div class="color-control">
-                <label class="color-label">Category 2 Color</label>
+                <label class="color-label">Odd Row Background</label>
                 <div class="color-input-group">
-                    <input type="color" id="cat2Color" value="#22c55e">
-                    <input type="text" id="cat2ColorText" value="#22c55e">
+                    <input type="color" id="oddRowColor" value="#252525">
+                    <input type="text" id="oddRowColorText" value="#252525">
                 </div>
             </div>
             
             <div class="color-control">
-                <label class="color-label">Category 3 Color</label>
+                <label class="color-label">Even Row Background</label>
                 <div class="color-input-group">
-                    <input type="color" id="cat3Color" value="#ef4444">
-                    <input type="text" id="cat3ColorText" value="#ef4444">
+                    <input type="color" id="evenRowColor" value="#1e1e1e">
+                    <input type="text" id="evenRowColorText" value="#1e1e1e">
                 </div>
             </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">🏷️ Category Colors</div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 0 (Movies)</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat0Color" value="#4da6ff">
+                    <input type="text" id="cat0ColorText" value="#4da6ff">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 1 (Series)</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat1Color" value="#66cc66">
+                    <input type="text" id="cat1ColorText" value="#66cc66">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 2 (Music)</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat2Color" value="#ffcc00">
+                    <input type="text" id="cat2ColorText" value="#ffcc00">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 3 (Games)</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat3Color" value="#ff6666">
+                    <input type="text" id="cat3ColorText" value="#ff6666">
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📋 Details Panel</div>
+            
+            <div class="color-control">
+                <label class="color-label">Details Background</label>
+                <div class="color-input-group">
+                    <input type="color" id="detailsBgColor" value="#2d2d2d">
+                    <input type="text" id="detailsBgColorText" value="#2d2d2d">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Details Title Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="detailsTitleColor" value="#e0e0e0">
+                    <input type="text" id="detailsTitleColorText" value="#e0e0e0">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Description Text Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="descriptionColor" value="#e0e0e0">
+                    <input type="text" id="descriptionColorText" value="#e0e0e0">
+                </div>
+            </div>
+        </div>
         
         <div class="section">
             <div class="section-title">⚙️ Options</div>
@@ -375,58 +456,74 @@
         const presets = [
             { id: 'dark', name: '🌙 Dark', colors: { 
                 bg: '#1e1e1e', text: '#e0e0e0', primary: '#0553a1', secondary: '#2d2d2d', hover: '#333333', border: '#444444',
-                link: '#0553a1', linkHover: '#3886d4', accent: '#0553a1', oddRow: '#252525', thBg: '#333333'
+                link: '#0553a1', linkHover: '#3886d4', accent: '#0553a1', oddRow: '#252525', evenRow: '#1e1e1e', thBg: '#333333',
+                cat0: '#4da6ff', cat1: '#66cc66', cat2: '#ffcc00', cat3: '#ff6666',
+                detailsBg: '#2d2d2d', detailsTitle: '#e0e0e0', description: '#e0e0e0'
             }},
             { id: 'midnight', name: '🌊 Midnight', colors: { 
                 bg: '#0a192f', text: '#ccd6f6', primary: '#64ffda', secondary: '#1d2d50', hover: '#233554', border: '#233554',
-                link: '#64ffda', linkHover: '#8cffee', accent: '#64ffda', oddRow: '#0f2138', thBg: '#1d2d50'
+                link: '#64ffda', linkHover: '#8cffee', accent: '#64ffda', oddRow: '#0f2138', evenRow: '#0a192f', thBg: '#1d2d50',
+                cat0: '#64ffda', cat1: '#ffd700', cat2: '#ff6b6b', cat3: '#a29bfe',
+                detailsBg: '#1d2d50', detailsTitle: '#ccd6f6', description: '#ccd6f6'
             }},
             { id: 'cyberpunk', name: '🎮 Cyberpunk', colors: { 
                 bg: '#0d0221', text: '#00ff41', primary: '#ff006e', secondary: '#1a0b2e', hover: '#2d1b3d', border: '#ff006e',
-                link: '#00d4ff', linkHover: '#00ff41', accent: '#ffbe0b', oddRow: '#120828', thBg: '#2d1b3d'
+                link: '#00d4ff', linkHover: '#00ff41', accent: '#ffbe0b', oddRow: '#120828', evenRow: '#0d0221', thBg: '#2d1b3d',
+                cat0: '#00d4ff', cat1: '#00ff41', cat2: '#ffbe0b', cat3: '#ff006e',
+                detailsBg: '#1a0b2e', detailsTitle: '#00ff41', description: '#00ff41'
             }},
             { id: 'nord', name: '❄️ Nord', colors: { 
                 bg: '#2e3440', text: '#d8dee9', primary: '#88c0d0', secondary: '#3b4252', hover: '#434c5e', border: '#434c5e',
-                link: '#88c0d0', linkHover: '#8fbcbb', accent: '#81a1c1', oddRow: '#353a47', thBg: '#3b4252'
+                link: '#88c0d0', linkHover: '#8fbcbb', accent: '#81a1c1', oddRow: '#353a47', evenRow: '#2e3440', thBg: '#3b4252',
+                cat0: '#88c0d0', cat1: '#a3be8c', cat2: '#ebcb8b', cat3: '#bf616a',
+                detailsBg: '#3b4252', detailsTitle: '#d8dee9', description: '#d8dee9'
             }},
             { id: 'dracula', name: '🧛 Dracula', colors: { 
                 bg: '#282a36', text: '#f8f8f2', primary: '#ff79c6', secondary: '#44475a', hover: '#6272a4', border: '#6272a4',
-                link: '#8be9fd', linkHover: '#50fa7b', accent: '#bd93f9', oddRow: '#21222c', thBg: '#44475a',
-                cat0: '#8be9fd', cat1: '#50fa7b', cat2: '#f1fa8c', cat3: '#ffb86c'
+                link: '#8be9fd', linkHover: '#50fa7b', accent: '#bd93f9', oddRow: '#21222c', evenRow: '#282a36', thBg: '#44475a',
+                cat0: '#8be9fd', cat1: '#50fa7b', cat2: '#f1fa8c', cat3: '#ffb86c',
+                detailsBg: '#44475a', detailsTitle: '#f8f8f2', description: '#f8f8f2'
             }},
             { id: 'forest', name: '🌲 Forest', colors: { 
                 bg: '#1a3a2a', text: '#c9dac8', primary: '#7fbf7f', secondary: '#2d4a3e', hover: '#3a5f4e', border: '#2d4a3e',
-                link: '#7fbf7f', linkHover: '#a4d4a4', accent: '#5a9e5a', oddRow: '#1f3f2f', thBg: '#2d4a3e'
+                link: '#7fbf7f', linkHover: '#a4d4a4', accent: '#5a9e5a', oddRow: '#1f3f2f', evenRow: '#1a3a2a', thBg: '#2d4a3e',
+                cat0: '#7fbf7f', cat1: '#a4d4a4', cat2: '#d4a574', cat3: '#bf7f7f',
+                detailsBg: '#2d4a3e', detailsTitle: '#c9dac8', description: '#c9dac8'
             }},
             { id: 'sunset', name: '🌅 Sunset', colors: { 
                 bg: '#1a1625', text: '#ffd6ba', primary: '#ff9a76', secondary: '#3d1f47', hover: '#5e2750', border: '#5e2750',
-                link: '#ff9a76', linkHover: '#ffb699', accent: '#ffb0a1', oddRow: '#211829', thBg: '#3d1f47'
+                link: '#ff9a76', linkHover: '#ffb699', accent: '#ffb0a1', oddRow: '#211829', evenRow: '#1a1625', thBg: '#3d1f47',
+                cat0: '#ff9a76', cat1: '#ffd700', cat2: '#ff6b9d', cat3: '#a29bfe',
+                detailsBg: '#3d1f47', detailsTitle: '#ffd6ba', description: '#ffd6ba'
             }},
             { id: 'spring', name: '🌸 Spring', colors: { 
                 bg: '#e8f5e8', text: '#2e7d32', primary: '#e91e63', secondary: '#c8e6c9', hover: '#a5d6a7', border: '#a5d6a7',
-                link: '#1b5e20', linkHover: '#4caf50', accent: '#e91e63', oddRow: '#f1f8e9', thBg: '#c8e6c9'
+                link: '#1b5e20', linkHover: '#4caf50', accent: '#e91e63', oddRow: '#f1f8e9', evenRow: '#e8f5e8', thBg: '#c8e6c9',
+                cat0: '#e91e63', cat1: '#4caf50', cat2: '#ffeb3b', cat3: '#ff5722',
+                detailsBg: '#f0f8e7', detailsTitle: '#2e7d32', description: '#2e7d32'
             }},
             { id: 'summer', name: '☀️ Summer', colors: { 
                 bg: '#e3f2fd', text: '#0d47a1', primary: '#ffd54f', secondary: '#bbdefb', hover: '#90caf9', border: '#64b5f6',
-                link: '#0d47a1', linkHover: '#42a5f5', accent: '#ffd54f', oddRow: '#f3e5f5', thBg: '#90caf9'
+                link: '#0d47a1', linkHover: '#42a5f5', accent: '#ffd54f', oddRow: '#f3e5f5', evenRow: '#e3f2fd', thBg: '#90caf9',
+                cat0: '#ffd54f', cat1: '#4caf50', cat2: '#ffeb3b', cat3: '#ff5722',
+                detailsBg: '#e3f2fd', detailsTitle: '#0d47a1', description: '#0d47a1'
             }},
             { id: 'autumn', name: '🍂 Autumn', colors: { 
                 bg: '#fff3e0', text: '#bf360c', primary: '#e65100', secondary: '#ffcc80', hover: '#fb8c00', border: '#f57c00',
-                link: '#8d6e63', linkHover: '#fb8c00', accent: '#e65100', oddRow: '#ffe0b2', thBg: '#fb8c00'
+                link: '#8d6e63', linkHover: '#fb8c00', accent: '#e65100', oddRow: '#ffe0b2', evenRow: '#fff3e0', thBg: '#fb8c00',
+                cat0: '#e65100', cat1: '#8d6e63', cat2: '#ffa726', cat3: '#d32f2f',
+                detailsBg: '#fff3e0', detailsTitle: '#bf360c', description: '#bf360c'
             }},
             { id: 'winter', name: '⛄ Winter', colors: { 
                 bg: '#f5f5f5', text: '#263238', primary: '#00bcd4', secondary: '#e0f2f1', hover: '#b0bec5', border: '#90a4ae',
-                link: '#37474f', linkHover: '#00bcd4', accent: '#00bcd4', oddRow: '#eceff1', thBg: '#b0bec5'
+                link: '#37474f', linkHover: '#00bcd4', accent: '#00bcd4', oddRow: '#eceff1', evenRow: '#f5f5f5', thBg: '#b0bec5',
+                cat0: '#00bcd4', cat1: '#4db6ac', cat2: '#81d4fa', cat3: '#ef5350',
+                detailsBg: '#f5f5f5', detailsTitle: '#263238', description: '#263238'
             }},
             { id: 'custom', name: '✨ Custom', colors: null }
         ];
         
         let currentColors = presets[0].colors;
-        // Set defaults for category colors if not in preset
-        currentColors.cat0 = currentColors.cat0 || '#3b82f6';
-        currentColors.cat1 = currentColors.cat1 || '#f59e0b';
-        currentColors.cat2 = currentColors.cat2 || '#22c55e';
-        currentColors.cat3 = currentColors.cat3 || '#ef4444';
         let useGradients = false;
         let useGlow = false;
         let useRounded = true;
@@ -473,7 +570,7 @@
         }
         
         function setupColorInputs() {
-            const colorKeys = ['bg', 'text', 'primary', 'secondary', 'hover', 'border', 'cat0', 'cat1', 'cat2', 'cat3'];
+            const colorKeys = ['bg', 'text', 'primary', 'secondary', 'hover', 'border', 'link', 'linkHover', 'thBg', 'oddRow', 'evenRow', 'cat0', 'cat1', 'cat2', 'cat3', 'detailsBg', 'detailsTitle', 'description'];
             
             colorKeys.forEach(key => {
                 const picker = document.getElementById(key + 'Color');
@@ -639,13 +736,19 @@
             const linkHover = currentColors.linkHover || adjustBrightness(link, 20);
             const accent = currentColors.accent || currentColors.primary;
             const oddRow = currentColors.oddRow || adjustBrightness(currentColors.bg, 5);
+            const evenRow = currentColors.evenRow || currentColors.bg;
             const thBg = currentColors.thBg || currentColors.secondary;
             
-            // Category colors - use specific ones if available (like Dracula), otherwise derive
+            // Category colors - use specific ones if available, otherwise derive
             const cat0 = currentColors.cat0 || adjustHue(currentColors.primary, 0);
             const cat1 = currentColors.cat1 || adjustHue(currentColors.primary, 30);
             const cat2 = currentColors.cat2 || adjustHue(currentColors.primary, 60);
             const cat3 = currentColors.cat3 || adjustHue(currentColors.primary, 90);
+            
+            // Details panel colors
+            const detailsBg = currentColors.detailsBg || currentColors.secondary;
+            const detailsTitle = currentColors.detailsTitle || currentColors.text;
+            const description = currentColors.description || currentColors.text;
             
             const bgGradient = useGradients ? 
                 `linear-gradient(135deg, ${currentColors.bg} 0%, ${adjustBrightness(currentColors.bg, 15)} 50%, ${adjustBrightness(currentColors.bg, 25)} 100%)` : 
@@ -769,7 +872,7 @@ body.theme-${themeName} table.spots th.sorted a {
 }
 
 body.theme-${themeName} table.spots tr.even {
-    background-color: ${currentColors.bg};
+    background-color: ${evenRow};
 }
 
 body.theme-${themeName} table.spots tr.odd {
@@ -817,7 +920,7 @@ body.theme-${themeName} table.spots tr.spotcat3 td.category {
 
 /* DETAILS PANEL */
 body.theme-${themeName} div.details {
-    background-color: ${currentColors.bg};
+    background-color: ${detailsBg};
     border: 2px solid ${currentColors.primary};
     ${boxGlow}
 }
@@ -832,7 +935,7 @@ body.theme-${themeName} div.details a.closeDetails:hover {
 }
 
 body.theme-${themeName} div.details div.spotinfo h1 {
-    color: ${adjustBrightness(currentColors.primary, 15)};
+    color: ${detailsTitle};
     border-bottom: 2px solid ${hexToRgba(currentColors.primary, 0.3)};
     ${glow}
 }
@@ -847,6 +950,10 @@ body.theme-${themeName} div.details table td {
     color: ${currentColors.text};
     background-color: ${oddRow};
     border-color: ${hexToRgba(currentColors.primary, 0.1)};
+}
+
+body.theme-${themeName} div.details div.description pre {
+    color: ${description};
 }
 
 /* FILTERS */
