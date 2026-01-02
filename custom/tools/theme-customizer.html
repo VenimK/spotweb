@@ -296,43 +296,38 @@
                     <input type="text" id="borderColorText" value="#444444">
                 </div>
             </div>
-        </div>
-        
-        <div class="section">
-            <div class="section-title">🏷️ Category Colors</div>
             
             <div class="color-control">
-                <label class="color-label">Category 0</label>
+                <label class="color-label">Category 0 Color</label>
                 <div class="color-input-group">
-                    <input type="color" id="cat0Color" value="#e65100">
-                    <input type="text" id="cat0ColorText" value="#e65100">
+                    <input type="color" id="cat0Color" value="#3b82f6">
+                    <input type="text" id="cat0ColorText" value="#3b82f6">
                 </div>
             </div>
             
             <div class="color-control">
-                <label class="color-label">Category 1</label>
+                <label class="color-label">Category 1 Color</label>
                 <div class="color-input-group">
-                    <input type="color" id="cat1Color" value="#8d6e63">
-                    <input type="text" id="cat1ColorText" value="#8d6e63">
+                    <input type="color" id="cat1Color" value="#f59e0b">
+                    <input type="text" id="cat1ColorText" value="#f59e0b">
                 </div>
             </div>
             
             <div class="color-control">
-                <label class="color-label">Category 2</label>
+                <label class="color-label">Category 2 Color</label>
                 <div class="color-input-group">
-                    <input type="color" id="cat2Color" value="#ffa726">
-                    <input type="text" id="cat2ColorText" value="#ffa726">
+                    <input type="color" id="cat2Color" value="#22c55e">
+                    <input type="text" id="cat2ColorText" value="#22c55e">
                 </div>
             </div>
             
             <div class="color-control">
-                <label class="color-label">Category 3</label>
+                <label class="color-label">Category 3 Color</label>
                 <div class="color-input-group">
-                    <input type="color" id="cat3Color" value="#d32f2f">
-                    <input type="text" id="cat3ColorText" value="#d32f2f">
+                    <input type="color" id="cat3Color" value="#ef4444">
+                    <input type="text" id="cat3ColorText" value="#ef4444">
                 </div>
             </div>
-        </div>
         
         <div class="section">
             <div class="section-title">⚙️ Options</div>
@@ -427,18 +422,14 @@
         ];
         
         let currentColors = presets[0].colors;
+        // Set defaults for category colors if not in preset
+        currentColors.cat0 = currentColors.cat0 || '#3b82f6';
+        currentColors.cat1 = currentColors.cat1 || '#f59e0b';
+        currentColors.cat2 = currentColors.cat2 || '#22c55e';
+        currentColors.cat3 = currentColors.cat3 || '#ef4444';
         let useGradients = false;
         let useGlow = false;
         let useRounded = true;
-        
-        // Set default category colors
-        currentColors = {
-            ...currentColors,
-            cat0: currentColors.cat0 || '#e65100',
-            cat1: currentColors.cat1 || '#8d6e63',
-            cat2: currentColors.cat2 || '#ffa726',
-            cat3: currentColors.cat3 || '#d32f2f'
-        };
         
         // Initialize
         renderPresets();
@@ -462,12 +453,6 @@
             
             currentColors = {...preset.colors};
             
-            // Set category colors
-            currentColors.cat0 = preset.colors.cat0 || '#e65100';
-            currentColors.cat1 = preset.colors.cat1 || '#8d6e63';
-            currentColors.cat2 = preset.colors.cat2 || '#ffa726';
-            currentColors.cat3 = preset.colors.cat3 || '#d32f2f';
-            
             // Update color pickers
             Object.keys(currentColors).forEach(key => {
                 const picker = document.getElementById(key + 'Color');
@@ -488,41 +473,25 @@
         }
         
         function setupColorInputs() {
-            const colorKeys = ['bg', 'text', 'primary', 'secondary', 'hover', 'border'];
+            const colorKeys = ['bg', 'text', 'primary', 'secondary', 'hover', 'border', 'cat0', 'cat1', 'cat2', 'cat3'];
             
             colorKeys.forEach(key => {
                 const picker = document.getElementById(key + 'Color');
                 const text = document.getElementById(key + 'ColorText');
                 
-                picker.addEventListener('input', (e) => {
-                    currentColors[key] = e.target.value;
-                    text.value = e.target.value;
-                    updatePreview();
-                });
-                
-                text.addEventListener('input', (e) => {
-                    currentColors[key] = e.target.value;
-                    picker.value = e.target.value;
-                    updatePreview();
-                });
-            });
-            
-            // Category colors
-            ['cat0', 'cat1', 'cat2', 'cat3'].forEach(key => {
-                const picker = document.getElementById(key + 'Color');
-                const text = document.getElementById(key + 'ColorText');
-                
-                picker.addEventListener('input', (e) => {
-                    currentColors[key] = e.target.value;
-                    text.value = e.target.value;
-                    updatePreview();
-                });
-                
-                text.addEventListener('input', (e) => {
-                    currentColors[key] = e.target.value;
-                    picker.value = e.target.value;
-                    updatePreview();
-                });
+                if (picker && text) {
+                    picker.addEventListener('input', (e) => {
+                        currentColors[key] = e.target.value;
+                        text.value = e.target.value;
+                        updatePreview();
+                    });
+                    
+                    text.addEventListener('input', (e) => {
+                        currentColors[key] = e.target.value;
+                        picker.value = e.target.value;
+                        updatePreview();
+                    });
+                }
             });
         }
         
