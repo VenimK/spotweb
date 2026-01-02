@@ -1,0 +1,109 @@
+/* WINTER THEME FOR SPOTWEB */
+/* Cool whites and icy blues */
+
+:root[data-sw-theme="winter"] {
+  --color-surface: #f5f5f5;
+  --color-surface-2: #e0f2f1;
+  --color-border: #b0bec5;
+  --color-text: #263238;
+  --color-bg: #f5f5f5;
+  --color-muted: #37474f;
+  --color-accent: #00bcd4;
+  --sw-strip-gradient: linear-gradient(120deg, #e0f2f1, #f5f5f5);
+  --sw-strip-border: #b0bec5;
+  --sw-strip-text: #263238;
+
+  --sw-cat0: #00bcd4;
+  --sw-cat1: #4db6ac;
+  --sw-cat2: #81d4fa;
+  --sw-cat3: #ef5350;
+}
+
+/* GENERAL */
+body.theme-winter {background-color:#f5f5f5; color:#263238;}
+body.theme-winter a:visited,
+body.theme-winter a:link {color:#37474f;}
+body.theme-winter a:hover {color:#00bcd4; text-decoration:underline;}
+
+/* HEADER */
+body.theme-winter div.container {background:transparent;}
+body.theme-winter div.logo h1 a {color:#263238;}
+body.theme-winter div.filter h4 {color:#263238;}
+
+/* MENU */
+body.theme-winter ul.mainmenu li a {color:#263238;}
+body.theme-winter ul.mainmenu li:hover {background-color:#b0bec5;}
+body.theme-winter ul.mainmenu li.active {background-color:#90a4ae;}
+
+/* TOOLBAR */
+body.theme-winter div#toolbar {background-color:#b0bec5; border-color:#90a4ae;}
+body.theme-winter div.notifications,
+body.theme-winter div.toolbarButton {border-right-color:#90a4ae;}
+body.theme-winter div.toolbarButton:hover {background-color:#90a4ae;}
+body.theme-winter div.toolbarButton p a {color:#263238;}
+
+/* SPOTS LIST */
+body.theme-winter table.spots {background-color:#f5f5f5; border-color:#90a4ae;}
+body.theme-winter table.spots th {background-color:#b0bec5; color:#263238; border-color:#90a4ae;}
+body.theme-winter table.spots th a {color:#263238;}
+body.theme-winter table.spots th.sorted a {color:#00bcd4;}
+body.theme-winter table.spots tr.even {background-color:#eceff1;}
+body.theme-winter table.spots tr.odd {background-color:#f5f5f5;}
+body.theme-winter table.spots tr:hover {background-color:#b0bec5;}
+body.theme-winter table.spots tr.active {background-color:#90a4ae;}
+body.theme-winter table.spots tr.active td,
+body.theme-winter table.spots tr.active td a {color:#263238;}
+body.theme-winter table.spots td {color:#263238; border-color:#90a4ae;}
+body.theme-winter table.spots td a {color:#37474f;}
+body.theme-winter table.spots td.category {color:#263238;}
+
+/* SPOT CATEGORIES */
+body.theme-winter table.spots tr.spotcat0 td {background-color:#eceff1;}
+body.theme-winter table.spots tr.spotcat1 td {background-color:#eceff1;}
+body.theme-winter table.spots tr.spotcat2 td {background-color:#eceff1;}
+body.theme-winter table.spots tr.spotcat3 td {background-color:#eceff1;}
+body.theme-winter table.spots tr.spotcat0 td.category {color:#00bcd4;}
+body.theme-winter table.spots tr.spotcat1 td.category {color:#4db6ac;}
+body.theme-winter table.spots tr.spotcat2 td.category {color:#81d4fa;}
+body.theme-winter table.spots tr.spotcat3 td.category {color:#ef5350;}
+body.theme-winter table.spots tr.spam td {background-color:#eceff1;}
+body.theme-winter table.spots tr.spam td.title a {color:#999; text-decoration:line-through;}
+
+/* SPOT DETAILS */
+body.theme-winter div.details {background-color:#f5f5f5; border-color:#90a4ae;}
+body.theme-winter div.details a.closeDetails {background-color:#b0bec5;}
+body.theme-winter div.details a.closeDetails:hover {background-color:#90a4ae;}
+body.theme-winter div.details div.spotinfo h1 {color:#263238; border-bottom-color:#90a4ae;}
+body.theme-winter div.details table.spotheader th,
+body.theme-winter div.details table.spotinfo th {color:#263238; background-color:#b0bec5; border-color:#90a4ae;}
+body.theme-winter div.details table.spotheader td,
+body.theme-winter div.details table.spotinfo td {color:#263238; background-color:#eceff1; border-color:#90a4ae;}
+body.theme-winter div.details table.spotheader td a,
+body.theme-winter div.details table.spotinfo td a {color:#00bcd4;}
+body.theme-winter div.details div.description pre {color:#263238;}
+body.theme-winter div.details div.comments h4,
+body.theme-winter div.details div.comments h3 {color:#37474f; border-color:#90a4ae;}
+body.theme-winter div.details div.comments ul {background-color:#eceff1; border-color:#90a4ae;}
+body.theme-winter div.details div.comments ul li {border-color:#90a4ae;}
+body.theme-winter div.details div.comments ul li.even {background-color:#eceff1;}
+body.theme-winter div.details div.comments ul li.odd {background-color:#f5f5f5;}
+body.theme-winter div.details div.comments ul li p {color:#00bcd4;}
+body.theme-winter div.details div.comments ul li p.user {color:#37474f;}
+
+/* QUICKLINKS */
+body.theme-winter div.filter ul.quicklinks li {margin:0 0 2px 0;}
+body.theme-winter div.filter ul.quicklinks li a {color:#263238;}
+
+/* FILTERS */
+body.theme-winter div.filter {background-color:#f5f5f5; border-color:#90a4ae;}
+body.theme-winter div.filter h4 {background-color:#b0bec5; border-color:#90a4ae;}
+body.theme-winter div.filter ul.filterlist li {border-color:#90a4ae;}
+body.theme-winter div.filter ul.filterlist li:hover {background-color:#b0bec5;}
+body.theme-winter div.filter ul.filterlist li a {color:#263238;}
+body.theme-winter div.filter ul.filterlist li.blue a {color:#00bcd4; font-weight:bold;}
+body.theme-winter div.filter ul.filterlist li.red a {color:#ef5350; font-weight:bold;}
+body.theme-winter div.filter ul.filterlist li.green a {color:#4db6ac; font-weight:bold;}
+body.theme-winter div.filter ul.filterlist li.active {background-color:#90a4ae;}
+
+/* PAGING */
+body.theme-winter div.paging a {color:#263238; border-color:#90a4ae;}

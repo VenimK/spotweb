@@ -1,0 +1,109 @@
+/* AUTUMN THEME FOR SPOTWEB */
+/* Warm oranges and deep reds */
+
+:root[data-sw-theme="autumn"] {
+  --color-surface: #fff3e0;
+  --color-surface-2: #ffcc80;
+  --color-border: #fb8c00;
+  --color-text: #bf360c;
+  --color-bg: #fff3e0;
+  --color-muted: #d84315;
+  --color-accent: #e65100;
+  --sw-strip-gradient: linear-gradient(120deg, #ffcc80, #fff3e0);
+  --sw-strip-border: #fb8c00;
+  --sw-strip-text: #bf360c;
+
+  --sw-cat0: #e65100;
+  --sw-cat1: #8d6e63;
+  --sw-cat2: #ffa726;
+  --sw-cat3: #d32f2f;
+}
+
+/* GENERAL */
+body.theme-autumn {background-color:#fff3e0; color:#bf360c;}
+body.theme-autumn a:visited,
+body.theme-autumn a:link {color:#8d6e63;}
+body.theme-autumn a:hover {color:#fb8c00; text-decoration:underline;}
+
+/* HEADER */
+body.theme-autumn div.container {background:transparent;}
+body.theme-autumn div.logo h1 a {color:#bf360c;}
+body.theme-autumn div.filter h4 {color:#bf360c;}
+
+/* MENU */
+body.theme-autumn ul.mainmenu li a {color:#bf360c;}
+body.theme-autumn ul.mainmenu li:hover {background-color:#fb8c00;}
+body.theme-autumn ul.mainmenu li.active {background-color:#f57c00;}
+
+/* TOOLBAR */
+body.theme-autumn div#toolbar {background-color:#fb8c00; border-color:#f57c00;}
+body.theme-autumn div.notifications,
+body.theme-autumn div.toolbarButton {border-right-color:#f57c00;}
+body.theme-autumn div.toolbarButton:hover {background-color:#f57c00;}
+body.theme-autumn div.toolbarButton p a {color:#bf360c;}
+
+/* SPOTS LIST */
+body.theme-autumn table.spots {background-color:#fff3e0; border-color:#f57c00;}
+body.theme-autumn table.spots th {background-color:#fb8c00; color:#bf360c; border-color:#f57c00;}
+body.theme-autumn table.spots th a {color:#bf360c;}
+body.theme-autumn table.spots th.sorted a {color:#e65100;}
+body.theme-autumn table.spots tr.even {background-color:#ffe0b2;}
+body.theme-autumn table.spots tr.odd {background-color:#fff3e0;}
+body.theme-autumn table.spots tr:hover {background-color:#fb8c00;}
+body.theme-autumn table.spots tr.active {background-color:#f57c00;}
+body.theme-autumn table.spots tr.active td,
+body.theme-autumn table.spots tr.active td a {color:#bf360c;}
+body.theme-autumn table.spots td {color:#bf360c; border-color:#f57c00;}
+body.theme-autumn table.spots td a {color:#8d6e63;}
+body.theme-autumn table.spots td.category {color:#bf360c;}
+
+/* SPOT CATEGORIES */
+body.theme-autumn table.spots tr.spotcat0 td {background-color:#ffe0b2;}
+body.theme-autumn table.spots tr.spotcat1 td {background-color:#ffe0b2;}
+body.theme-autumn table.spots tr.spotcat2 td {background-color:#ffe0b2;}
+body.theme-autumn table.spots tr.spotcat3 td {background-color:#ffe0b2;}
+body.theme-autumn table.spots tr.spotcat0 td.category {color:#e65100;}
+body.theme-autumn table.spots tr.spotcat1 td.category {color:#8d6e63;}
+body.theme-autumn table.spots tr.spotcat2 td.category {color:#ffa726;}
+body.theme-autumn table.spots tr.spotcat3 td.category {color:#d32f2f;}
+body.theme-autumn table.spots tr.spam td {background-color:#ffe0b2;}
+body.theme-autumn table.spots tr.spam td.title a {color:#999; text-decoration:line-through;}
+
+/* SPOT DETAILS */
+body.theme-autumn div.details {background-color:#fff3e0; border-color:#f57c00;}
+body.theme-autumn div.details a.closeDetails {background-color:#fb8c00;}
+body.theme-autumn div.details a.closeDetails:hover {background-color:#f57c00;}
+body.theme-autumn div.details div.spotinfo h1 {color:#bf360c; border-bottom-color:#f57c00;}
+body.theme-autumn div.details table.spotheader th,
+body.theme-autumn div.details table.spotinfo th {color:#bf360c; background-color:#fb8c00; border-color:#f57c00;}
+body.theme-autumn div.details table.spotheader td,
+body.theme-autumn div.details table.spotinfo td {color:#bf360c; background-color:#ffe0b2; border-color:#f57c00;}
+body.theme-autumn div.details table.spotheader td a,
+body.theme-autumn div.details table.spotinfo td a {color:#e65100;}
+body.theme-autumn div.details div.description pre {color:#bf360c;}
+body.theme-autumn div.details div.comments h4,
+body.theme-autumn div.details div.comments h3 {color:#8d6e63; border-color:#f57c00;}
+body.theme-autumn div.details div.comments ul {background-color:#ffe0b2; border-color:#f57c00;}
+body.theme-autumn div.details div.comments ul li {border-color:#f57c00;}
+body.theme-autumn div.details div.comments ul li.even {background-color:#ffe0b2;}
+body.theme-autumn div.details div.comments ul li.odd {background-color:#fff3e0;}
+body.theme-autumn div.details div.comments ul li p {color:#e65100;}
+body.theme-autumn div.details div.comments ul li p.user {color:#d84315;}
+
+/* QUICKLINKS */
+body.theme-autumn div.filter ul.quicklinks li {margin:0 0 2px 0;}
+body.theme-autumn div.filter ul.quicklinks li a {color:#bf360c;}
+
+/* FILTERS */
+body.theme-autumn div.filter {background-color:#fff3e0; border-color:#f57c00;}
+body.theme-autumn div.filter h4 {background-color:#fb8c00; border-color:#f57c00;}
+body.theme-autumn div.filter ul.filterlist li {border-color:#f57c00;}
+body.theme-autumn div.filter ul.filterlist li:hover {background-color:#fb8c00;}
+body.theme-autumn div.filter ul.filterlist li a {color:#bf360c;}
+body.theme-autumn div.filter ul.filterlist li.blue a {color:#e65100; font-weight:bold;}
+body.theme-autumn div.filter ul.filterlist li.red a {color:#d32f2f; font-weight:bold;}
+body.theme-autumn div.filter ul.filterlist li.green a {color:#8d6e63; font-weight:bold;}
+body.theme-autumn div.filter ul.filterlist li.active {background-color:#f57c00;}
+
+/* PAGING */
+body.theme-autumn div.paging a {color:#bf360c; border-color:#f57c00;}

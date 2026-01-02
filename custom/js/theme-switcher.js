@@ -13,7 +13,11 @@ const themeMetadata = {
     'nord': { name: 'Nord', icon: '❄️' },
     'dracula': { name: 'Dracula', icon: '🧛' },
     'forest': { name: 'Forest', icon: '🌲' },
-    'sunset': { name: 'Sunset', icon: '🌅' }
+    'sunset': { name: 'Sunset', icon: '🌅' },
+    'spring': { name: 'Spring', icon: '🌸' },
+    'summer': { name: 'Summer', icon: '☀️' },
+    'autumn': { name: 'Autumn', icon: '🍂' },
+    'winter': { name: 'Winter', icon: '❄️' }
 };
 
 // Auto-detect available themes from loaded CSS files

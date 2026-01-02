@@ -42,6 +42,10 @@ Transform your Spotweb interface with professionally designed themes featuring a
 | 🧛 **Dracula** | Purple comfort theme | Relaxed browsing, Development |
 | 🌲 **Forest** | Nature earth tones | Peaceful browsing, Relaxation |
 | 🌅 **Sunset** | Warm orange/purple | Evening, Cozy atmosphere |
+| 🌸 **Spring** | Fresh greens and pastels | Renewal, Nature lovers |
+| ☀️ **Summer** | Bright blues and yellows | Vibrant, Sunny moods |
+| 🍂 **Autumn** | Warm oranges and browns | Cozy, Harvest season |
+| ⛄ **Winter** | Cool whites and icy blues | Calm, Winter evenings |
 
 ---
 
@@ -93,7 +97,7 @@ Already have Spotweb? See **[MIGRATION-GUIDE.md](MIGRATION-GUIDE.md)** for insta
 
 ### With Complete Theme Pack:
 
-- ✅ **8 Pre-installed Themes** - Dark, Midnight Ocean, Cyberpunk, Nord, Dracula, Forest, Sunset + Light
+- ✅ **12 Pre-installed Themes** - Dark, Midnight Ocean, Cyberpunk, Nord, Dracula, Forest, Sunset, Spring, Summer, Autumn, Winter + Light
 - ✅ **Smart Theme Switcher** - 🎨 button in UI for instant theme changes
 - ✅ **Theme Customizer** - Visual tool at `/custom/tools/theme-customizer.html`
 - ✅ **Theme Upload Tool** - Easy upload at `/custom/tools/theme-upload.php`

@@ -50,6 +50,10 @@ Located in: `custom/themes/preinstalled/`
 - theme-dracula.css
 - theme-forest.css
 - theme-sunset.css
+- theme-spring.css
+- theme-summer.css
+- theme-autumn.css
+- theme-winter.css
 
 ### Custom Themes (User-created)
 Located in: `custom/themes/`

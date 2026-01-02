@@ -36,3 +36,4 @@ Temporary Items
 *.tmp
 *.bak
 *.backup
+custom.code-workspace
