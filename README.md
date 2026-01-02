@@ -1,6 +1,6 @@
 # 🎨 Spotweb Multi-Theme System
 
-> **8 Beautiful Themes + Update-Safe Architecture for Spotweb on Proxmox**
+> **11 Beautiful Themes + Update-Safe Architecture for Spotweb on Proxmox**
 
 Transform your Spotweb interface with professionally designed themes featuring an intelligent theme switcher, customization tools, and automatic theme detection. All themes are update-safe and won't be overwritten when you update Spotweb!
 
@@ -19,7 +19,7 @@ Transform your Spotweb interface with professionally designed themes featuring a
 
 ## ✨ Features
 
-- 🎨 **8 Pre-installed Themes** - Beautiful, professionally designed color schemes
+- 🎨 **11 Pre-installed Themes** - Beautiful, professionally designed color schemes
 - 🔄 **Smart Theme Switcher** - One-click theme changes with smooth transitions
 - 🎯 **Auto-Detection** - Automatically discovers and displays all available themes
 - 🛠️ **Theme Customizer** - Visual tool to create your own custom themes
@@ -97,7 +97,7 @@ Already have Spotweb? See **[MIGRATION-GUIDE.md](MIGRATION-GUIDE.md)** for insta
 
 ### With Complete Theme Pack:
 
-- ✅ **12 Pre-installed Themes** - Dark, Midnight Ocean, Cyberpunk, Nord, Dracula, Forest, Sunset, Spring, Summer, Autumn, Winter + Light
+- ✅ **11 Pre-installed Themes** - Dark, Midnight Ocean, Cyberpunk, Nord, Dracula, Forest, Sunset, Spring, Summer, Autumn, Winter + Light
 - ✅ **Smart Theme Switcher** - 🎨 button in UI for instant theme changes
 - ✅ **Theme Customizer** - Visual tool at `/custom/tools/theme-customizer.html`
 - ✅ **Theme Upload Tool** - Easy upload at `/custom/tools/theme-upload.php`
@@ -117,6 +117,10 @@ Already have Spotweb? See **[MIGRATION-GUIDE.md](MIGRATION-GUIDE.md)** for insta
   ├─ 🧛 Dracula
   ├─ 🌲 Forest
   ├─ 🌅 Sunset
+  ├─ 🌸 Spring
+  ├─ ☀️ Summer
+  ├─ 🍂 Autumn
+  ├─ ⛄ Winter
   └─ 🎨 Your Custom Themes
 ```
 
