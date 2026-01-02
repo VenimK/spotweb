@@ -430,6 +430,15 @@
         </div>
         
         <div class="section">
+            <div class="section-title">📂 Import</div>
+            <div class="actions">
+                <input type="file" id="cssFileInput" accept=".css" style="display: none;" onchange="importCSS(event)">
+                <button class="btn-primary" onclick="document.getElementById('cssFileInput').click()">📁 Import CSS File</button>
+            </div>
+            <p style="font-size: 11px; color: #888; margin-top: 8px;">Import a previously exported theme CSS file to continue editing.</p>
+        </div>
+        
+        <div class="section">
             <div class="section-title">💾 Export</div>
             <div class="actions">
                 <button class="btn-success" onclick="downloadCSS()">📥 Download CSS</button>
@@ -1313,6 +1322,106 @@ body.theme-${themeName} input[type="submit"]:hover {
             a.href = url;
             a.download = 'theme-' + sanitizedName + '.css';
             a.click();
+        }
+        
+        function importCSS(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const css = e.target.result;
+                parseAndApplyCSS(css);
+            };
+            reader.readAsText(file);
+            
+            // Reset file input so same file can be imported again
+            event.target.value = '';
+        }
+        
+        function parseAndApplyCSS(css) {
+            // Color mapping: CSS property patterns to our color keys
+            const colorMappings = [
+                // :root CSS variables
+                { pattern: /--color-bg:\s*(#[0-9a-fA-F]{6})/i, key: 'bg' },
+                { pattern: /--color-text:\s*(#[0-9a-fA-F]{6})/i, key: 'text' },
+                { pattern: /--color-accent:\s*(#[0-9a-fA-F]{6})/i, key: 'primary' },
+                { pattern: /--color-surface:\s*(#[0-9a-fA-F]{6})/i, key: 'oddRow' },
+                { pattern: /--color-surface-2:\s*(#[0-9a-fA-F]{6})/i, key: 'thBg' },
+                { pattern: /--sw-cat0:\s*(#[0-9a-fA-F]{6})/i, key: 'cat0' },
+                { pattern: /--sw-cat1:\s*(#[0-9a-fA-F]{6})/i, key: 'cat1' },
+                { pattern: /--sw-cat2:\s*(#[0-9a-fA-F]{6})/i, key: 'cat2' },
+                { pattern: /--sw-cat3:\s*(#[0-9a-fA-F]{6})/i, key: 'cat3' },
+                
+                // Body background
+                { pattern: /body[^{]*\{[^}]*background:\s*(#[0-9a-fA-F]{6})/i, key: 'bg' },
+                { pattern: /body[^{]*\{[^}]*color:\s*(#[0-9a-fA-F]{6})/i, key: 'text' },
+                
+                // Links
+                { pattern: /a:link[^{]*\{[^}]*color:\s*(#[0-9a-fA-F]{6})/i, key: 'link' },
+                { pattern: /a:hover[^{]*\{[^}]*color:\s*(#[0-9a-fA-F]{6})/i, key: 'linkHover' },
+                
+                // Table
+                { pattern: /table\.spots\s+th[^{]*\{[^}]*background[^:]*:\s*(#[0-9a-fA-F]{6})/i, key: 'thBg' },
+                { pattern: /tr\.odd[^{]*\{[^}]*background[^:]*:\s*(#[0-9a-fA-F]{6})/i, key: 'oddRow' },
+                { pattern: /tr\.even[^{]*\{[^}]*background[^:]*:\s*(#[0-9a-fA-F]{6})/i, key: 'evenRow' },
+                { pattern: /tr:hover[^{]*\{[^}]*background[^:]*:\s*(#[0-9a-fA-F]{6})/i, key: 'hover' },
+                
+                // Details panel
+                { pattern: /div\.details[^{]*\{[^}]*background[^:]*:\s*(#[0-9a-fA-F]{6})/i, key: 'detailsBg' },
+                { pattern: /div\.details[^}]*spotinfo\s+h1[^{]*\{[^}]*color:\s*(#[0-9a-fA-F]{6})/i, key: 'detailsTitle' },
+                
+                // Logo/primary
+                { pattern: /div\.logo\s+h1\s+a[^{]*\{[^}]*color:\s*(#[0-9a-fA-F]{6})/i, key: 'primary' },
+                
+                // Secondary/toolbar
+                { pattern: /div#toolbar[^{]*\{[^}]*background:\s*(#[0-9a-fA-F]{6})/i, key: 'secondary' },
+                
+                // Border
+                { pattern: /border[^:]*:\s*\d+px\s+solid\s+(#[0-9a-fA-F]{6})/i, key: 'border' },
+            ];
+            
+            const extractedColors = {};
+            
+            // Extract colors from CSS
+            colorMappings.forEach(mapping => {
+                const match = css.match(mapping.pattern);
+                if (match && match[1]) {
+                    extractedColors[mapping.key] = match[1].toLowerCase();
+                }
+            });
+            
+            // Check if we found any colors
+            if (Object.keys(extractedColors).length === 0) {
+                alert('⚠️ Could not extract colors from CSS file.\nMake sure you are importing a theme file exported from this customizer.');
+                return;
+            }
+            
+            // Merge extracted colors with current colors (only override what was found)
+            Object.keys(extractedColors).forEach(key => {
+                currentColors[key] = extractedColors[key];
+            });
+            
+            // Update all color pickers
+            const colorKeys = ['bg', 'text', 'primary', 'secondary', 'hover', 'border', 'link', 'linkHover', 'thBg', 'oddRow', 'evenRow', 'cat0', 'cat1', 'cat2', 'cat3', 'detailsBg', 'detailsTitle', 'description'];
+            colorKeys.forEach(key => {
+                const picker = document.getElementById(key + 'Color');
+                const text = document.getElementById(key + 'ColorText');
+                if (picker && text && currentColors[key]) {
+                    picker.value = currentColors[key];
+                    text.value = currentColors[key];
+                }
+            });
+            
+            // Clear active preset button
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Update preview
+            updatePreview();
+            
+            alert('✓ Theme imported successfully!\n' + Object.keys(extractedColors).length + ' colors extracted.');
         }
         
         function copyToClipboard() {
