@@ -636,61 +636,234 @@
             const glow = useGlow ? `text-shadow: 0 0 10px ${currentColors.primary};` : '';
             const radius = useRounded ? '6px' : '0';
             
+            // Get all color values with fallbacks
+            const link = currentColors.link || currentColors.primary;
+            const linkHover = currentColors.linkHover || adjustBrightness(link, 20);
+            const thBg = currentColors.thBg || currentColors.secondary;
+            const oddRow = currentColors.oddRow || adjustBrightness(currentColors.bg, 5);
+            const evenRow = currentColors.evenRow || currentColors.bg;
+            const cat0 = currentColors.cat0 || '#4da6ff';
+            const cat1 = currentColors.cat1 || '#66cc66';
+            const cat2 = currentColors.cat2 || '#ffcc00';
+            const cat3 = currentColors.cat3 || '#ff6666';
+            const detailsBg = currentColors.detailsBg || currentColors.secondary;
+            const detailsTitle = currentColors.detailsTitle || currentColors.text;
+            const description = currentColors.description || currentColors.text;
+            
             return `
+                * { box-sizing: border-box; }
                 body {
                     background: ${bg};
                     color: ${currentColors.text};
                     font-family: Arial, sans-serif;
-                    padding: 20px;
+                    padding: 15px;
                     margin: 0;
+                    font-size: 13px;
                 }
                 
                 .header {
                     background: ${currentColors.secondary};
-                    padding: 20px;
+                    padding: 15px;
                     border-radius: ${radius};
-                    margin-bottom: 20px;
+                    margin-bottom: 15px;
+                    border: 1px solid ${currentColors.border};
                 }
                 
                 h1 {
                     color: ${currentColors.primary};
                     ${glow}
                     margin: 0;
+                    font-size: 20px;
                 }
                 
+                h2 {
+                    color: ${currentColors.primary};
+                    font-size: 14px;
+                    margin: 15px 0 10px 0;
+                    padding-bottom: 5px;
+                    border-bottom: 2px solid ${currentColors.primary};
+                }
+                
+                /* Links Section */
+                .links-demo {
+                    background: ${currentColors.secondary};
+                    padding: 12px;
+                    border-radius: ${radius};
+                    margin-bottom: 15px;
+                    border: 1px solid ${currentColors.border};
+                }
+                
+                .links-demo a {
+                    color: ${link};
+                    text-decoration: none;
+                    margin-right: 15px;
+                }
+                
+                .links-demo a:hover {
+                    color: ${linkHover};
+                    text-decoration: underline;
+                    ${glow}
+                }
+                
+                .links-demo a.hover-demo {
+                    color: ${linkHover};
+                }
+                
+                /* Table */
                 table {
                     width: 100%;
-                    background: ${currentColors.secondary};
                     border-collapse: collapse;
                     border-radius: ${radius};
                     overflow: hidden;
+                    margin-bottom: 15px;
+                    border: 1px solid ${currentColors.border};
                 }
                 
                 th {
-                    background: ${currentColors.hover};
+                    background: ${thBg};
                     color: ${currentColors.primary};
-                    padding: 12px;
+                    padding: 10px;
                     text-align: left;
                     border-bottom: 2px solid ${currentColors.border};
+                    font-weight: 600;
                 }
                 
                 td {
-                    padding: 12px;
+                    padding: 10px;
                     border-bottom: 1px solid ${currentColors.border};
                     color: ${currentColors.text};
                 }
                 
-                tr:hover {
+                tr.odd { background-color: ${oddRow}; }
+                tr.even { background-color: ${evenRow}; }
+                
+                tr:hover td { background: ${currentColors.hover}; }
+                
+                td a { color: ${link}; text-decoration: none; }
+                td a:hover { color: ${linkHover}; }
+                
+                /* Category Colors */
+                .cat0 { color: ${cat0} !important; font-weight: bold; }
+                .cat1 { color: ${cat1} !important; font-weight: bold; }
+                .cat2 { color: ${cat2} !important; font-weight: bold; }
+                .cat3 { color: ${cat3} !important; font-weight: bold; }
+                
+                /* Category Badges */
+                .category-badges {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 15px;
+                    flex-wrap: wrap;
+                }
+                
+                .badge {
+                    padding: 6px 12px;
+                    border-radius: 4px;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+                
+                .badge.cat0 { background: ${cat0}; color: #fff; }
+                .badge.cat1 { background: ${cat1}; color: #fff; }
+                .badge.cat2 { background: ${cat2}; color: #fff; }
+                .badge.cat3 { background: ${cat3}; color: #fff; }
+                
+                /* Details Panel */
+                .details-panel {
+                    background: ${detailsBg};
+                    border: 2px solid ${currentColors.primary};
+                    border-radius: ${radius};
+                    padding: 15px;
+                    margin-bottom: 15px;
+                }
+                
+                .details-panel h3 {
+                    color: ${detailsTitle};
+                    margin: 0 0 10px 0;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid ${currentColors.border};
+                    font-size: 16px;
+                }
+                
+                .details-panel .description {
+                    color: ${description};
+                    font-size: 12px;
+                    line-height: 1.5;
+                }
+                
+                .details-panel table {
+                    margin: 10px 0;
+                }
+                
+                /* Filters */
+                .filters {
+                    background: ${oddRow};
+                    border: 1px solid ${currentColors.border};
+                    border-radius: ${radius};
+                    padding: 10px;
+                }
+                
+                .filters h4 {
+                    background: ${thBg};
+                    color: ${currentColors.primary};
+                    margin: -10px -10px 10px -10px;
+                    padding: 8px 10px;
+                    font-size: 13px;
+                    border-radius: ${radius} ${radius} 0 0;
+                }
+                
+                .filter-item {
+                    padding: 6px 8px;
+                    border-bottom: 1px solid ${currentColors.border};
+                    cursor: pointer;
+                }
+                
+                .filter-item:hover {
                     background: ${currentColors.hover};
                 }
                 
-                a {
-                    color: ${currentColors.primary};
+                .filter-item a {
+                    color: ${link};
                     text-decoration: none;
                 }
                 
-                a:hover {
-                    ${glow}
+                .filter-item.active {
+                    background: ${currentColors.hover};
+                    border-left: 3px solid ${currentColors.primary};
+                }
+                
+                /* Toolbar */
+                .toolbar-demo {
+                    background: ${currentColors.secondary};
+                    padding: 8px 12px;
+                    border-radius: ${radius};
+                    margin-bottom: 15px;
+                    display: flex;
+                    gap: 15px;
+                    border: 1px solid ${currentColors.border};
+                }
+                
+                .toolbar-btn {
+                    color: ${currentColors.primary};
+                    cursor: pointer;
+                }
+                
+                .toolbar-btn:hover {
+                    color: ${linkHover};
+                }
+                
+                /* Two Column Layout */
+                .two-col {
+                    display: flex;
+                    gap: 15px;
+                }
+                
+                .two-col > div {
+                    flex: 1;
+                }
+                
+                @media (max-width: 600px) {
+                    .two-col { flex-direction: column; }
                 }
             `;
         }
@@ -698,34 +871,107 @@
         function generatePreviewHTML() {
             return `
                 <div class="header">
-                    <h1>Custom Theme Preview</h1>
+                    <h1>🎨 Custom Theme Preview</h1>
                 </div>
+                
+                <div class="toolbar-demo">
+                    <span class="toolbar-btn">🏠 Home</span>
+                    <span class="toolbar-btn">⚙️ Settings</span>
+                    <span class="toolbar-btn">🔔 Notifications</span>
+                    <span class="toolbar-btn">👤 Profile</span>
+                </div>
+                
+                <h2>🔗 Link Colors</h2>
+                <div class="links-demo">
+                    <a href="#">Normal Link</a>
+                    <a href="#" class="hover-demo">Hover Link</a>
+                    <a href="#">Another Link</a>
+                </div>
+                
+                <h2>🏷️ Category Badges</h2>
+                <div class="category-badges">
+                    <span class="badge cat0">Movies</span>
+                    <span class="badge cat1">Series</span>
+                    <span class="badge cat2">Music</span>
+                    <span class="badge cat3">Games</span>
+                </div>
+                
+                <h2>📊 Table with Categories</h2>
                 <table>
                     <thead>
                         <tr>
                             <th>Category</th>
                             <th>Title</th>
+                            <th>Size</th>
                             <th>Date</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Movies</td>
-                            <td><a href="#">Example Movie Title 2024</a></td>
-                            <td>Dec 08, 2025</td>
+                        <tr class="odd">
+                            <td class="cat0">Movies</td>
+                            <td><a href="#">Example Movie Title 2024 BluRay</a></td>
+                            <td>4.2 GB</td>
+                            <td>Jan 02, 2026</td>
                         </tr>
-                        <tr>
-                            <td>TV</td>
-                            <td><a href="#">TV Show S01E01</a></td>
-                            <td>Dec 08, 2025</td>
+                        <tr class="even">
+                            <td class="cat1">Series</td>
+                            <td><a href="#">TV Show S01E01 720p</a></td>
+                            <td>1.1 GB</td>
+                            <td>Jan 01, 2026</td>
                         </tr>
-                        <tr>
-                            <td>Music</td>
-                            <td><a href="#">Album Name - Artist</a></td>
-                            <td>Dec 08, 2025</td>
+                        <tr class="odd">
+                            <td class="cat2">Music</td>
+                            <td><a href="#">Album Name - Artist FLAC</a></td>
+                            <td>450 MB</td>
+                            <td>Dec 31, 2025</td>
+                        </tr>
+                        <tr class="even">
+                            <td class="cat3">Games</td>
+                            <td><a href="#">Game Title Deluxe Edition</a></td>
+                            <td>25 GB</td>
+                            <td>Dec 30, 2025</td>
                         </tr>
                     </tbody>
                 </table>
+                
+                <div class="two-col">
+                    <div>
+                        <h2>📋 Details Panel</h2>
+                        <div class="details-panel">
+                            <h3>Example Movie Title 2024</h3>
+                            <table>
+                                <tr class="odd">
+                                    <th>Category</th>
+                                    <td class="cat0">Movies</td>
+                                </tr>
+                                <tr class="even">
+                                    <th>Size</th>
+                                    <td>4.2 GB</td>
+                                </tr>
+                                <tr class="odd">
+                                    <th>Posted</th>
+                                    <td>Jan 02, 2026</td>
+                                </tr>
+                            </table>
+                            <div class="description">
+                                This is the description text area. It shows how the description color appears in the details panel. 
+                                You can customize this color separately from the main text color to improve readability.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h2>🔍 Filters</h2>
+                        <div class="filters">
+                            <h4>Categories</h4>
+                            <div class="filter-item active"><a href="#">All Categories</a></div>
+                            <div class="filter-item"><a href="#">Movies</a></div>
+                            <div class="filter-item"><a href="#">Series</a></div>
+                            <div class="filter-item"><a href="#">Music</a></div>
+                            <div class="filter-item"><a href="#">Games</a></div>
+                        </div>
+                    </div>
+                </div>
             `;
         }
         
