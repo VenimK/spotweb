@@ -27,7 +27,11 @@ $preinstalledThemes = [
     'nord',
     'dracula',
     'forest',
-    'sunset'
+    'sunset',
+    'spring',
+    'summer',
+    'autumn',
+    'winter'
 ];
 
 foreach ($preinstalledThemes as $theme) {
