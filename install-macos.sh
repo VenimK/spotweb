@@ -224,7 +224,7 @@ install_themes() {
            "${spotweb_dir}/custom/includes"
 
   if [[ "${mode}" == "pack" ]]; then
-    local themes=("dark" "midnight-ocean" "cyberpunk" "nord" "dracula" "forest" "sunset")
+    local themes=("dark" "midnight-ocean" "cyberpunk" "nord" "dracula" "forest" "sunset" "spring" "summer" "autumn" "winter")
     for theme in "${themes[@]}"; do
       print_info "Downloading theme-${theme}.css"
       curl -fsSL "${GITHUB_RAW_BASE}/custom/themes/preinstalled/theme-${theme}.css" \
