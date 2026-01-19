@@ -1,0 +1,109 @@
+/* SUMMER THEME FOR SPOTWEB */
+/* Bright blues and sunny yellows */
+
+:root[data-sw-theme="summer"] {
+  --color-surface: #e3f2fd;
+  --color-surface-2: #bbdefb;
+  --color-border: #90caf9;
+  --color-text: #0d47a1;
+  --color-bg: #e3f2fd;
+  --color-muted: #1565c0;
+  --color-accent: #ffd54f;
+  --sw-strip-gradient: linear-gradient(120deg, #bbdefb, #e3f2fd);
+  --sw-strip-border: #90caf9;
+  --sw-strip-text: #0d47a1;
+
+  --sw-cat0: #ffd54f;
+  --sw-cat1: #4caf50;
+  --sw-cat2: #ffeb3b;
+  --sw-cat3: #ff5722;
+}
+
+/* GENERAL */
+body.theme-summer {background-color:#e3f2fd; color:#0d47a1;}
+body.theme-summer a:visited,
+body.theme-summer a:link {color:#0d47a1;}
+body.theme-summer a:hover {color:#42a5f5; text-decoration:underline;}
+
+/* HEADER */
+body.theme-summer div.container {background:transparent;}
+body.theme-summer div.logo h1 a {color:#0d47a1;}
+body.theme-summer div.filter h4 {color:#0d47a1;}
+
+/* MENU */
+body.theme-summer ul.mainmenu li a {color:#0d47a1;}
+body.theme-summer ul.mainmenu li:hover {background-color:#90caf9;}
+body.theme-summer ul.mainmenu li.active {background-color:#64b5f6;}
+
+/* TOOLBAR */
+body.theme-summer div#toolbar {background-color:#90caf9; border-color:#64b5f6;}
+body.theme-summer div.notifications,
+body.theme-summer div.toolbarButton {border-right-color:#64b5f6;}
+body.theme-summer div.toolbarButton:hover {background-color:#64b5f6;}
+body.theme-summer div.toolbarButton p a {color:#0d47a1;}
+
+/* SPOTS LIST */
+body.theme-summer table.spots {background-color:#e3f2fd; border-color:#64b5f6;}
+body.theme-summer table.spots th {background-color:#90caf9; color:#0d47a1; border-color:#64b5f6;}
+body.theme-summer table.spots th a {color:#0d47a1;}
+body.theme-summer table.spots th.sorted a {color:#ffd54f;}
+body.theme-summer table.spots tr.even {background-color:#f3e5f5;}
+body.theme-summer table.spots tr.odd {background-color:#e3f2fd;}
+body.theme-summer table.spots tr:hover {background-color:#90caf9;}
+body.theme-summer table.spots tr.active {background-color:#64b5f6;}
+body.theme-summer table.spots tr.active td,
+body.theme-summer table.spots tr.active td a {color:#0d47a1;}
+body.theme-summer table.spots td {color:#0d47a1; border-color:#64b5f6;}
+body.theme-summer table.spots td a {color:#1976d2;}
+body.theme-summer table.spots td.category {color:#0d47a1;}
+
+/* SPOT CATEGORIES */
+body.theme-summer table.spots tr.spotcat0 td {background-color:#f3e5f5;}
+body.theme-summer table.spots tr.spotcat1 td {background-color:#f3e5f5;}
+body.theme-summer table.spots tr.spotcat2 td {background-color:#f3e5f5;}
+body.theme-summer table.spots tr.spotcat3 td {background-color:#f3e5f5;}
+body.theme-summer table.spots tr.spotcat0 td.category {color:#ffd54f;}
+body.theme-summer table.spots tr.spotcat1 td.category {color:#4caf50;}
+body.theme-summer table.spots tr.spotcat2 td.category {color:#ffeb3b;}
+body.theme-summer table.spots tr.spotcat3 td.category {color:#ff5722;}
+body.theme-summer table.spots tr.spam td {background-color:#f3e5f5;}
+body.theme-summer table.spots tr.spam td.title a {color:#999; text-decoration:line-through;}
+
+/* SPOT DETAILS */
+body.theme-summer div.details {background-color:#e3f2fd; border-color:#64b5f6;}
+body.theme-summer div.details a.closeDetails {background-color:#90caf9;}
+body.theme-summer div.details a.closeDetails:hover {background-color:#64b5f6;}
+body.theme-summer div.details div.spotinfo h1 {color:#0d47a1; border-bottom-color:#64b5f6;}
+body.theme-summer div.details table.spotheader th,
+body.theme-summer div.details table.spotinfo th {color:#0d47a1; background-color:#90caf9; border-color:#64b5f6;}
+body.theme-summer div.details table.spotheader td,
+body.theme-summer div.details table.spotinfo td {color:#0d47a1; background-color:#f3e5f5; border-color:#64b5f6;}
+body.theme-summer div.details table.spotheader td a,
+body.theme-summer div.details table.spotinfo td a {color:#ffd54f;}
+body.theme-summer div.details div.description pre {color:#0d47a1;}
+body.theme-summer div.details div.comments h4,
+body.theme-summer div.details div.comments h3 {color:#bf360c; border-color:#64b5f6;}
+body.theme-summer div.details div.comments ul {background-color:#f3e5f5; border-color:#64b5f6;}
+body.theme-summer div.details div.comments ul li {border-color:#64b5f6;}
+body.theme-summer div.details div.comments ul li.even {background-color:#f3e5f5;}
+body.theme-summer div.details div.comments ul li.odd {background-color:#e3f2fd;}
+body.theme-summer div.details div.comments ul li p {color:#ffd54f;}
+body.theme-summer div.details div.comments ul li p.user {color:#1565c0;}
+
+/* QUICKLINKS */
+body.theme-summer div.filter ul.quicklinks li {margin:0 0 2px 0;}
+body.theme-summer div.filter ul.quicklinks li a {color:#0d47a1;}
+
+/* FILTERS */
+body.theme-summer div.filter {background-color:#e3f2fd; border-color:#64b5f6;}
+body.theme-summer div.filter h4 {background-color:#90caf9; border-color:#64b5f6;}
+body.theme-summer div.filter ul.filterlist li {border-color:#64b5f6;}
+body.theme-summer div.filter ul.filterlist li:hover {background-color:#90caf9;}
+body.theme-summer div.filter ul.filterlist li a {color:#0d47a1;}
+body.theme-summer div.filter ul.filterlist li.blue a {color:#ffd54f; font-weight:bold;}
+body.theme-summer div.filter ul.filterlist li.red a {color:#ff5722; font-weight:bold;}
+body.theme-summer div.filter ul.filterlist li.green a {color:#4caf50; font-weight:bold;}
+body.theme-summer div.filter ul.filterlist li.active {background-color:#64b5f6;}
+
+/* PAGING */
+body.theme-summer div.paging a {color:#0d47a1; border-color:#64b5f6;}

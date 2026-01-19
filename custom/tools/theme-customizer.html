@@ -299,6 +299,118 @@
         </div>
         
         <div class="section">
+            <div class="section-title">🔗 Link Colors</div>
+            
+            <div class="color-control">
+                <label class="color-label">Link Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="linkColor" value="#0553a1">
+                    <input type="text" id="linkColorText" value="#0553a1">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Link Hover Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="linkHoverColor" value="#3886d4">
+                    <input type="text" id="linkHoverColorText" value="#3886d4">
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📊 Table Colors</div>
+            
+            <div class="color-control">
+                <label class="color-label">Table Header Background</label>
+                <div class="color-input-group">
+                    <input type="color" id="thBgColor" value="#333333">
+                    <input type="text" id="thBgColorText" value="#333333">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Odd Row Background</label>
+                <div class="color-input-group">
+                    <input type="color" id="oddRowColor" value="#252525">
+                    <input type="text" id="oddRowColorText" value="#252525">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Even Row Background</label>
+                <div class="color-input-group">
+                    <input type="color" id="evenRowColor" value="#1e1e1e">
+                    <input type="text" id="evenRowColorText" value="#1e1e1e">
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">🏷️ Category Colors</div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 0 (Movies)</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat0Color" value="#4da6ff">
+                    <input type="text" id="cat0ColorText" value="#4da6ff">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 1 (Series)</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat1Color" value="#66cc66">
+                    <input type="text" id="cat1ColorText" value="#66cc66">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 2 (Music)</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat2Color" value="#ffcc00">
+                    <input type="text" id="cat2ColorText" value="#ffcc00">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Category 3 (Games)</label>
+                <div class="color-input-group">
+                    <input type="color" id="cat3Color" value="#ff6666">
+                    <input type="text" id="cat3ColorText" value="#ff6666">
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📋 Details Panel</div>
+            
+            <div class="color-control">
+                <label class="color-label">Details Background</label>
+                <div class="color-input-group">
+                    <input type="color" id="detailsBgColor" value="#2d2d2d">
+                    <input type="text" id="detailsBgColorText" value="#2d2d2d">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Details Title Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="detailsTitleColor" value="#e0e0e0">
+                    <input type="text" id="detailsTitleColorText" value="#e0e0e0">
+                </div>
+            </div>
+            
+            <div class="color-control">
+                <label class="color-label">Description Text Color</label>
+                <div class="color-input-group">
+                    <input type="color" id="descriptionColor" value="#e0e0e0">
+                    <input type="text" id="descriptionColorText" value="#e0e0e0">
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
             <div class="section-title">⚙️ Options</div>
             
             <div class="toggle-switch">
@@ -315,6 +427,15 @@
                 <span>Rounded Corners</span>
                 <div class="switch active" id="roundedToggle"></div>
             </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">📂 Import</div>
+            <div class="actions">
+                <input type="file" id="cssFileInput" accept=".css" style="display: none;" onchange="importCSS(event)">
+                <button class="btn-primary" onclick="document.getElementById('cssFileInput').click()">📁 Import CSS File</button>
+            </div>
+            <p style="font-size: 11px; color: #888; margin-top: 8px;">Import a previously exported theme CSS file to continue editing.</p>
         </div>
         
         <div class="section">
@@ -344,32 +465,69 @@
         const presets = [
             { id: 'dark', name: '🌙 Dark', colors: { 
                 bg: '#1e1e1e', text: '#e0e0e0', primary: '#0553a1', secondary: '#2d2d2d', hover: '#333333', border: '#444444',
-                link: '#0553a1', linkHover: '#3886d4', accent: '#0553a1', oddRow: '#252525', thBg: '#333333'
+                link: '#0553a1', linkHover: '#3886d4', accent: '#0553a1', oddRow: '#252525', evenRow: '#1e1e1e', thBg: '#333333',
+                cat0: '#4da6ff', cat1: '#66cc66', cat2: '#ffcc00', cat3: '#ff6666',
+                detailsBg: '#2d2d2d', detailsTitle: '#e0e0e0', description: '#e0e0e0'
             }},
             { id: 'midnight', name: '🌊 Midnight', colors: { 
                 bg: '#0a192f', text: '#ccd6f6', primary: '#64ffda', secondary: '#1d2d50', hover: '#233554', border: '#233554',
-                link: '#64ffda', linkHover: '#8cffee', accent: '#64ffda', oddRow: '#0f2138', thBg: '#1d2d50'
+                link: '#64ffda', linkHover: '#8cffee', accent: '#64ffda', oddRow: '#0f2138', evenRow: '#0a192f', thBg: '#1d2d50',
+                cat0: '#64ffda', cat1: '#ffd700', cat2: '#ff6b6b', cat3: '#a29bfe',
+                detailsBg: '#1d2d50', detailsTitle: '#ccd6f6', description: '#ccd6f6'
             }},
             { id: 'cyberpunk', name: '🎮 Cyberpunk', colors: { 
                 bg: '#0d0221', text: '#00ff41', primary: '#ff006e', secondary: '#1a0b2e', hover: '#2d1b3d', border: '#ff006e',
-                link: '#00d4ff', linkHover: '#00ff41', accent: '#ffbe0b', oddRow: '#120828', thBg: '#2d1b3d'
+                link: '#00d4ff', linkHover: '#00ff41', accent: '#ffbe0b', oddRow: '#120828', evenRow: '#0d0221', thBg: '#2d1b3d',
+                cat0: '#00d4ff', cat1: '#00ff41', cat2: '#ffbe0b', cat3: '#ff006e',
+                detailsBg: '#1a0b2e', detailsTitle: '#00ff41', description: '#00ff41'
             }},
             { id: 'nord', name: '❄️ Nord', colors: { 
                 bg: '#2e3440', text: '#d8dee9', primary: '#88c0d0', secondary: '#3b4252', hover: '#434c5e', border: '#434c5e',
-                link: '#88c0d0', linkHover: '#8fbcbb', accent: '#81a1c1', oddRow: '#353a47', thBg: '#3b4252'
+                link: '#88c0d0', linkHover: '#8fbcbb', accent: '#81a1c1', oddRow: '#353a47', evenRow: '#2e3440', thBg: '#3b4252',
+                cat0: '#88c0d0', cat1: '#a3be8c', cat2: '#ebcb8b', cat3: '#bf616a',
+                detailsBg: '#3b4252', detailsTitle: '#d8dee9', description: '#d8dee9'
             }},
             { id: 'dracula', name: '🧛 Dracula', colors: { 
                 bg: '#282a36', text: '#f8f8f2', primary: '#ff79c6', secondary: '#44475a', hover: '#6272a4', border: '#6272a4',
-                link: '#8be9fd', linkHover: '#50fa7b', accent: '#bd93f9', oddRow: '#21222c', thBg: '#44475a',
-                cat0: '#8be9fd', cat1: '#50fa7b', cat2: '#f1fa8c', cat3: '#ffb86c'
+                link: '#8be9fd', linkHover: '#50fa7b', accent: '#bd93f9', oddRow: '#21222c', evenRow: '#282a36', thBg: '#44475a',
+                cat0: '#8be9fd', cat1: '#50fa7b', cat2: '#f1fa8c', cat3: '#ffb86c',
+                detailsBg: '#44475a', detailsTitle: '#f8f8f2', description: '#f8f8f2'
             }},
             { id: 'forest', name: '🌲 Forest', colors: { 
                 bg: '#1a3a2a', text: '#c9dac8', primary: '#7fbf7f', secondary: '#2d4a3e', hover: '#3a5f4e', border: '#2d4a3e',
-                link: '#7fbf7f', linkHover: '#a4d4a4', accent: '#5a9e5a', oddRow: '#1f3f2f', thBg: '#2d4a3e'
+                link: '#7fbf7f', linkHover: '#a4d4a4', accent: '#5a9e5a', oddRow: '#1f3f2f', evenRow: '#1a3a2a', thBg: '#2d4a3e',
+                cat0: '#7fbf7f', cat1: '#a4d4a4', cat2: '#d4a574', cat3: '#bf7f7f',
+                detailsBg: '#2d4a3e', detailsTitle: '#c9dac8', description: '#c9dac8'
             }},
             { id: 'sunset', name: '🌅 Sunset', colors: { 
                 bg: '#1a1625', text: '#ffd6ba', primary: '#ff9a76', secondary: '#3d1f47', hover: '#5e2750', border: '#5e2750',
-                link: '#ff9a76', linkHover: '#ffb699', accent: '#ffb0a1', oddRow: '#211829', thBg: '#3d1f47'
+                link: '#ff9a76', linkHover: '#ffb699', accent: '#ffb0a1', oddRow: '#211829', evenRow: '#1a1625', thBg: '#3d1f47',
+                cat0: '#ff9a76', cat1: '#ffd700', cat2: '#ff6b9d', cat3: '#a29bfe',
+                detailsBg: '#3d1f47', detailsTitle: '#ffd6ba', description: '#ffd6ba'
+            }},
+            { id: 'spring', name: '🌸 Spring', colors: { 
+                bg: '#e8f5e8', text: '#2e7d32', primary: '#e91e63', secondary: '#c8e6c9', hover: '#a5d6a7', border: '#a5d6a7',
+                link: '#1b5e20', linkHover: '#4caf50', accent: '#e91e63', oddRow: '#f1f8e9', evenRow: '#e8f5e8', thBg: '#c8e6c9',
+                cat0: '#e91e63', cat1: '#4caf50', cat2: '#ffeb3b', cat3: '#ff5722',
+                detailsBg: '#f0f8e7', detailsTitle: '#2e7d32', description: '#2e7d32'
+            }},
+            { id: 'summer', name: '☀️ Summer', colors: { 
+                bg: '#e3f2fd', text: '#0d47a1', primary: '#ffd54f', secondary: '#bbdefb', hover: '#90caf9', border: '#64b5f6',
+                link: '#0d47a1', linkHover: '#42a5f5', accent: '#ffd54f', oddRow: '#f3e5f5', evenRow: '#e3f2fd', thBg: '#90caf9',
+                cat0: '#ffd54f', cat1: '#4caf50', cat2: '#ffeb3b', cat3: '#ff5722',
+                detailsBg: '#e3f2fd', detailsTitle: '#0d47a1', description: '#0d47a1'
+            }},
+            { id: 'autumn', name: '🍂 Autumn', colors: { 
+                bg: '#fff3e0', text: '#bf360c', primary: '#e65100', secondary: '#ffcc80', hover: '#fb8c00', border: '#f57c00',
+                link: '#8d6e63', linkHover: '#fb8c00', accent: '#e65100', oddRow: '#ffe0b2', evenRow: '#fff3e0', thBg: '#fb8c00',
+                cat0: '#e65100', cat1: '#8d6e63', cat2: '#ffa726', cat3: '#d32f2f',
+                detailsBg: '#fff3e0', detailsTitle: '#bf360c', description: '#bf360c'
+            }},
+            { id: 'winter', name: '⛄ Winter', colors: { 
+                bg: '#f5f5f5', text: '#263238', primary: '#00bcd4', secondary: '#e0f2f1', hover: '#b0bec5', border: '#90a4ae',
+                link: '#37474f', linkHover: '#00bcd4', accent: '#00bcd4', oddRow: '#eceff1', evenRow: '#f5f5f5', thBg: '#b0bec5',
+                cat0: '#00bcd4', cat1: '#4db6ac', cat2: '#81d4fa', cat3: '#ef5350',
+                detailsBg: '#f5f5f5', detailsTitle: '#263238', description: '#263238'
             }},
             { id: 'custom', name: '✨ Custom', colors: null }
         ];
@@ -421,23 +579,25 @@
         }
         
         function setupColorInputs() {
-            const colorKeys = ['bg', 'text', 'primary', 'secondary', 'hover', 'border'];
+            const colorKeys = ['bg', 'text', 'primary', 'secondary', 'hover', 'border', 'link', 'linkHover', 'thBg', 'oddRow', 'evenRow', 'cat0', 'cat1', 'cat2', 'cat3', 'detailsBg', 'detailsTitle', 'description'];
             
             colorKeys.forEach(key => {
                 const picker = document.getElementById(key + 'Color');
                 const text = document.getElementById(key + 'ColorText');
                 
-                picker.addEventListener('input', (e) => {
-                    currentColors[key] = e.target.value;
-                    text.value = e.target.value;
-                    updatePreview();
-                });
-                
-                text.addEventListener('input', (e) => {
-                    currentColors[key] = e.target.value;
-                    picker.value = e.target.value;
-                    updatePreview();
-                });
+                if (picker && text) {
+                    picker.addEventListener('input', (e) => {
+                        currentColors[key] = e.target.value;
+                        text.value = e.target.value;
+                        updatePreview();
+                    });
+                    
+                    text.addEventListener('input', (e) => {
+                        currentColors[key] = e.target.value;
+                        picker.value = e.target.value;
+                        updatePreview();
+                    });
+                }
             });
         }
         
@@ -485,61 +645,234 @@
             const glow = useGlow ? `text-shadow: 0 0 10px ${currentColors.primary};` : '';
             const radius = useRounded ? '6px' : '0';
             
+            // Get all color values with fallbacks
+            const link = currentColors.link || currentColors.primary;
+            const linkHover = currentColors.linkHover || adjustBrightness(link, 20);
+            const thBg = currentColors.thBg || currentColors.secondary;
+            const oddRow = currentColors.oddRow || adjustBrightness(currentColors.bg, 5);
+            const evenRow = currentColors.evenRow || currentColors.bg;
+            const cat0 = currentColors.cat0 || '#4da6ff';
+            const cat1 = currentColors.cat1 || '#66cc66';
+            const cat2 = currentColors.cat2 || '#ffcc00';
+            const cat3 = currentColors.cat3 || '#ff6666';
+            const detailsBg = currentColors.detailsBg || currentColors.secondary;
+            const detailsTitle = currentColors.detailsTitle || currentColors.text;
+            const description = currentColors.description || currentColors.text;
+            
             return `
+                * { box-sizing: border-box; }
                 body {
                     background: ${bg};
                     color: ${currentColors.text};
                     font-family: Arial, sans-serif;
-                    padding: 20px;
+                    padding: 15px;
                     margin: 0;
+                    font-size: 13px;
                 }
                 
                 .header {
                     background: ${currentColors.secondary};
-                    padding: 20px;
+                    padding: 15px;
                     border-radius: ${radius};
-                    margin-bottom: 20px;
+                    margin-bottom: 15px;
+                    border: 1px solid ${currentColors.border};
                 }
                 
                 h1 {
                     color: ${currentColors.primary};
                     ${glow}
                     margin: 0;
+                    font-size: 20px;
                 }
                 
+                h2 {
+                    color: ${currentColors.primary};
+                    font-size: 14px;
+                    margin: 15px 0 10px 0;
+                    padding-bottom: 5px;
+                    border-bottom: 2px solid ${currentColors.primary};
+                }
+                
+                /* Links Section */
+                .links-demo {
+                    background: ${currentColors.secondary};
+                    padding: 12px;
+                    border-radius: ${radius};
+                    margin-bottom: 15px;
+                    border: 1px solid ${currentColors.border};
+                }
+                
+                .links-demo a {
+                    color: ${link};
+                    text-decoration: none;
+                    margin-right: 15px;
+                }
+                
+                .links-demo a:hover {
+                    color: ${linkHover};
+                    text-decoration: underline;
+                    ${glow}
+                }
+                
+                .links-demo a.hover-demo {
+                    color: ${linkHover};
+                }
+                
+                /* Table */
                 table {
                     width: 100%;
-                    background: ${currentColors.secondary};
                     border-collapse: collapse;
                     border-radius: ${radius};
                     overflow: hidden;
+                    margin-bottom: 15px;
+                    border: 1px solid ${currentColors.border};
                 }
                 
                 th {
-                    background: ${currentColors.hover};
+                    background: ${thBg};
                     color: ${currentColors.primary};
-                    padding: 12px;
+                    padding: 10px;
                     text-align: left;
                     border-bottom: 2px solid ${currentColors.border};
+                    font-weight: 600;
                 }
                 
                 td {
-                    padding: 12px;
+                    padding: 10px;
                     border-bottom: 1px solid ${currentColors.border};
                     color: ${currentColors.text};
                 }
                 
-                tr:hover {
+                tr.odd { background-color: ${oddRow}; }
+                tr.even { background-color: ${evenRow}; }
+                
+                tr:hover td { background: ${currentColors.hover}; }
+                
+                td a { color: ${link}; text-decoration: none; }
+                td a:hover { color: ${linkHover}; }
+                
+                /* Category Colors */
+                .cat0 { color: ${cat0} !important; font-weight: bold; }
+                .cat1 { color: ${cat1} !important; font-weight: bold; }
+                .cat2 { color: ${cat2} !important; font-weight: bold; }
+                .cat3 { color: ${cat3} !important; font-weight: bold; }
+                
+                /* Category Badges */
+                .category-badges {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 15px;
+                    flex-wrap: wrap;
+                }
+                
+                .badge {
+                    padding: 6px 12px;
+                    border-radius: 4px;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+                
+                .badge.cat0 { background: ${cat0}; color: #fff; }
+                .badge.cat1 { background: ${cat1}; color: #fff; }
+                .badge.cat2 { background: ${cat2}; color: #fff; }
+                .badge.cat3 { background: ${cat3}; color: #fff; }
+                
+                /* Details Panel */
+                .details-panel {
+                    background: ${detailsBg};
+                    border: 2px solid ${currentColors.primary};
+                    border-radius: ${radius};
+                    padding: 15px;
+                    margin-bottom: 15px;
+                }
+                
+                .details-panel h3 {
+                    color: ${detailsTitle};
+                    margin: 0 0 10px 0;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid ${currentColors.border};
+                    font-size: 16px;
+                }
+                
+                .details-panel .description {
+                    color: ${description};
+                    font-size: 12px;
+                    line-height: 1.5;
+                }
+                
+                .details-panel table {
+                    margin: 10px 0;
+                }
+                
+                /* Filters */
+                .filters {
+                    background: ${oddRow};
+                    border: 1px solid ${currentColors.border};
+                    border-radius: ${radius};
+                    padding: 10px;
+                }
+                
+                .filters h4 {
+                    background: ${thBg};
+                    color: ${currentColors.primary};
+                    margin: -10px -10px 10px -10px;
+                    padding: 8px 10px;
+                    font-size: 13px;
+                    border-radius: ${radius} ${radius} 0 0;
+                }
+                
+                .filter-item {
+                    padding: 6px 8px;
+                    border-bottom: 1px solid ${currentColors.border};
+                    cursor: pointer;
+                }
+                
+                .filter-item:hover {
                     background: ${currentColors.hover};
                 }
                 
-                a {
-                    color: ${currentColors.primary};
+                .filter-item a {
+                    color: ${link};
                     text-decoration: none;
                 }
                 
-                a:hover {
-                    ${glow}
+                .filter-item.active {
+                    background: ${currentColors.hover};
+                    border-left: 3px solid ${currentColors.primary};
+                }
+                
+                /* Toolbar */
+                .toolbar-demo {
+                    background: ${currentColors.secondary};
+                    padding: 8px 12px;
+                    border-radius: ${radius};
+                    margin-bottom: 15px;
+                    display: flex;
+                    gap: 15px;
+                    border: 1px solid ${currentColors.border};
+                }
+                
+                .toolbar-btn {
+                    color: ${currentColors.primary};
+                    cursor: pointer;
+                }
+                
+                .toolbar-btn:hover {
+                    color: ${linkHover};
+                }
+                
+                /* Two Column Layout */
+                .two-col {
+                    display: flex;
+                    gap: 15px;
+                }
+                
+                .two-col > div {
+                    flex: 1;
+                }
+                
+                @media (max-width: 600px) {
+                    .two-col { flex-direction: column; }
                 }
             `;
         }
@@ -547,34 +880,107 @@
         function generatePreviewHTML() {
             return `
                 <div class="header">
-                    <h1>Custom Theme Preview</h1>
+                    <h1>🎨 Custom Theme Preview</h1>
                 </div>
+                
+                <div class="toolbar-demo">
+                    <span class="toolbar-btn">🏠 Home</span>
+                    <span class="toolbar-btn">⚙️ Settings</span>
+                    <span class="toolbar-btn">🔔 Notifications</span>
+                    <span class="toolbar-btn">👤 Profile</span>
+                </div>
+                
+                <h2>🔗 Link Colors</h2>
+                <div class="links-demo">
+                    <a href="#">Normal Link</a>
+                    <a href="#" class="hover-demo">Hover Link</a>
+                    <a href="#">Another Link</a>
+                </div>
+                
+                <h2>🏷️ Category Badges</h2>
+                <div class="category-badges">
+                    <span class="badge cat0">Movies</span>
+                    <span class="badge cat1">Series</span>
+                    <span class="badge cat2">Music</span>
+                    <span class="badge cat3">Games</span>
+                </div>
+                
+                <h2>📊 Table with Categories</h2>
                 <table>
                     <thead>
                         <tr>
                             <th>Category</th>
                             <th>Title</th>
+                            <th>Size</th>
                             <th>Date</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Movies</td>
-                            <td><a href="#">Example Movie Title 2024</a></td>
-                            <td>Dec 08, 2025</td>
+                        <tr class="odd">
+                            <td class="cat0">Movies</td>
+                            <td><a href="#">Example Movie Title 2024 BluRay</a></td>
+                            <td>4.2 GB</td>
+                            <td>Jan 02, 2026</td>
                         </tr>
-                        <tr>
-                            <td>TV</td>
-                            <td><a href="#">TV Show S01E01</a></td>
-                            <td>Dec 08, 2025</td>
+                        <tr class="even">
+                            <td class="cat1">Series</td>
+                            <td><a href="#">TV Show S01E01 720p</a></td>
+                            <td>1.1 GB</td>
+                            <td>Jan 01, 2026</td>
                         </tr>
-                        <tr>
-                            <td>Music</td>
-                            <td><a href="#">Album Name - Artist</a></td>
-                            <td>Dec 08, 2025</td>
+                        <tr class="odd">
+                            <td class="cat2">Music</td>
+                            <td><a href="#">Album Name - Artist FLAC</a></td>
+                            <td>450 MB</td>
+                            <td>Dec 31, 2025</td>
+                        </tr>
+                        <tr class="even">
+                            <td class="cat3">Games</td>
+                            <td><a href="#">Game Title Deluxe Edition</a></td>
+                            <td>25 GB</td>
+                            <td>Dec 30, 2025</td>
                         </tr>
                     </tbody>
                 </table>
+                
+                <div class="two-col">
+                    <div>
+                        <h2>📋 Details Panel</h2>
+                        <div class="details-panel">
+                            <h3>Example Movie Title 2024</h3>
+                            <table>
+                                <tr class="odd">
+                                    <th>Category</th>
+                                    <td class="cat0">Movies</td>
+                                </tr>
+                                <tr class="even">
+                                    <th>Size</th>
+                                    <td>4.2 GB</td>
+                                </tr>
+                                <tr class="odd">
+                                    <th>Posted</th>
+                                    <td>Jan 02, 2026</td>
+                                </tr>
+                            </table>
+                            <div class="description">
+                                This is the description text area. It shows how the description color appears in the details panel. 
+                                You can customize this color separately from the main text color to improve readability.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h2>🔍 Filters</h2>
+                        <div class="filters">
+                            <h4>Categories</h4>
+                            <div class="filter-item active"><a href="#">All Categories</a></div>
+                            <div class="filter-item"><a href="#">Movies</a></div>
+                            <div class="filter-item"><a href="#">Series</a></div>
+                            <div class="filter-item"><a href="#">Music</a></div>
+                            <div class="filter-item"><a href="#">Games</a></div>
+                        </div>
+                    </div>
+                </div>
             `;
         }
         
@@ -585,13 +991,19 @@
             const linkHover = currentColors.linkHover || adjustBrightness(link, 20);
             const accent = currentColors.accent || currentColors.primary;
             const oddRow = currentColors.oddRow || adjustBrightness(currentColors.bg, 5);
+            const evenRow = currentColors.evenRow || currentColors.bg;
             const thBg = currentColors.thBg || currentColors.secondary;
             
-            // Category colors - use specific ones if available (like Dracula), otherwise derive
+            // Category colors - use specific ones if available, otherwise derive
             const cat0 = currentColors.cat0 || adjustHue(currentColors.primary, 0);
             const cat1 = currentColors.cat1 || adjustHue(currentColors.primary, 30);
             const cat2 = currentColors.cat2 || adjustHue(currentColors.primary, 60);
             const cat3 = currentColors.cat3 || adjustHue(currentColors.primary, 90);
+            
+            // Details panel colors
+            const detailsBg = currentColors.detailsBg || currentColors.secondary;
+            const detailsTitle = currentColors.detailsTitle || currentColors.text;
+            const description = currentColors.description || currentColors.text;
             
             const bgGradient = useGradients ? 
                 `linear-gradient(135deg, ${currentColors.bg} 0%, ${adjustBrightness(currentColors.bg, 15)} 50%, ${adjustBrightness(currentColors.bg, 25)} 100%)` : 
@@ -715,7 +1127,7 @@ body.theme-${themeName} table.spots th.sorted a {
 }
 
 body.theme-${themeName} table.spots tr.even {
-    background-color: ${currentColors.bg};
+    background-color: ${evenRow};
 }
 
 body.theme-${themeName} table.spots tr.odd {
@@ -763,7 +1175,7 @@ body.theme-${themeName} table.spots tr.spotcat3 td.category {
 
 /* DETAILS PANEL */
 body.theme-${themeName} div.details {
-    background-color: ${currentColors.bg};
+    background-color: ${detailsBg};
     border: 2px solid ${currentColors.primary};
     ${boxGlow}
 }
@@ -778,7 +1190,7 @@ body.theme-${themeName} div.details a.closeDetails:hover {
 }
 
 body.theme-${themeName} div.details div.spotinfo h1 {
-    color: ${adjustBrightness(currentColors.primary, 15)};
+    color: ${detailsTitle};
     border-bottom: 2px solid ${hexToRgba(currentColors.primary, 0.3)};
     ${glow}
 }
@@ -793,6 +1205,10 @@ body.theme-${themeName} div.details table td {
     color: ${currentColors.text};
     background-color: ${oddRow};
     border-color: ${hexToRgba(currentColors.primary, 0.1)};
+}
+
+body.theme-${themeName} div.details div.description pre {
+    color: ${description};
 }
 
 /* FILTERS */
@@ -906,6 +1322,106 @@ body.theme-${themeName} input[type="submit"]:hover {
             a.href = url;
             a.download = 'theme-' + sanitizedName + '.css';
             a.click();
+        }
+        
+        function importCSS(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const css = e.target.result;
+                parseAndApplyCSS(css);
+            };
+            reader.readAsText(file);
+            
+            // Reset file input so same file can be imported again
+            event.target.value = '';
+        }
+        
+        function parseAndApplyCSS(css) {
+            // Color mapping: CSS property patterns to our color keys
+            const colorMappings = [
+                // :root CSS variables
+                { pattern: /--color-bg:\s*(#[0-9a-fA-F]{6})/i, key: 'bg' },
+                { pattern: /--color-text:\s*(#[0-9a-fA-F]{6})/i, key: 'text' },
+                { pattern: /--color-accent:\s*(#[0-9a-fA-F]{6})/i, key: 'primary' },
+                { pattern: /--color-surface:\s*(#[0-9a-fA-F]{6})/i, key: 'oddRow' },
+                { pattern: /--color-surface-2:\s*(#[0-9a-fA-F]{6})/i, key: 'thBg' },
+                { pattern: /--sw-cat0:\s*(#[0-9a-fA-F]{6})/i, key: 'cat0' },
+                { pattern: /--sw-cat1:\s*(#[0-9a-fA-F]{6})/i, key: 'cat1' },
+                { pattern: /--sw-cat2:\s*(#[0-9a-fA-F]{6})/i, key: 'cat2' },
+                { pattern: /--sw-cat3:\s*(#[0-9a-fA-F]{6})/i, key: 'cat3' },
+                
+                // Body background
+                { pattern: /body[^{]*\{[^}]*background:\s*(#[0-9a-fA-F]{6})/i, key: 'bg' },
+                { pattern: /body[^{]*\{[^}]*color:\s*(#[0-9a-fA-F]{6})/i, key: 'text' },
+                
+                // Links
+                { pattern: /a:link[^{]*\{[^}]*color:\s*(#[0-9a-fA-F]{6})/i, key: 'link' },
+                { pattern: /a:hover[^{]*\{[^}]*color:\s*(#[0-9a-fA-F]{6})/i, key: 'linkHover' },
+                
+                // Table
+                { pattern: /table\.spots\s+th[^{]*\{[^}]*background[^:]*:\s*(#[0-9a-fA-F]{6})/i, key: 'thBg' },
+                { pattern: /tr\.odd[^{]*\{[^}]*background[^:]*:\s*(#[0-9a-fA-F]{6})/i, key: 'oddRow' },
+                { pattern: /tr\.even[^{]*\{[^}]*background[^:]*:\s*(#[0-9a-fA-F]{6})/i, key: 'evenRow' },
+                { pattern: /tr:hover[^{]*\{[^}]*background[^:]*:\s*(#[0-9a-fA-F]{6})/i, key: 'hover' },
+                
+                // Details panel
+                { pattern: /div\.details[^{]*\{[^}]*background[^:]*:\s*(#[0-9a-fA-F]{6})/i, key: 'detailsBg' },
+                { pattern: /div\.details[^}]*spotinfo\s+h1[^{]*\{[^}]*color:\s*(#[0-9a-fA-F]{6})/i, key: 'detailsTitle' },
+                
+                // Logo/primary
+                { pattern: /div\.logo\s+h1\s+a[^{]*\{[^}]*color:\s*(#[0-9a-fA-F]{6})/i, key: 'primary' },
+                
+                // Secondary/toolbar
+                { pattern: /div#toolbar[^{]*\{[^}]*background:\s*(#[0-9a-fA-F]{6})/i, key: 'secondary' },
+                
+                // Border
+                { pattern: /border[^:]*:\s*\d+px\s+solid\s+(#[0-9a-fA-F]{6})/i, key: 'border' },
+            ];
+            
+            const extractedColors = {};
+            
+            // Extract colors from CSS
+            colorMappings.forEach(mapping => {
+                const match = css.match(mapping.pattern);
+                if (match && match[1]) {
+                    extractedColors[mapping.key] = match[1].toLowerCase();
+                }
+            });
+            
+            // Check if we found any colors
+            if (Object.keys(extractedColors).length === 0) {
+                alert('⚠️ Could not extract colors from CSS file.\nMake sure you are importing a theme file exported from this customizer.');
+                return;
+            }
+            
+            // Merge extracted colors with current colors (only override what was found)
+            Object.keys(extractedColors).forEach(key => {
+                currentColors[key] = extractedColors[key];
+            });
+            
+            // Update all color pickers
+            const colorKeys = ['bg', 'text', 'primary', 'secondary', 'hover', 'border', 'link', 'linkHover', 'thBg', 'oddRow', 'evenRow', 'cat0', 'cat1', 'cat2', 'cat3', 'detailsBg', 'detailsTitle', 'description'];
+            colorKeys.forEach(key => {
+                const picker = document.getElementById(key + 'Color');
+                const text = document.getElementById(key + 'ColorText');
+                if (picker && text && currentColors[key]) {
+                    picker.value = currentColors[key];
+                    text.value = currentColors[key];
+                }
+            });
+            
+            // Clear active preset button
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Update preview
+            updatePreview();
+            
+            alert('✓ Theme imported successfully!\n' + Object.keys(extractedColors).length + ' colors extracted.');
         }
         
         function copyToClipboard() {

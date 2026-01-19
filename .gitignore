@@ -36,4 +36,5 @@ Temporary Items
 *.tmp
 *.bak
 *.backup
+custom.code-workspace
 spotweb-1.code-workspace

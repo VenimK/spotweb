@@ -1,0 +1,109 @@
+/* SPRING THEME FOR SPOTWEB */
+/* Fresh greens and soft pastels */
+
+:root[data-sw-theme="spring"] {
+  --color-surface: #f0f8e7;
+  --color-surface-2: #e8f5e8;
+  --color-border: #c8e6c9;
+  --color-text: #2e7d32;
+  --color-bg: #e8f5e8;
+  --color-muted: #558b2f;
+  --color-accent: #e91e63;
+  --sw-strip-gradient: linear-gradient(120deg, #e8f5e8, #f1f8e9);
+  --sw-strip-border: #c8e6c9;
+  --sw-strip-text: #2e7d32;
+
+  --sw-cat0: #e91e63;
+  --sw-cat1: #4caf50;
+  --sw-cat2: #ffeb3b;
+  --sw-cat3: #ff5722;
+}
+
+/* GENERAL */
+body.theme-spring {background-color:#e8f5e8; color:#2e7d32;}
+body.theme-spring a:visited,
+body.theme-spring a:link {color:#1b5e20;}
+body.theme-spring a:hover {color:#4caf50; text-decoration:underline;}
+
+/* HEADER */
+body.theme-spring div.container {background:transparent;}
+body.theme-spring div.logo h1 a {color:#2e7d32;}
+body.theme-spring div.filter h4 {color:#2e7d32;}
+
+/* MENU */
+body.theme-spring ul.mainmenu li a {color:#2e7d32;}
+body.theme-spring ul.mainmenu li:hover {background-color:#c8e6c9;}
+body.theme-spring ul.mainmenu li.active {background-color:#a5d6a7;}
+
+/* TOOLBAR */
+body.theme-spring div#toolbar {background-color:#c8e6c9; border-color:#a5d6a7;}
+body.theme-spring div.notifications,
+body.theme-spring div.toolbarButton {border-right-color:#a5d6a7;}
+body.theme-spring div.toolbarButton:hover {background-color:#a5d6a7;}
+body.theme-spring div.toolbarButton p a {color:#2e7d32;}
+
+/* SPOTS LIST */
+body.theme-spring table.spots {background-color:#f0f8e7; border-color:#a5d6a7;}
+body.theme-spring table.spots th {background-color:#c8e6c9; color:#2e7d32; border-color:#a5d6a7;}
+body.theme-spring table.spots th a {color:#2e7d32;}
+body.theme-spring table.spots th.sorted a {color:#e91e63;}
+body.theme-spring table.spots tr.even {background-color:#f1f8e9;}
+body.theme-spring table.spots tr.odd {background-color:#f0f8e7;}
+body.theme-spring table.spots tr:hover {background-color:#c8e6c9;}
+body.theme-spring table.spots tr.active {background-color:#a5d6a7;}
+body.theme-spring table.spots tr.active td,
+body.theme-spring table.spots tr.active td a {color:#2e7d32;}
+body.theme-spring table.spots td {color:#2e7d32; border-color:#a5d6a7;}
+body.theme-spring table.spots td a {color:#388e3c;}
+body.theme-spring table.spots td.category {color:#2e7d32;}
+
+/* SPOT CATEGORIES */
+body.theme-spring table.spots tr.spotcat0 td {background-color:#f1f8e9;}
+body.theme-spring table.spots tr.spotcat1 td {background-color:#f1f8e9;}
+body.theme-spring table.spots tr.spotcat2 td {background-color:#f1f8e9;}
+body.theme-spring table.spots tr.spotcat3 td {background-color:#f1f8e9;}
+body.theme-spring table.spots tr.spotcat0 td.category {color:#e91e63;}
+body.theme-spring table.spots tr.spotcat1 td.category {color:#4caf50;}
+body.theme-spring table.spots tr.spotcat2 td.category {color:#ffeb3b;}
+body.theme-spring table.spots tr.spotcat3 td.category {color:#ff5722;}
+body.theme-spring table.spots tr.spam td {background-color:#f1f8e9;}
+body.theme-spring table.spots tr.spam td.title a {color:#999; text-decoration:line-through;}
+
+/* SPOT DETAILS */
+body.theme-spring div.details {background-color:#f0f8e7; border-color:#a5d6a7;}
+body.theme-spring div.details a.closeDetails {background-color:#c8e6c9;}
+body.theme-spring div.details a.closeDetails:hover {background-color:#a5d6a7;}
+body.theme-spring div.details div.spotinfo h1 {color:#2e7d32; border-bottom-color:#a5d6a7;}
+body.theme-spring div.details table.spotheader th,
+body.theme-spring div.details table.spotinfo th {color:#2e7d32; background-color:#c8e6c9; border-color:#a5d6a7;}
+body.theme-spring div.details table.spotheader td,
+body.theme-spring div.details table.spotinfo td {color:#2e7d32; background-color:#f1f8e9; border-color:#a5d6a7;}
+body.theme-spring div.details table.spotheader td a,
+body.theme-spring div.details table.spotinfo td a {color:#e91e63;}
+body.theme-spring div.details div.description pre {color:#2e7d32;}
+body.theme-spring div.details div.comments h4,
+body.theme-spring div.details div.comments h3 {color:#c21807; border-color:#a5d6a7;}
+body.theme-spring div.details div.comments ul {background-color:#f1f8e9; border-color:#a5d6a7;}
+body.theme-spring div.details div.comments ul li {border-color:#a5d6a7;}
+body.theme-spring div.details div.comments ul li.even {background-color:#f1f8e9;}
+body.theme-spring div.details div.comments ul li.odd {background-color:#f0f8e7;}
+body.theme-spring div.details div.comments ul li p {color:#e91e63;}
+body.theme-spring div.details div.comments ul li p.user {color:#558b2f;}
+
+/* QUICKLINKS */
+body.theme-spring div.filter ul.quicklinks li {margin:0 0 2px 0;}
+body.theme-spring div.filter ul.quicklinks li a {color:#2e7d32;}
+
+/* FILTERS */
+body.theme-spring div.filter {background-color:#f0f8e7; border-color:#a5d6a7;}
+body.theme-spring div.filter h4 {background-color:#c8e6c9; border-color:#a5d6a7;}
+body.theme-spring div.filter ul.filterlist li {border-color:#a5d6a7;}
+body.theme-spring div.filter ul.filterlist li:hover {background-color:#c8e6c9;}
+body.theme-spring div.filter ul.filterlist li a {color:#2e7d32;}
+body.theme-spring div.filter ul.filterlist li.blue a {color:#e91e63; font-weight:bold;}
+body.theme-spring div.filter ul.filterlist li.red a {color:#ff5722; font-weight:bold;}
+body.theme-spring div.filter ul.filterlist li.green a {color:#4caf50; font-weight:bold;}
+body.theme-spring div.filter ul.filterlist li.active {background-color:#a5d6a7;}
+
+/* PAGING */
+body.theme-spring div.paging a {color:#2e7d32; border-color:#a5d6a7;}

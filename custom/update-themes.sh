@@ -41,7 +41,7 @@ fi
 echo ""
 echo "⬇️  Downloading latest preinstalled themes..."
 cd "${CUSTOM_DIR}/themes/preinstalled"
-for theme in dark midnight-ocean cyberpunk nord dracula forest sunset; do
+for theme in dark midnight-ocean cyberpunk nord dracula forest sunset spring summer autumn winter; do
     echo "  → theme-${theme}.css"
     curl -fsSL "${GITHUB_REPO}/custom/themes/preinstalled/theme-${theme}.css" -o "theme-${theme}.css"
 done

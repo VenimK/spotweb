@@ -742,8 +742,8 @@ mkdir -p "${SPOTWEB_DIR}/custom/includes"
 
 # Download theme files from GitHub based on selection
 if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
-    # Download all 7 theme CSS files to custom/themes/preinstalled/
-    themes=("dark" "midnight-ocean" "cyberpunk" "nord" "dracula" "forest" "sunset")
+    # Download all 11 theme CSS files to custom/themes/preinstalled/
+    themes=("dark" "midnight-ocean" "cyberpunk" "nord" "dracula" "forest" "sunset" "spring" "summer" "autumn" "winter")
     for theme in "${themes[@]}"; do
         echo "  → Downloading theme-${theme}.css"
         curl -fsSL "${GITHUB_REPO}/custom/themes/preinstalled/theme-${theme}.css" \
