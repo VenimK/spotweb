@@ -357,6 +357,19 @@ NC='\033[0m'
 
 print_success() { echo -e "${GREEN}✓ $1${NC}"; }
 print_info() { echo -e "${BLUE}ℹ $1${NC}"; }
+
+# Fix retrieve.php variable scope issue after Spotweb installation
+fix_retrieve_php() {
+    if [ -f "/var/www/html/spotweb/retrieve.php" ]; then
+        # Check if fix is already applied
+        if ! grep -q "^\$retriever = null;" /var/www/html/spotweb/retrieve.php; then
+            sed -i '/^try {/i\$retriever = null;\n' /var/www/html/spotweb/retrieve.php
+            print_success "Fixed retrieve.php variable scope issue"
+        else
+            print_info "retrieve.php already fixed"
+        fi
+    fi
+}
 print_warning() { echo -e "${YELLOW}⚠ $1${NC}"; }
 
 SPOTWEB_DIR="/var/www/html/spotweb"
@@ -678,6 +691,9 @@ echo "  Password: ${DB_PASS}"
 echo ""
 echo -e "${BLUE}Credentials saved to: /root/spotweb-credentials.txt${NC}"
 echo ""
+
+# Fix retrieve.php variable scope issue
+fix_retrieve_php
 
 INSTALLER_SCRIPT
 
