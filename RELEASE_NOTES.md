@@ -1,5 +1,12 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.11 — Fix Windows PATH explosion
+
+- Stop duplicating `$env:Path` on every Refresh-Path call (caused "environment variable is too long")
+- Deduplicate PATH entries; prepend portable PHP safely
+
+---
+
 ## v2.2.10 — Existing spotweb database handling
 
 - Detect existing MySQL/MariaDB database named `spotweb`

@@ -1,4 +1,4 @@
-﻿# Spotweb Windows Installer v2.2.10 (Windows PowerShell 5.1 compatible)
+﻿# Spotweb Windows Installer v2.2.11 (Windows PowerShell 5.1 compatible)
 <#
 .SYNOPSIS
   Install Spotweb + VenimK theme pack on Windows (PowerShell).
@@ -92,25 +92,58 @@ function Install-WingetPackage([string]$Id, [string]$DisplayName) {
   return $false
 }
 
+function Get-PathParts([string]$PathValue) {
+  if ([string]::IsNullOrWhiteSpace($PathValue)) { return @() }
+  return @(
+    $PathValue.Split(';') |
+      ForEach-Object { $_.Trim() } |
+      Where-Object { $_ -ne '' }
+  )
+}
+
 function Refresh-Path {
+  # IMPORTANT: do NOT append current $env:Path (that duplicates forever and hits Windows PATH limits)
   $machine = [Environment]::GetEnvironmentVariable('Path', 'Machine')
   $user = [Environment]::GetEnvironmentVariable('Path', 'User')
-  $env:Path = @($machine, $user, $env:Path) -join ';'
+  $parts = @(Get-PathParts $machine) + @(Get-PathParts $user)
+  # de-dupe while preserving order
+  $seen = @{}
+  $out = New-Object System.Collections.Generic.List[string]
+  foreach ($p in $parts) {
+    $key = $p.ToLowerInvariant()
+    if ($seen.ContainsKey($key)) { continue }
+    $seen[$key] = $true
+    $out.Add($p)
+  }
+  $env:Path = ($out -join ';')
+}
+
+function Prepend-SessionPath([string]$Dir) {
+  if ([string]::IsNullOrWhiteSpace($Dir)) { return }
+  $parts = @(Get-PathParts $env:Path) | Where-Object { $_.ToLowerInvariant() -ne $Dir.ToLowerInvariant() }
+  $env:Path = (@($Dir) + $parts) -join ';'
 }
 
 function Add-ToUserPath([string]$Dir) {
   if (-not (Test-Path -LiteralPath $Dir)) { return }
   $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
-  $parts = @()
-  if ($userPath) { $parts = $userPath.Split(';') | Where-Object { $_ -and $_.Trim() -ne '' } }
-  if ($parts -contains $Dir) {
-    Refresh-Path
-    return
+  $parts = @(Get-PathParts $userPath)
+  $exists = $false
+  foreach ($p in $parts) {
+    if ($p.ToLowerInvariant() -eq $Dir.ToLowerInvariant()) { $exists = $true; break }
   }
-  $newPath = if ($userPath) { "$userPath;$Dir" } else { $Dir }
-  [Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
-  $env:Path = "$env:Path;$Dir"
-  Write-Ok "Added to user PATH: $Dir"
+  if (-not $exists) {
+    $parts = $parts + @($Dir)
+    $newPath = ($parts -join ';')
+    if ($newPath.Length -gt 8192) {
+      Write-WarnMsg "User PATH is very long ($($newPath.Length) chars); not modifying permanent User PATH"
+    } else {
+      [Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
+      Write-Ok "Added to user PATH: $Dir"
+    }
+  }
+  Refresh-Path
+  Prepend-SessionPath $Dir
 }
 
 function Resolve-Php {
@@ -118,7 +151,7 @@ function Resolve-Php {
   # Prefer our portable build over any older WinGet PHP earlier on PATH
   $portable = Join-Path $env:LOCALAPPDATA 'SpotwebTools\php\php.exe'
   if (Test-Path -LiteralPath $portable) {
-    $env:Path = "$(Split-Path -Parent $portable);" + $env:Path
+    Prepend-SessionPath (Split-Path -Parent $portable)
     return $portable
   }
 
@@ -195,8 +228,7 @@ function Install-PhpPortable {
   $phpExe = Join-Path $targetRoot 'php.exe'
   if ((-not $Force) -and (Test-Path -LiteralPath $phpExe) -and (Test-PhpUsable $phpExe)) {
     Add-ToUserPath $targetRoot
-    # Put portable PHP first on this session PATH
-    $env:Path = "$targetRoot;" + $env:Path
+    Prepend-SessionPath $targetRoot
     Write-Ok "Using existing portable PHP: $phpExe"
     return $phpExe
   }
@@ -254,10 +286,10 @@ function Install-PhpPortable {
   }
 
   Add-ToUserPath $targetRoot
-  $env:Path = "$targetRoot;" + $env:Path
+  Prepend-SessionPath $targetRoot
   Write-Ok "Portable PHP installed: $phpExe"
 
-  # php.ini-development has extensions commented out — enable before usability checks
+  # php.ini-development has extensions commented out - enable before usability checks
   Enable-PhpExtensions -PhpBin $phpExe
   return $phpExe
 }
@@ -266,7 +298,7 @@ function Ensure-PhpInstalled {
   # Prefer Spotweb portable PHP first (avoid stale WinGet 8.1 earlier on PATH)
   $portablePath = Join-Path $env:LOCALAPPDATA 'SpotwebTools\php\php.exe'
   if (Test-Path -LiteralPath $portablePath) {
-    $env:Path = "$(Split-Path -Parent $portablePath);" + $env:Path
+    Prepend-SessionPath (Split-Path -Parent $portablePath)
     Enable-PhpExtensions -PhpBin $portablePath
     if (Test-PhpUsable $portablePath) {
       Write-Ok "Using portable PHP: $portablePath ($(Get-PhpVersion $portablePath))"
@@ -303,7 +335,7 @@ function Ensure-PhpInstalled {
     if (Install-WingetPackage -Id $id -DisplayName "PHP ($id)") {
       # Prefer newly installed package paths over old 8.1
       Refresh-Path
-      $env:Path = "$(Join-Path $env:LOCALAPPDATA 'SpotwebTools\php');" + $env:Path
+      Prepend-SessionPath (Join-Path $env:LOCALAPPDATA 'SpotwebTools\php')
       $php = Resolve-Php
       if ($php -and $php -like '*PHP.PHP.8.1*') {
         # Explicitly ignore known-bad WinGet 8.1 package
