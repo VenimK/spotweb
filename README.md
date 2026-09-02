@@ -101,7 +101,23 @@ curl -fsSL https://raw.githubusercontent.com/VenimK/spotweb/themes-only/apply-sp
 bash /tmp/apply-spotweb-overlays.sh "$HOME/Sites/spotweb"
 ```
 
-### Option 3: Add to Existing Spotweb
+### Option 3: Native Windows (PowerShell)
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/VenimK/spotweb/themes-only/install-windows.ps1 -OutFile install-windows.ps1
+.\install-windows.ps1
+```
+
+Start Spotweb afterwards:
+
+```powershell
+cd $env:USERPROFILE\Spotweb
+.\Start-Spotweb.ps1
+# http://127.0.0.1:9999/
+```
+
+### Option 4: Add to Existing Spotweb
 
 Already have Spotweb? See **[MIGRATION-GUIDE.md](MIGRATION-GUIDE.md)** for installation steps.
 

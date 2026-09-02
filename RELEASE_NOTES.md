@@ -1,5 +1,18 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.0 — Windows PowerShell installer
+
+### Added
+- **`install-windows.ps1`** — native Windows installer (winget for Git/PHP/MariaDB when available, theme pack, overlays, DB init)
+- **`apply-spotweb-overlays.ps1`** — Windows overlay applier (zip download from themes-only)
+- **`Start-Spotweb.ps1`** — start PHP built-in server with `router.php` on port 9999
+
+### Notes
+- Prefer IIS + PHP FastCGI or Apache for production; `php -S` is for local use
+- Ensure MariaDB/MySQL service is running before DB setup completes
+
+---
+
 ## v2.1.0 — Spotweb overlays (NZB panel, modern UX, macOS router)
 
 ### Added
