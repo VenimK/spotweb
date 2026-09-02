@@ -1,4 +1,4 @@
-﻿# Spotweb Windows Installer v2.2.9 (Windows PowerShell 5.1 compatible)
+﻿# Spotweb Windows Installer v2.2.10 (Windows PowerShell 5.1 compatible)
 <#
 .SYNOPSIS
   Install Spotweb + VenimK theme pack on Windows (PowerShell).
@@ -30,6 +30,8 @@ param(
   [ValidateSet('master', 'develop')]
   [string]$SpotwebBranch = 'master',
   [int]$Port = 9999,
+  [ValidateSet('ask', 'reuse', 'wipe', 'create')]
+  [string]$DbAction = 'ask',
   [switch]$SkipPackageInstall,
   [switch]$NonInteractive
 )
@@ -737,6 +739,7 @@ UPDATE usersettings SET otherprefs = REPLACE(otherprefs, 's:6:"modern"', 's:6:"w
 }
 
 # -------------------- main --------------------
+$ResetAdminPassword = $true
 Write-Host ""
 Write-Host "Spotweb Windows Installer (PowerShell)" -ForegroundColor Green
 Write-Host "======================================"
@@ -856,9 +859,101 @@ if (-not (Wait-MysqlReady -MysqlBin $MysqlBin -Password $rootPass -Tries 30 -Del
   Die "Cannot connect to MariaDB/MySQL on 127.0.0.1 (is the service running?)"
 }
 
-Write-Info "Creating database and user..."
+function Test-MysqlDatabaseExists([string]$MysqlBin, [string]$Password, [string]$Name) {
+  $args = @('-h127.0.0.1', '-uroot')
+  if (-not [string]::IsNullOrEmpty($Password)) { $args += "-p$Password" }
+  $args += @('-N', '-e', "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='$Name';")
+  $oldEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $out = & $MysqlBin @args 2>&1
+    $code = $LASTEXITCODE
+  } finally { $ErrorActionPreference = $oldEap }
+  if ($code -ne 0) { return $false }
+  return (("$out".Trim()) -eq '1')
+}
+
+function Get-SpotwebTableCount([string]$MysqlBin, [string]$Password, [string]$Name) {
+  $args = @('-h127.0.0.1', '-uroot')
+  if (-not [string]::IsNullOrEmpty($Password)) { $args += "-p$Password" }
+  $args += @('-N', '-e', "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA='$Name' AND TABLE_NAME IN ('spots','users','settings','usersettings');")
+  $oldEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $out = & $MysqlBin @args 2>&1
+    $code = $LASTEXITCODE
+  } finally { $ErrorActionPreference = $oldEap }
+  if ($code -ne 0) { return 0 }
+  $n = 0
+  [void][int]::TryParse(("$out".Trim()), [ref]$n)
+  return $n
+}
+
+function Resolve-DatabaseAction {
+  param(
+    [string]$MysqlBin,
+    [string]$Password,
+    [string]$Name,
+    [string]$Action
+  )
+  # Note: Spotweb uses a DATABASE named spotweb with many tables (spots, users, settings...).
+  # A single TABLE named spotweb is unrelated and is ignored by this installer.
+  if (-not (Test-MysqlDatabaseExists -MysqlBin $MysqlBin -Password $Password -Name $Name)) {
+    return @{ Action = 'create'; Name = $Name; ResetAdmin = $true }
+  }
+
+  $spotTables = Get-SpotwebTableCount -MysqlBin $MysqlBin -Password $Password -Name $Name
+  Write-WarnMsg "MySQL/MariaDB database '$Name' already exists (Spotweb core tables found: $spotTables / 4)."
+
+  $choice = $Action
+  if ($choice -eq 'ask') {
+    if ($NonInteractive) {
+      $choice = 'reuse'
+      Write-WarnMsg "NonInteractive mode: reusing existing database '$Name'"
+    } else {
+      Write-Host ""
+      Write-Host "Existing database options:"
+      Write-Host "  1) Reuse existing database (run schema upgrade; keep data)"
+      Write-Host "  2) Wipe database (DROP + recreate - DESTROYS all data in '$Name')"
+      Write-Host "  3) Use a different database name"
+      $sel = Read-Default "Select database action" '1'
+      switch ($sel) {
+        '2' { $choice = 'wipe' }
+        '3' { $choice = 'create'; $Name = Read-Default "New database name" ($Name + '_new'); }
+        default { $choice = 'reuse' }
+      }
+    }
+  }
+
+  $resetAdmin = $true
+  if ($choice -eq 'reuse') {
+    if (-not $NonInteractive) {
+      $ans = Read-Default "Reset admin password to 'spotweb'?" 'Y'
+      if ($ans -match '^(n|no)$') { $resetAdmin = $false }
+    }
+  }
+
+  return @{ Action = $choice; Name = $Name; ResetAdmin = $resetAdmin }
+}
+
+Write-Info "Preparing database and user..."
 try {
-  Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "CREATE DATABASE IF NOT EXISTS ``$DbName`` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+  $dbPlan = Resolve-DatabaseAction -MysqlBin $MysqlBin -Password $rootPass -Name $DbName -Action $DbAction
+  $DbName = $dbPlan.Name
+  $script:ResetAdminPassword = [bool]$dbPlan.ResetAdmin
+
+  if ($dbPlan.Action -eq 'wipe') {
+    Write-WarnMsg "Dropping database '$DbName'..."
+    Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "DROP DATABASE IF EXISTS ``$DbName``;"
+  }
+
+  if ($dbPlan.Action -eq 'wipe' -or $dbPlan.Action -eq 'create' -or -not (Test-MysqlDatabaseExists -MysqlBin $MysqlBin -Password $rootPass -Name $DbName)) {
+    Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "CREATE DATABASE IF NOT EXISTS ``$DbName`` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+    Write-Ok "Database ready: $DbName"
+  } else {
+    Write-Ok "Reusing existing database: $DbName"
+  }
+
   # Create user for both localhost and 127.0.0.1 (Windows auth quirks)
   foreach ($hostName in @('localhost', '127.0.0.1')) {
     try { Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "CREATE USER IF NOT EXISTS '$DbUser'@'$hostName' IDENTIFIED BY '$DbPass';" } catch { }
@@ -866,7 +961,7 @@ try {
     Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "GRANT ALL PRIVILEGES ON ``$DbName``.* TO '$DbUser'@'$hostName';"
   }
   Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "FLUSH PRIVILEGES;"
-  Write-Ok "Database configured"
+  Write-Ok "Database user configured"
 } catch {
   Die "Database setup failed: $($_.Exception.Message). Check root password / that MariaDB is running."
 }
@@ -891,9 +986,13 @@ Write-Info "Initializing Spotweb database schema..."
 if ($LASTEXITCODE -ne 0) { Die "upgrade-db.php failed" }
 Write-Ok "Database initialized"
 
-Write-Info "Setting admin password (default: spotweb)..."
-& $PhpBin (Join-Path $SpotwebDir 'bin\upgrade-db.php') '--reset-password' 'admin'
-Write-Ok "Admin password set"
+if ($ResetAdminPassword) {
+  Write-Info "Setting admin password (default: spotweb)..."
+  & $PhpBin (Join-Path $SpotwebDir 'bin\upgrade-db.php') '--reset-password' 'admin'
+  Write-Ok "Admin password set"
+} else {
+  Write-WarnMsg "Skipped admin password reset (existing database reused)"
+}
 
 if ($SpotwebBranch -eq 'master') {
   Ensure-MasterTemplateCompat -MysqlBin $MysqlBin -Name $DbName -User $DbUser -Pass $DbPass

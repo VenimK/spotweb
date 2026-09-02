@@ -130,6 +130,15 @@ cd $env:USERPROFILE\Spotweb
 # http://127.0.0.1:9999/
 ```
 
+### Existing MySQL database named `spotweb`
+
+The installer creates a **database** named `spotweb` (with many tables like `spots`, `users`, `settings`). That is not the same as a single **table** named `spotweb`.
+
+If the `spotweb` database already exists, the Windows installer asks whether to:
+1. **Reuse** it (schema upgrade; optional admin password reset)
+2. **Wipe** it (DROP + recreate — destroys data)
+3. Use a **different database name**
+
 ### Option 4: Add to Existing Spotweb
 
 Already have Spotweb? See **[MIGRATION-GUIDE.md](MIGRATION-GUIDE.md)** for installation steps.

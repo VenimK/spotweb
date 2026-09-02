@@ -1,5 +1,13 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.10 — Existing spotweb database handling
+
+- Detect existing MySQL/MariaDB database named `spotweb`
+- Prompt: reuse (upgrade), wipe (DROP), or choose another name
+- Optional skip of admin password reset when reusing
+
+---
+
 ## v2.2.9 — Fix Start-Spotweb.ps1 for Windows PowerShell 5.1
 
 - Replace Unicode dash that broke `Start-Spotweb.ps1` parsing (`â€"` / em-dash)
