@@ -1,5 +1,13 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.3 — Register MariaDB Windows service if missing
+
+- Detect when MariaDB files exist but no Windows service is registered
+- Attempt `mysqld --install` and start the service
+- Prevent installer crash when `mysql.exe` writes ERROR 2002 to stderr during wait loops
+
+---
+
 ## v2.2.2 — Auto-start MariaDB + seed php.ini
 
 - Start MariaDB/MySQL Windows service automatically and wait until it accepts connections

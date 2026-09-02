@@ -319,36 +319,111 @@ function Enable-PhpExtensions([string]$PhpBin) {
   Write-Ok "Updated php.ini extensions"
 }
 
-function Start-MariaDbService {
-  Write-Info "Starting MariaDB/MySQL Windows service (if present)..."
-  $names = Get-Service -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -match 'maria|mysql' -or $_.DisplayName -match 'MariaDB|MySQL' } |
-    Select-Object -ExpandProperty Name -Unique
+function Get-MariaDbInstallDir {
+  $hits = @()
+  foreach ($pattern in @(
+      'C:\Program Files\MariaDB*',
+      'C:\Program Files\MySQL\MySQL Server*'
+    )) {
+    $hits += Get-Item $pattern -ErrorAction SilentlyContinue
+  }
+  if ($hits.Count -eq 0) { return $null }
+  return ($hits | Sort-Object FullName -Descending | Select-Object -First 1).FullName
+}
 
-  if (-not $names -or $names.Count -eq 0) {
-    # Common service names
-    $names = @('MariaDB', 'MySQL', 'MySQL80', 'MySQL57')
+function Ensure-MariaDbWindowsService {
+  <#
+    Winget often installs MariaDB files without a running service.
+    Try to find/create/start the Windows service.
+  #>
+  Write-Info "Looking for MariaDB/MySQL Windows service..."
+
+  $svcs = @(Get-Service -ErrorAction SilentlyContinue | Where-Object {
+      $_.Name -match '(?i)maria|mysql' -or $_.DisplayName -match '(?i)MariaDB|MySQL'
+    })
+
+  if ($svcs.Count -eq 0) {
+    Write-WarnMsg "No MariaDB/MySQL service registered yet. Trying to create one..."
+    $installDir = Get-MariaDbInstallDir
+    if (-not $installDir) {
+      Write-WarnMsg "MariaDB install directory not found under Program Files."
+      return $false
+    }
+    $mysqld = Join-Path $installDir 'bin\mysqld.exe'
+    $mysqlInstallDb = Join-Path $installDir 'bin\mysql_install_db.exe'
+    if (-not (Test-Path -LiteralPath $mysqld)) {
+      Write-WarnMsg "mysqld.exe not found in $installDir"
+      return $false
+    }
+
+    # Some packages ship mysql_install_db for first-time data dir init
+    $dataDir = Join-Path $installDir 'data'
+    if ((Test-Path -LiteralPath $mysqlInstallDb) -and -not (Test-Path -LiteralPath $dataDir)) {
+      Write-Info "Initializing MariaDB data directory..."
+      try {
+        $oldEap = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        & $mysqlInstallDb 2>&1 | Out-Host
+        $ErrorActionPreference = $oldEap
+      } catch {
+        Write-WarnMsg "mysql_install_db failed: $($_.Exception.Message)"
+      }
+    }
+
+    Write-Info "Registering Windows service via: $mysqld --install"
+    try {
+      $oldEap = $ErrorActionPreference
+      $ErrorActionPreference = 'Continue'
+      & $mysqld --install 2>&1 | Out-Host
+      $ErrorActionPreference = $oldEap
+    } catch {
+      Write-WarnMsg "mysqld --install failed: $($_.Exception.Message)"
+      Write-WarnMsg "Re-run this installer from an elevated PowerShell (Run as administrator)."
+      return $false
+    }
+
+    Start-Sleep -Seconds 2
+    $svcs = @(Get-Service -ErrorAction SilentlyContinue | Where-Object {
+        $_.Name -match '(?i)maria|mysql' -or $_.DisplayName -match '(?i)MariaDB|MySQL'
+      })
+  }
+
+  if ($svcs.Count -eq 0) {
+    # Last-ditch known names
+    foreach ($name in @('MariaDB', 'MySQL', 'MySQL80', 'MySQL57', 'mariadb')) {
+      $svc = Get-Service -Name $name -ErrorAction SilentlyContinue
+      if ($svc) { $svcs += $svc }
+    }
+  }
+
+  if ($svcs.Count -eq 0) {
+    Write-WarnMsg "Still no MariaDB/MySQL Windows service."
+    Write-Host ""
+    Write-Host "Fix manually (elevated PowerShell):" -ForegroundColor Yellow
+    Write-Host '  cd "C:\Program Files\MariaDB 12.3\bin"'
+    Write-Host "  .\mysqld --install"
+    Write-Host "  Start-Service MySQL"
+    Write-Host "  # or: Start-Service MariaDB"
+    Write-Host ""
+    return $false
   }
 
   $started = $false
-  foreach ($name in $names) {
-    $svc = Get-Service -Name $name -ErrorAction SilentlyContinue
-    if (-not $svc) { continue }
+  foreach ($svc in $svcs) {
     try {
       if ($svc.Status -ne 'Running') {
         Write-Info "Starting service: $($svc.Name) ($($svc.DisplayName))"
         Start-Service -Name $svc.Name -ErrorAction Stop
       }
-      Write-Ok "Service running: $($svc.Name)"
-      $started = $true
+      $svc.Refresh()
+      if ($svc.Status -eq 'Running') {
+        Write-Ok "Service running: $($svc.Name)"
+        $started = $true
+      }
     } catch {
       Write-WarnMsg "Could not start $($svc.Name): $($_.Exception.Message)"
-      Write-WarnMsg "Try elevated PowerShell: Start-Service $($svc.Name)"
+      Write-WarnMsg "Open an elevated PowerShell and run: Start-Service $($svc.Name)"
     }
-  }
-
-  if (-not $started) {
-    Write-WarnMsg "No MariaDB/MySQL service was started. Open services.msc and start MariaDB manually."
   }
   return $started
 }
@@ -361,16 +436,23 @@ function Wait-MysqlReady {
     [int]$DelaySeconds = 2
   )
   Write-Info "Waiting for MariaDB/MySQL to accept connections..."
-  for ($i = 1; $i -le $Tries; $i++) {
-    $args = @('-h127.0.0.1', '-uroot')
-    if (-not [string]::IsNullOrEmpty($Password)) { $args += "-p$Password" }
-    $args += @('-e', 'SELECT 1;')
-    & $MysqlBin @args 2>$null | Out-Null
-    if ($LASTEXITCODE -eq 0) {
-      Write-Ok "MariaDB/MySQL is ready"
-      return $true
+  $oldEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    for ($i = 1; $i -le $Tries; $i++) {
+      $args = @('-h127.0.0.1', '-uroot')
+      if (-not [string]::IsNullOrEmpty($Password)) { $args += "-p$Password" }
+      $args += @('-e', 'SELECT 1;')
+      $null = & $MysqlBin @args 2>&1
+      if ($LASTEXITCODE -eq 0) {
+        Write-Ok "MariaDB/MySQL is ready"
+        return $true
+      }
+      Write-Info "  attempt $i/$Tries — not ready yet..."
+      Start-Sleep -Seconds $DelaySeconds
     }
-    Start-Sleep -Seconds $DelaySeconds
+  } finally {
+    $ErrorActionPreference = $oldEap
   }
   return $false
 }
@@ -389,8 +471,17 @@ function Invoke-MysqlSql {
   if (-not [string]::IsNullOrEmpty($Password)) { $args += "-p$Password" }
   if ($Database) { $args += $Database }
   $args += @('-e', $Sql)
-  & $MysqlBin @args
-  if ($LASTEXITCODE -ne 0) { throw "mysql failed: $Sql" }
+  $oldEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $output = & $MysqlBin @args 2>&1
+    $code = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $oldEap
+  }
+  if ($code -ne 0) {
+    throw "mysql failed ($code): $Sql`n$($output | Out-String)"
+  }
 }
 
 function Download-File([string]$Url, [string]$OutFile) {
@@ -614,7 +705,7 @@ if (-not $MysqlBin) { Die "mysql client not found on PATH" }
 Write-Ok "Using mysql: $MysqlBin"
 
 # MariaDB must be running (ERROR 2002 / 10061 = service not listening)
-[void](Start-MariaDbService)
+[void](Ensure-MariaDbWindowsService)
 $rootPass = ''
 if (-not $NonInteractive) {
   $rootPass = Read-Host "MariaDB/MySQL root password (blank if none)"
@@ -622,12 +713,15 @@ if (-not $NonInteractive) {
 if (-not (Wait-MysqlReady -MysqlBin $MysqlBin -Password $rootPass -Tries 30 -DelaySeconds 2)) {
   Write-Host ""
   Write-Host "MariaDB is installed but not accepting connections." -ForegroundColor Yellow
-  Write-Host "Run this in an elevated PowerShell, then re-run the installer:" -ForegroundColor Yellow
+  Write-Host "Run these in an elevated PowerShell (Run as administrator):" -ForegroundColor Yellow
+  Write-Host '  cd "C:\Program Files\MariaDB 12.3\bin"'
+  Write-Host "  .\mysqld --install"
   Write-Host "  Get-Service *maria*,*mysql* | Format-Table Name,Status,DisplayName"
-  Write-Host "  Start-Service MariaDB"
-  Write-Host "  # or: net start MariaDB"
+  Write-Host "  Start-Service MySQL"
+  Write-Host "  # if service name is MariaDB: Start-Service MariaDB"
+  Write-Host '  & ".\mysql.exe" -h127.0.0.1 -uroot -e "SELECT 1;"'
   Write-Host ""
-  Write-Host "Then:"
+  Write-Host "Then re-run:"
   Write-Host "  .\install-windows.ps1 -SkipPackageInstall"
   Die "Cannot connect to MariaDB/MySQL on 127.0.0.1 (is the service running?)"
 }
