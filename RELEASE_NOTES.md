@@ -1,77 +1,38 @@
-# Spotweb Multi-Theme System v1.0.0
+# Spotweb Multi-Theme System — Release Notes
 
-## 🎨 What's Included
+## v2.1.0 — Spotweb overlays (NZB panel, modern UX, macOS router)
 
-A complete theme system for Spotweb featuring:
+### Added
+- **`overlays/spotweb/`** — curated Spotweb core/theme file overlays from the VenimK working tree
+- **`apply-spotweb-overlays.sh`** — apply overlays to a fresh or existing Spotweb install
+- Installers (macOS + Proxmox) now apply overlays after theme installation
+- macOS defaults to port **9999** and documents `bin/dev-server.sh` + `router.php` (static asset caching for `php -S`)
 
-- **8 Beautiful Pre-installed Themes**
-  - Light (Default)
-  - Dark
-  - Midnight Ocean
-  - Cyberpunk
-  - Nord
-  - Dracula
-  - Forest
-  - Sunset
+### Fixes included in overlays
+- **NZBGet / SABnzbd sidebar panel overlap** — opaque panel + `filters-open` so Quick Links text no longer stacks through the panel title
+- Modern theme Power UX dashboard / live download strip assets
+- NZBGet handler / sabpanel improvements
+- Apache `.htaccess` expires + gzip rules (used when not on `php -S`)
+- Helpers: `bin/doctor.php`, `bin/configure-nzb.php`, `bin/retrieve-cron.sh`, `bin/dev-server.sh`
 
-- **Smart Theme Switcher** - One-click theme changes with auto-detection
-- **Theme Customizer** - Visual tool to create custom themes
-- **Theme Upload Tool** - Easy custom theme uploads
-- **Update-Safe Architecture** - Themes survive Spotweb core updates
-- **One-Command Updates** - `update-themes.sh` script included
-
-## 📥 Installation
-
-### Fresh Spotweb Installation
-
+### Apply on an existing install
 ```bash
-# Download installer
-curl -fsSL https://github.com/VenimK/spotweb/releases/download/v1.0.0/proxmox-create-and-install-spotweb.sh -o install-spotweb.sh
-chmod +x install-spotweb.sh
-
-# Run installer
-./install-spotweb.sh
+curl -fsSL https://raw.githubusercontent.com/VenimK/spotweb/themes-only/apply-spotweb-overlays.sh -o /tmp/apply-spotweb-overlays.sh
+bash /tmp/apply-spotweb-overlays.sh /path/to/spotweb
 ```
-
-Choose **Option 3: Complete theme pack** during installation.
-
-### Add to Existing Spotweb
-
-See [MIGRATION-GUIDE.md](https://github.com/VenimK/spotweb/blob/themes-only/MIGRATION-GUIDE.md)
-
-## 🔄 Updates
-
-Keep your themes updated:
-
-```bash
-cd /var/www/html/spotweb/custom
-./update-themes.sh
-```
-
-## 📋 Requirements
-
-- Proxmox VE 7.0+ or any Linux with LXC containers
-- Debian 12 or Ubuntu 22.04 LTS
-- 1 CPU, 512MB RAM, 8GB storage (minimum)
-
-## 🐛 Known Issues
-
-None! This is the first stable release.
-
-## 📝 Full Documentation
-
-- [README.md](https://github.com/VenimK/spotweb/blob/themes-only/README.md) - Complete documentation
-- [MIGRATION-GUIDE.md](https://github.com/VenimK/spotweb/blob/themes-only/MIGRATION-GUIDE.md) - For existing Spotweb users
-- [custom/README.md](https://github.com/VenimK/spotweb/blob/themes-only/custom/README.md) - Architecture details
-
-## 🙏 Credits
-
-Built with ❤️ for the Spotweb community.
 
 ---
 
-**If you find this useful:**
-- ⭐ Star this repository
-- 📢 Share with others
-- 💡 Contribute your themes
-- ☕ [Buy me a coffee](https://paypal.me/VenimK)
+## v2.0.0 — Seasonal themes
+
+- Added Spring / Summer / Autumn / Winter themes
+- Theme customizer improvements (category colors, CSS import, fuller preview)
+- Installer updates for the expanded theme pack
+
+---
+
+## v1.0.0 — Initial theme pack
+
+- Pre-installed themes + switcher + customizer + upload tool
+- Update-safe `/custom/` architecture
+- Proxmox + macOS installers

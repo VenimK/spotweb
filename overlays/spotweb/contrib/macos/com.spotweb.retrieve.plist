@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  SpotWeb retrieve via launchd (every 15 minutes).
+
+  Install:
+    cp contrib/macos/com.spotweb.retrieve.plist ~/Library/LaunchAgents/
+    # edit paths in the copy if your install is not /Users/venimk/Sites/spotweb
+    launchctl load ~/Library/LaunchAgents/com.spotweb.retrieve.plist
+
+  Uninstall:
+    launchctl unload ~/Library/LaunchAgents/com.spotweb.retrieve.plist
+    rm ~/Library/LaunchAgents/com.spotweb.retrieve.plist
+
+  Logs: /Users/venimk/Sites/spotweb/logs/retrieve-cron.log
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.spotweb.retrieve</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/venimk/Sites/spotweb/bin/retrieve-cron.sh</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/venimk/Sites/spotweb</string>
+
+  <key>StartInterval</key>
+  <integer>900</integer>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/venimk/Sites/spotweb/logs/retrieve-cron.launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/venimk/Sites/spotweb/logs/retrieve-cron.launchd.err.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/opt/php@8.2/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+</dict>
+</plist>

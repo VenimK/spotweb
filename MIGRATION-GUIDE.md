@@ -38,6 +38,27 @@ custom/
 
 ---
 
+## 🧩 Apply latest Spotweb overlays (NZB panel / modern UX)
+
+If you already have Spotweb + the theme pack, you can apply the latest VenimK Spotweb fixes without reinstalling:
+
+```bash
+cd /path/to/spotweb
+curl -fsSL https://raw.githubusercontent.com/VenimK/spotweb/themes-only/apply-spotweb-overlays.sh -o /tmp/apply-spotweb-overlays.sh
+bash /tmp/apply-spotweb-overlays.sh "$(pwd)"
+```
+
+This updates modern theme CSS/JS (including the NZBGet panel overlap fix), NZBGet integration helpers, `router.php`, and `bin/dev-server.sh` / `bin/doctor.php`.
+
+On macOS, prefer starting Spotweb with:
+
+```bash
+./bin/dev-server.sh
+# http://127.0.0.1:9999/
+```
+
+---
+
 ## 🎯 **Migration Strategies**
 
 ### **Option A: Fresh Deploy (Recommended)**

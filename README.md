@@ -81,10 +81,24 @@ chmod +x install-macos.sh
 ./install-macos.sh
 ```
 
-After installation, start Spotweb locally (the installer will print the exact command):
+After installation, start Spotweb locally (the installer will print the exact command). Preferred:
 
 ```bash
-/opt/homebrew/opt/php@8.2/bin/php -S 127.0.0.1:8080 -t "$HOME/Sites/spotweb"
+"$HOME/Sites/spotweb/bin/dev-server.sh"
+# http://127.0.0.1:9999/
+```
+
+Or manually with the caching router:
+
+```bash
+/opt/homebrew/opt/php@8.2/bin/php -S 127.0.0.1:9999 -t "$HOME/Sites/spotweb" "$HOME/Sites/spotweb/router.php"
+```
+
+To refresh Spotweb UI/NZB fixes later without reinstalling themes:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/VenimK/spotweb/themes-only/apply-spotweb-overlays.sh -o /tmp/apply-spotweb-overlays.sh
+bash /tmp/apply-spotweb-overlays.sh "$HOME/Sites/spotweb"
 ```
 
 ### Option 3: Add to Existing Spotweb

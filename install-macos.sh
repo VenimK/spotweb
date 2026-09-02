@@ -20,7 +20,7 @@ DEFAULT_SPOTWEB_DIR="${HOME}/Sites/spotweb"
 DEFAULT_DB_NAME="spotweb"
 DEFAULT_DB_USER="spotweb"
 DEFAULT_DB_PASS="spotweb"
-DEFAULT_PORT="8080"
+DEFAULT_PORT="9999"
 
 print_info() { echo -e "${BLUE}ℹ ${*}${NC}"; }
 print_success() { echo -e "${GREEN}✓ ${*}${NC}"; }
@@ -477,6 +477,21 @@ main() {
 
   install_themes "${spotweb_dir}" "${theme_mode}"
 
+  # Modern UI / NZBGet / performance overlays (after theme header patches)
+  local apply_script
+  apply_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/apply-spotweb-overlays.sh"
+  if [[ ! -f "${apply_script}" ]]; then
+    print_info "Downloading apply-spotweb-overlays.sh..."
+    apply_script="$(mktemp)"
+    curl -fsSL "${GITHUB_RAW_BASE}/apply-spotweb-overlays.sh" -o "${apply_script}" || apply_script=""
+  fi
+  if [[ -n "${apply_script}" && -f "${apply_script}" ]]; then
+    print_info "Applying Spotweb overlays (NZB panel fix, router, modern UX helpers)..."
+    bash "${apply_script}" "${spotweb_dir}" || print_warn "Overlay apply reported errors (continuing)"
+  else
+    print_warn "apply-spotweb-overlays.sh unavailable; skipping overlays"
+  fi
+
   init_spotweb_db "${spotweb_dir}"
 
   if [[ "${SPOTWEB_GIT_BRANCH}" == "master" ]]; then
@@ -488,8 +503,9 @@ main() {
   print_success "Installation complete"
   echo ""
   echo "Access Spotweb (local PHP dev server):"
-  echo "  1) Start server:"
-  echo "     ${PHP_BIN} -S 127.0.0.1:${port} -t \"${spotweb_dir}\""
+  echo "  1) Start server (preferred — caching router):"
+  echo "     \"${spotweb_dir}/bin/dev-server.sh\""
+  echo "     # or: ${PHP_BIN} -S 127.0.0.1:${port} -t \"${spotweb_dir}\" \"${spotweb_dir}/router.php\""
   echo "  2) Open:"
   echo "     http://127.0.0.1:${port}/"
   echo ""
@@ -502,6 +518,9 @@ main() {
     echo "  Customizer: http://127.0.0.1:${port}/custom/tools/theme-customizer.html"
     echo "  Upload:     http://127.0.0.1:${port}/custom/tools/theme-upload.php"
   fi
+  echo ""
+  echo "Health check:"
+  echo "  ${PHP_BIN} \"${spotweb_dir}/bin/doctor.php\""
 
   # Calculate elapsed time
   END_TIME=$(date +%s)
