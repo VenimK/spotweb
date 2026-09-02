@@ -1,5 +1,13 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.9 — Fix Start-Spotweb.ps1 for Windows PowerShell 5.1
+
+- Replace Unicode dash that broke `Start-Spotweb.ps1` parsing (`â€"` / em-dash)
+- Prefer portable PHP under `%LOCALAPPDATA%\SpotwebTools\php`
+- Include `Start-Spotweb.ps1` in overlays for future installs
+
+---
+
 ## v2.2.8 — Enable portable PHP extensions before usability check
 
 - After extracting portable PHP, enable ext DLLs before `Test-PhpUsable`

@@ -1,4 +1,4 @@
-﻿# Spotweb Windows Installer v2.2.8 (Windows PowerShell 5.1 compatible)
+﻿# Spotweb Windows Installer v2.2.9 (Windows PowerShell 5.1 compatible)
 <#
 .SYNOPSIS
   Install Spotweb + VenimK theme pack on Windows (PowerShell).
