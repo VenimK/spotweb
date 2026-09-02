@@ -1,4 +1,4 @@
-﻿# Configure Spotweb on XAMPP Apache (Windows) v1.0.0
+﻿# Configure Spotweb on XAMPP Apache (Windows) v1.0.1
 # ASCII-only for Windows PowerShell 5.1
 <#
 .SYNOPSIS
@@ -217,11 +217,13 @@ if (Test-Path -LiteralPath $phpIni) {
 
 # Config test + restart
 Write-Info "Testing Apache config..."
+# httpd -t writes "Syntax OK" to stderr; don't treat that as a terminating error
 $oldEap = $ErrorActionPreference
 $ErrorActionPreference = 'Continue'
-& $httpd -t 2>&1 | Out-Host
+$testOut = & cmd /c "`"$httpd`" -t 2>&1"
 $testCode = $LASTEXITCODE
 $ErrorActionPreference = $oldEap
+$testOut | ForEach-Object { Write-Host $_ }
 if ($testCode -ne 0) {
   Die "Apache config test failed. Fix errors above, then re-run."
 }
