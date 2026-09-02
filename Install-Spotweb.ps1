@@ -1,4 +1,4 @@
-﻿# Spotweb Windows Installer v2.2.7 (Windows PowerShell 5.1 compatible)
+﻿# Spotweb Windows Installer v2.2.8 (Windows PowerShell 5.1 compatible)
 <#
 .SYNOPSIS
   Install Spotweb + VenimK theme pack on Windows (PowerShell).
@@ -113,8 +113,15 @@ function Add-ToUserPath([string]$Dir) {
 
 function Resolve-Php {
   Refresh-Path
+  # Prefer our portable build over any older WinGet PHP earlier on PATH
+  $portable = Join-Path $env:LOCALAPPDATA 'SpotwebTools\php\php.exe'
+  if (Test-Path -LiteralPath $portable) {
+    $env:Path = "$(Split-Path -Parent $portable);" + $env:Path
+    return $portable
+  }
+
   $cmd = Get-Command php -ErrorAction SilentlyContinue
-  if ($cmd) { return $cmd.Source }
+  if ($cmd -and ($cmd.Source -notlike '*PHP.PHP.8.1*')) { return $cmd.Source }
 
   $searchRoots = @(
     (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages'),
@@ -128,9 +135,10 @@ function Resolve-Php {
 
   foreach ($root in $searchRoots) {
     try {
-      $hit = Get-ChildItem -Path $root -Filter php.exe -Recurse -ErrorAction SilentlyContinue |
-        Where-Object { $_.FullName -notmatch '\\tests\\|\\test\\' } |
-        Select-Object -First 1
+      $hits = @(Get-ChildItem -Path $root -Filter php.exe -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch '\\tests\\|\\test\\|PHP\.PHP\.8\.1' })
+      # Prefer higher version folder names when possible
+      $hit = $hits | Sort-Object FullName -Descending | Select-Object -First 1
       if ($hit) { return $hit.FullName }
     } catch { }
   }
@@ -246,26 +254,44 @@ function Install-PhpPortable {
   Add-ToUserPath $targetRoot
   $env:Path = "$targetRoot;" + $env:Path
   Write-Ok "Portable PHP installed: $phpExe"
+
+  # php.ini-development has extensions commented out — enable before usability checks
+  Enable-PhpExtensions -PhpBin $phpExe
   return $phpExe
 }
 
 function Ensure-PhpInstalled {
-  # Prefer a complete portable PHP build on Windows (WinGet packages are often missing ext DLLs)
+  # Prefer Spotweb portable PHP first (avoid stale WinGet 8.1 earlier on PATH)
+  $portablePath = Join-Path $env:LOCALAPPDATA 'SpotwebTools\php\php.exe'
+  if (Test-Path -LiteralPath $portablePath) {
+    $env:Path = "$(Split-Path -Parent $portablePath);" + $env:Path
+    Enable-PhpExtensions -PhpBin $portablePath
+    if (Test-PhpUsable $portablePath) {
+      Write-Ok "Using portable PHP: $portablePath ($(Get-PhpVersion $portablePath))"
+      return $portablePath
+    }
+  }
+
   $existing = Resolve-Php
-  if ($existing -and (Test-PhpUsable $existing) -and ($existing -match 'SpotwebTools\\php\\')) {
+  if ($existing -and (Test-PhpUsable $existing)) {
     return $existing
   }
-  if ($existing -and -not (Test-PhpUsable $existing)) {
-    Write-WarnMsg "Existing PHP is incomplete/unusable: $existing"
+  if ($existing) {
+    Write-WarnMsg "Existing PHP is incomplete/unusable: $existing ($(Get-PhpVersion $existing))"
     Write-WarnMsg "Installing a full portable PHP build instead..."
   }
 
   [void](Install-WingetPackage -Id 'Microsoft.VCRedist.2015+.x64' -DisplayName 'Visual C++ Redistributable')
 
-  $portable = Install-PhpPortable -Force:(-not (Test-PhpUsable (Join-Path $env:LOCALAPPDATA 'SpotwebTools\php\php.exe')))
-  if ($portable -and (Test-PhpUsable $portable)) { return $portable }
+  $portable = Install-PhpPortable -Force
+  if ($portable) {
+    Enable-PhpExtensions -PhpBin $portable
+    if (Test-PhpUsable $portable) { return $portable }
+    Write-WarnMsg "Portable PHP at $portable still failed module/version checks ($(Get-PhpVersion $portable))"
+  } else {
+    Write-WarnMsg "Portable PHP download/extract failed; trying winget PHP packages..."
+  }
 
-  Write-WarnMsg "Portable PHP failed; trying winget PHP packages..."
   $ids = @(
     'PHP.PHP.NTS.8.3', 'PHP.PHP.8.3',
     'PHP.PHP.NTS.8.4', 'PHP.PHP.8.4',
@@ -273,8 +299,18 @@ function Ensure-PhpInstalled {
   )
   foreach ($id in $ids) {
     if (Install-WingetPackage -Id $id -DisplayName "PHP ($id)") {
+      # Prefer newly installed package paths over old 8.1
+      Refresh-Path
+      $env:Path = "$(Join-Path $env:LOCALAPPDATA 'SpotwebTools\php');" + $env:Path
       $php = Resolve-Php
-      if ($php -and (Test-PhpUsable $php)) { return $php }
+      if ($php -and $php -like '*PHP.PHP.8.1*') {
+        # Explicitly ignore known-bad WinGet 8.1 package
+        $php = $null
+      }
+      if ($php) {
+        Enable-PhpExtensions -PhpBin $php
+        if (Test-PhpUsable $php) { return $php }
+      }
     }
   }
 

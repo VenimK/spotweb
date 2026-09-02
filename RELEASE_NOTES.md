@@ -1,5 +1,12 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.8 — Enable portable PHP extensions before usability check
+
+- After extracting portable PHP, enable ext DLLs before `Test-PhpUsable`
+- Prefer `%LOCALAPPDATA%\SpotwebTools\php` over stale WinGet PHP 8.1 on PATH
+
+---
+
 ## v2.2.7 — Require PHP 8.2+ (Spotweb develop/composer)
 
 - Treat PHP < 8.2 as unusable and force portable NTS 8.3/8.4 install
