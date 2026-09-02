@@ -1,4 +1,4 @@
-﻿# Spotweb Windows Installer v2.2.5 (Windows PowerShell 5.1 compatible)
+﻿# Spotweb Windows Installer v2.2.6 (Windows PowerShell 5.1 compatible)
 <#
 .SYNOPSIS
   Install Spotweb + VenimK theme pack on Windows (PowerShell).
@@ -137,15 +137,36 @@ function Resolve-Php {
   return $null
 }
 
+function Test-PhpUsable([string]$PhpBin) {
+  if (-not $PhpBin -or -not (Test-Path -LiteralPath $PhpBin)) { return $false }
+  $oldEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $out = & $PhpBin -m 2>&1 | Out-String
+    $code = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $oldEap
+  }
+  if ($code -ne 0) { return $false }
+  # Spotweb needs these; WinGet PHP 8.1 packages are often incomplete
+  foreach ($mod in @('pdo_mysql', 'mysqli', 'curl', 'mbstring', 'openssl')) {
+    if ($out -notmatch "(?im)^\s*$mod\s*$") { return $false }
+  }
+  return $true
+}
+
 function Install-PhpPortable {
+  param([switch]$Force)
   <#
-    Fallback when winget cannot install PHP: download NTS x64 ZIP from windows.php.net
-    into %LOCALAPPDATA%\SpotwebTools\php and put it on PATH.
+    Download full NTS x64 ZIP from windows.php.net into %LOCALAPPDATA%\SpotwebTools\php.
+    Prefer this over incomplete WinGet PHP packages on Windows.
   #>
   $targetRoot = Join-Path $env:LOCALAPPDATA 'SpotwebTools\php'
   $phpExe = Join-Path $targetRoot 'php.exe'
-  if (Test-Path -LiteralPath $phpExe) {
+  if ((-not $Force) -and (Test-Path -LiteralPath $phpExe) -and (Test-PhpUsable $phpExe)) {
     Add-ToUserPath $targetRoot
+    # Put portable PHP first on this session PATH
+    $env:Path = "$targetRoot;" + $env:Path
     Write-Ok "Using existing portable PHP: $phpExe"
     return $phpExe
   }
@@ -159,15 +180,21 @@ function Install-PhpPortable {
     return $null
   }
 
-  # Prefer newest 8.3/8.4 NTS VS16/VS17 x64 zip (not development/src)
+  # Prefer newest 8.3/8.4 NTS VS16/VS17 x64 zip
   $pattern = 'href="(php-(8\.[3-4]\.\d+)-nts-Win32-vs1[67]-x64\.zip)"'
   $matches = [regex]::Matches($html, $pattern, 'IgnoreCase')
   if ($matches.Count -eq 0) {
-    Write-WarnMsg "No suitable PHP NTS x64 zip found on windows.php.net releases page"
+    # archives fallback
+    $releasesUrl = 'https://windows.php.net/downloads/releases/archives/'
+    try { $html = (Invoke-WebRequest -Uri $releasesUrl -UseBasicParsing).Content } catch { }
+    $matches = [regex]::Matches($html, $pattern, 'IgnoreCase')
+  }
+  if ($matches.Count -eq 0) {
+    Write-WarnMsg "No suitable PHP NTS x64 zip found on windows.php.net"
     return $null
   }
   $file = $matches[0].Groups[1].Value
-  $url = $releasesUrl + $file
+  $url = $releasesUrl.TrimEnd('/') + '/' + $file
   Write-Info "Fetching $file"
 
   $tmp = Join-Path ([System.IO.Path]::GetTempPath()) $file
@@ -190,66 +217,46 @@ function Install-PhpPortable {
     return $null
   }
 
-  # Seed php.ini from development template if needed
   $ini = Join-Path $targetRoot 'php.ini'
   $iniDev = Join-Path $targetRoot 'php.ini-development'
-  if (-not (Test-Path -LiteralPath $ini) -and (Test-Path -LiteralPath $iniDev)) {
+  if (Test-Path -LiteralPath $iniDev) {
     Copy-Item -LiteralPath $iniDev -Destination $ini -Force
   }
 
-  # extension_dir for portable builds
-  if (Test-Path -LiteralPath $ini) {
-    $raw = Get-Content -LiteralPath $ini -Raw
-    $extDir = Join-Path $targetRoot 'ext'
-    if ($raw -match '(?im)^\s*;?\s*extension_dir\s*=') {
-      $raw = [regex]::Replace($raw, '(?im)^\s*;?\s*extension_dir\s*=.*$', "extension_dir=`"$extDir`"")
-    } else {
-      $raw += "`r`nextension_dir=`"$extDir`"`r`n"
-    }
-    Set-Content -LiteralPath $ini -Value $raw -Encoding UTF8
-  }
-
   Add-ToUserPath $targetRoot
+  $env:Path = "$targetRoot;" + $env:Path
   Write-Ok "Portable PHP installed: $phpExe"
   return $phpExe
 }
 
 function Ensure-PhpInstalled {
+  # Prefer a complete portable PHP build on Windows (WinGet packages are often missing ext DLLs)
   $existing = Resolve-Php
-  if ($existing) { return $existing }
+  if ($existing -and (Test-PhpUsable $existing) -and ($existing -match 'SpotwebTools\\php\\')) {
+    return $existing
+  }
+  if ($existing -and -not (Test-PhpUsable $existing)) {
+    Write-WarnMsg "Existing PHP is incomplete/unusable: $existing"
+    Write-WarnMsg "Installing a full portable PHP build instead..."
+  }
 
-  # VC runtime often required by PHP builds
   [void](Install-WingetPackage -Id 'Microsoft.VCRedist.2015+.x64' -DisplayName 'Visual C++ Redistributable')
 
+  $portable = Install-PhpPortable -Force:(-not (Test-PhpUsable (Join-Path $env:LOCALAPPDATA 'SpotwebTools\php\php.exe')))
+  if ($portable -and (Test-PhpUsable $portable)) { return $portable }
+
+  Write-WarnMsg "Portable PHP failed; trying winget PHP packages..."
   $ids = @(
-    'PHP.PHP.NTS.8.3',
-    'PHP.PHP.8.3',
-    'PHP.PHP.NTS.8.4',
-    'PHP.PHP.8.4',
-    'PHP.PHP.NTS.8.2',
-    'PHP.PHP.8.2'
+    'PHP.PHP.NTS.8.3', 'PHP.PHP.8.3',
+    'PHP.PHP.NTS.8.4', 'PHP.PHP.8.4',
+    'PHP.PHP.NTS.8.2', 'PHP.PHP.8.2'
   )
-
-  # Prefer 8.2+ from winget search; avoid picking ancient 8.0/8.1 first
-  if (Get-Command winget -ErrorAction SilentlyContinue) {
-    try {
-      $search = & winget search --id PHP.PHP 2>$null | Out-String
-      $found = [regex]::Matches($search, 'PHP\.PHP(?:\.NTS)?\.(8\.[2-9])') | ForEach-Object { $_.Value } | Select-Object -Unique
-      $ids = @($ids) + @($found) | Select-Object -Unique
-    } catch { }
-  }
-  $ids += @('PHP.PHP.NTS.8.1', 'PHP.PHP.8.1', 'PHP.PHP')  # last resorts
-
   foreach ($id in $ids) {
     if (Install-WingetPackage -Id $id -DisplayName "PHP ($id)") {
       $php = Resolve-Php
-      if ($php) { return $php }
+      if ($php -and (Test-PhpUsable $php)) { return $php }
     }
   }
-
-  Write-WarnMsg "winget could not install PHP; trying portable ZIP fallback..."
-  $portable = Install-PhpPortable
-  if ($portable) { return $portable }
 
   return $null
 }
@@ -275,14 +282,27 @@ function Resolve-Mysql {
 
 function Enable-PhpExtensions([string]$PhpBin) {
   $phpDir = Split-Path -Parent $PhpBin
-  $loaded = & $PhpBin --ini 2>$null | Select-String 'Loaded Configuration File:\s*(.+)$' | ForEach-Object { $_.Matches[0].Groups[1].Value.Trim() }
+  $oldEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $iniOut = & $PhpBin --ini 2>&1 | Out-String
+  } finally {
+    $ErrorActionPreference = $oldEap
+  }
+
   $phpIni = $null
-  if ($loaded -and $loaded -ne '(none)' -and (Test-Path -LiteralPath $loaded)) {
-    $phpIni = $loaded
-  } else {
-    $candidate = Join-Path $phpDir 'php.ini'
-    $dev = Join-Path $phpDir 'php.ini-development'
-    $prod = Join-Path $phpDir 'php.ini-production'
+  $m = [regex]::Match($iniOut, 'Loaded Configuration File:\s*(.+)')
+  if ($m.Success) {
+    $loaded = $m.Groups[1].Value.Trim()
+    if ($loaded -and $loaded -ne '(none)' -and (Test-Path -LiteralPath $loaded)) {
+      $phpIni = $loaded
+    }
+  }
+
+  $candidate = Join-Path $phpDir 'php.ini'
+  $dev = Join-Path $phpDir 'php.ini-development'
+  $prod = Join-Path $phpDir 'php.ini-production'
+  if (-not $phpIni) {
     if (-not (Test-Path -LiteralPath $candidate)) {
       if (Test-Path -LiteralPath $dev) {
         Copy-Item -LiteralPath $dev -Destination $candidate -Force
@@ -310,15 +330,39 @@ function Enable-PhpExtensions([string]$PhpBin) {
       $raw += "`r`nextension_dir=`"$extDir`""
     }
   }
-  $exts = @('curl', 'fileinfo', 'gd', 'mbstring', 'mysqli', 'openssl', 'pdo_mysql', 'xml', 'zip')
-  foreach ($ext in $exts) {
+
+  # Only enable extensions whose DLLs actually exist (avoids WinGet incomplete packages)
+  $wanted = @('curl', 'fileinfo', 'gd', 'mbstring', 'mysqli', 'openssl', 'pdo_mysql', 'xml', 'zip')
+  foreach ($ext in $wanted) {
+    $dll = Join-Path $extDir "php_$ext.dll"
+    if (-not (Test-Path -LiteralPath $dll)) {
+      Write-WarnMsg "Skipping extension=$ext (missing php_$ext.dll)"
+      continue
+    }
+    # Uncomment existing lines
     $raw = [regex]::Replace($raw, "(?im)^\s*;\s*extension\s*=\s*(php_)?$ext(\.dll)?\s*$", "extension=$ext")
+    # Avoid duplicates: if already enabled once, strip extras later
     if ($raw -notmatch "(?im)^\s*extension\s*=\s*(php_)?$ext(\.dll)?\s*$") {
       $raw += "`r`nextension=$ext"
     }
   }
+
+  # Deduplicate extension= lines
+  $lines = $raw -split "`r?`n"
+  $seen = @{}
+  $out = New-Object System.Collections.Generic.List[string]
+  foreach ($line in $lines) {
+    $em = [regex]::Match($line, '(?im)^\s*extension\s*=\s*(php_)?([A-Za-z0-9_]+)(\.dll)?\s*$')
+    if ($em.Success) {
+      $key = $em.Groups[2].Value.ToLowerInvariant()
+      if ($seen.ContainsKey($key)) { continue }
+      $seen[$key] = $true
+    }
+    $out.Add($line)
+  }
+  $raw = ($out -join "`r`n")
   Set-Content -LiteralPath $phpIni -Value $raw -Encoding UTF8
-  Write-Ok "Updated php.ini extensions"
+  Write-Ok "Updated php.ini extensions (only DLLs present in ext\)"
 }
 
 function Get-MariaDbInstallDir {
@@ -667,21 +711,20 @@ if (-not $SkipPackageInstall) {
     }
     Refresh-Path
   }
-  if (-not (Resolve-Php)) {
+  $currentPhp = Resolve-Php
+  if (-not $currentPhp -or -not (Test-PhpUsable $currentPhp)) {
     $phpInstalled = Ensure-PhpInstalled
-    if (-not $phpInstalled) {
-      Write-WarnMsg "Automatic PHP install failed."
+    if (-not $phpInstalled -or -not (Test-PhpUsable $phpInstalled)) {
+      Write-WarnMsg "Automatic PHP install failed or incomplete."
       Write-Host ""
-      Write-Host "Manual fix (pick one):" -ForegroundColor Yellow
-      Write-Host "  A) winget install --id PHP.PHP.NTS.8.3 -e"
-      Write-Host "  B) winget install --id PHP.PHP.8.3 -e"
-      Write-Host "  C) Download ZIP from https://windows.php.net/download/ (VS16/VS17 x64 Non Thread Safe),"
-      Write-Host "     extract to C:\php, add C:\php to PATH, copy php.ini-development to php.ini"
-      Write-Host "  D) Install XAMPP/Laragon and ensure php.exe is on PATH"
+      Write-Host "Manual fix (recommended):" -ForegroundColor Yellow
+      Write-Host "  Download NTS x64 ZIP from https://windows.php.net/download/"
+      Write-Host "  Extract to $env:LOCALAPPDATA\SpotwebTools\php"
+      Write-Host "  Copy php.ini-development to php.ini, enable curl/mbstring/mysqli/openssl/pdo_mysql"
       Write-Host ""
       Write-Host "Then re-run:"
-      Write-Host "  .\install-windows.ps1 -SkipPackageInstall"
-      Die "PHP not found on PATH"
+      Write-Host "  .\Install-Spotweb.ps1 -SkipPackageInstall"
+      Die "PHP not usable"
     }
   }
   if (-not (Resolve-Mysql)) {
@@ -697,14 +740,25 @@ if (-not $SkipPackageInstall) {
 }
 
 $PhpBin = Resolve-Php
-if (-not $PhpBin) {
-  Write-Host ""
-  Write-Host "PHP still not found. Close this window, open a NEW PowerShell, then run:" -ForegroundColor Yellow
-  Write-Host "  .\install-windows.ps1 -SkipPackageInstall"
-  Die "PHP not found on PATH (new shell may be required after winget PATH changes)"
+if (-not $PhpBin -or -not (Test-PhpUsable $PhpBin)) {
+  Write-Info "Installing/repairing PHP via portable build..."
+  $PhpBin = Ensure-PhpInstalled
+}
+if (-not $PhpBin -or -not (Test-PhpUsable $PhpBin)) {
+  Die "PHP not usable. Install portable PHP 8.3 NTS x64 from windows.php.net and re-run."
 }
 Write-Ok "Using PHP: $PhpBin"
 Enable-PhpExtensions -PhpBin $PhpBin
+# Re-test after php.ini updates
+if (-not (Test-PhpUsable $PhpBin)) {
+  Write-WarnMsg "PHP still reports missing modules after php.ini update; installing portable PHP..."
+  $PhpBin = Install-PhpPortable -Force
+  if ($PhpBin) { Enable-PhpExtensions -PhpBin $PhpBin }
+}
+if (-not (Test-PhpUsable $PhpBin)) {
+  Die "PHP extensions incomplete. Portable PHP install failed."
+}
+Write-Ok ("PHP modules OK: " + ((& $PhpBin -r "echo implode(',', array_intersect(get_loaded_extensions(), ['pdo_mysql','mysqli','curl','mbstring','openssl']));") -join ''))
 
 $MysqlBin = Resolve-Mysql
 if (-not $MysqlBin) { Die "mysql client not found on PATH" }

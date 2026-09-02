@@ -1,5 +1,13 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.6 — Prefer portable PHP on Windows
+
+- Detect incomplete WinGet PHP (missing pdo_mysql/xml/zip) and replace with portable NTS build
+- Only enable php.ini extensions when `php_*.dll` exists (no duplicate mysqli / missing xml)
+- Do not abort installer on PHP startup warnings written to stderr
+
+---
+
 ## v2.2.5 — Bypass Windows download cache + stricter PS 5.1 quoting
 
 - Add `Install-Spotweb.ps1` (same installer, new name to avoid WinINET cache of old `install-windows.ps1`)
