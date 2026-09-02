@@ -109,12 +109,17 @@ Set-ExecutionPolicy -Scope Process Bypass
 Invoke-WebRequest -Headers @{ 'Cache-Control'='no-cache' } `
   -Uri ("https://raw.githubusercontent.com/VenimK/spotweb/themes-only/Install-Spotweb.ps1?" + (Get-Random)) `
   -OutFile .\Install-Spotweb.ps1
-# Confirm you have the latest script (must show v2.2.7+ / PHP 8.2 requirement):
+# Confirm you have the latest script (must show v2.2.7):
 Select-String -Path .\Install-Spotweb.ps1 -Pattern 'v2.2.7'
 .\Install-Spotweb.ps1 -SkipPackageInstall
 ```
-# If Select-String finds nothing, download by commit instead:
-# Invoke-WebRequest -Uri "https://raw.githubusercontent.com/VenimK/spotweb/96773cd/Install-Spotweb.ps1" -OutFile .\Install-Spotweb.ps1
+
+If `Select-String` finds nothing, download by commit SHA instead:
+
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/VenimK/spotweb/96773cd/Install-Spotweb.ps1" -OutFile .\Install-Spotweb.ps1
+Select-String -Path .\Install-Spotweb.ps1 -Pattern 'v2.2.7'
+.\Install-Spotweb.ps1 -SkipPackageInstall
 ```
 
 Start Spotweb afterwards:
