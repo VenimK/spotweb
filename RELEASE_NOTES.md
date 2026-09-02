@@ -1,5 +1,13 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.4 — Windows PowerShell 5.1 parse fix
+
+- Fix invalid `\"` escapes (PS 5.1) in template-compat SQL
+- Replace Unicode em-dash that broke parsing under some download encodings
+- Save installer as UTF-8 with BOM for Windows PowerShell 5.1
+
+---
+
 ## v2.2.3 — Register MariaDB Windows service if missing
 
 - Detect when MariaDB files exist but no Windows service is registered

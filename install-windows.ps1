@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   Install Spotweb + VenimK theme pack on Windows (PowerShell).
 
@@ -448,7 +448,7 @@ function Wait-MysqlReady {
         Write-Ok "MariaDB/MySQL is ready"
         return $true
       }
-      Write-Info "  attempt $i/$Tries — not ready yet..."
+      Write-Info "  attempt $i/$Tries - not ready yet..."
       Start-Sleep -Seconds $DelaySeconds
     }
   } finally {
@@ -609,8 +609,9 @@ function Apply-Overlays([string]$Dir) {
 
 function Ensure-MasterTemplateCompat([string]$MysqlBin, [string]$Name, [string]$User, [string]$Pass) {
   try {
-    Invoke-MysqlSql -MysqlBin $MysqlBin -User $User -Password $Pass -Database $Name -Sql `
-      "UPDATE usersettings SET otherprefs = REPLACE(otherprefs, 's:6:\"modern\"', 's:6:\"we1rdo\"');"
+    # Use single-quoted PS string (Windows PowerShell 5.1 does not treat \" as an escape)
+    $sql = 'UPDATE usersettings SET otherprefs = REPLACE(otherprefs, ''s:6:"modern"'', ''s:6:"we1rdo"'');'
+    Invoke-MysqlSql -MysqlBin $MysqlBin -User $User -Password $Pass -Database $Name -Sql $sql
   } catch {
     Write-WarnMsg "Template compat update skipped"
   }
