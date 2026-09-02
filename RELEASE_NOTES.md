@@ -1,5 +1,15 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.1 — Windows PHP install fallbacks
+
+- Stronger PHP discovery after winget (WinGet Packages folder, PATH refresh)
+- Tries NTS/TS package IDs (`PHP.PHP.NTS.8.3`, `PHP.PHP.8.4`, …)
+- Installs VC++ redistributable first when needed
+- **Portable PHP ZIP fallback** from windows.php.net into `%LOCALAPPDATA%\SpotwebTools\php`
+- Clearer recovery instructions when PHP is still missing
+
+---
+
 ## v2.2.0 — Windows PowerShell installer
 
 ### Added

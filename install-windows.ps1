@@ -70,35 +70,185 @@ function Install-WingetPackage([string]$Id, [string]$DisplayName) {
     return $false
   }
   Write-Info "Installing $DisplayName via winget ($Id)..."
-  $args = @('install', '--id', $Id, '-e', '--accept-package-agreements', '--accept-source-agreements')
-  & winget @args
-  if ($LASTEXITCODE -ne 0) {
-    Write-WarnMsg "winget install failed for $DisplayName (exit $LASTEXITCODE)"
-    return $false
+  # Prefer per-user scope when possible (avoids some admin/UAC failures)
+  $argSets = @(
+    @('install', '--id', $Id, '-e', '--accept-package-agreements', '--accept-source-agreements', '--scope', 'user'),
+    @('install', '--id', $Id, '-e', '--accept-package-agreements', '--accept-source-agreements'),
+    @('install', '--name', $Id, '--accept-package-agreements', '--accept-source-agreements')
+  )
+  foreach ($args in $argSets) {
+    & winget @args
+    if ($LASTEXITCODE -eq 0) {
+      Write-Ok "$DisplayName installed"
+      Refresh-Path
+      return $true
+    }
   }
-  Write-Ok "$DisplayName installed"
-  return $true
+  Write-WarnMsg "winget install failed for $DisplayName (last exit $LASTEXITCODE)"
+  return $false
 }
 
 function Refresh-Path {
   $machine = [Environment]::GetEnvironmentVariable('Path', 'Machine')
   $user = [Environment]::GetEnvironmentVariable('Path', 'User')
-  $env:Path = "$machine;$user"
+  $env:Path = @($machine, $user, $env:Path) -join ';'
+}
+
+function Add-ToUserPath([string]$Dir) {
+  if (-not (Test-Path -LiteralPath $Dir)) { return }
+  $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+  $parts = @()
+  if ($userPath) { $parts = $userPath.Split(';') | Where-Object { $_ -and $_.Trim() -ne '' } }
+  if ($parts -contains $Dir) {
+    Refresh-Path
+    return
+  }
+  $newPath = if ($userPath) { "$userPath;$Dir" } else { $Dir }
+  [Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
+  $env:Path = "$env:Path;$Dir"
+  Write-Ok "Added to user PATH: $Dir"
 }
 
 function Resolve-Php {
   Refresh-Path
   $cmd = Get-Command php -ErrorAction SilentlyContinue
   if ($cmd) { return $cmd.Source }
-  $candidates = @(
-    'C:\php\php.exe',
-    'C:\tools\php\php.exe',
-    "$env:ProgramFiles\PHP\php.exe",
-    "${env:ProgramFiles(x86)}\PHP\php.exe"
-  ) + @(Get-ChildItem -Path "$env:ProgramFiles" -Filter php.exe -Recurse -ErrorAction SilentlyContinue | Select-Object -First 5 -ExpandProperty FullName)
-  foreach ($c in $candidates) {
-    if ($c -and (Test-Path -LiteralPath $c)) { return $c }
+
+  $searchRoots = @(
+    (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages'),
+    (Join-Path $env:LOCALAPPDATA 'Programs'),
+    'C:\php',
+    'C:\tools\php',
+    "$env:ProgramFiles\PHP",
+    "${env:ProgramFiles(x86)}\PHP",
+    $env:ProgramFiles
+  ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
+
+  foreach ($root in $searchRoots) {
+    try {
+      $hit = Get-ChildItem -Path $root -Filter php.exe -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -notmatch '\\tests\\|\\test\\' } |
+        Select-Object -First 1
+      if ($hit) { return $hit.FullName }
+    } catch { }
   }
+  return $null
+}
+
+function Install-PhpPortable {
+  <#
+    Fallback when winget cannot install PHP: download NTS x64 ZIP from windows.php.net
+    into %LOCALAPPDATA%\SpotwebTools\php and put it on PATH.
+  #>
+  $targetRoot = Join-Path $env:LOCALAPPDATA 'SpotwebTools\php'
+  $phpExe = Join-Path $targetRoot 'php.exe'
+  if (Test-Path -LiteralPath $phpExe) {
+    Add-ToUserPath $targetRoot
+    Write-Ok "Using existing portable PHP: $phpExe"
+    return $phpExe
+  }
+
+  Write-Info "Downloading portable PHP (NTS x64) from windows.php.net..."
+  $releasesUrl = 'https://windows.php.net/downloads/releases/'
+  try {
+    $html = (Invoke-WebRequest -Uri $releasesUrl -UseBasicParsing).Content
+  } catch {
+    Write-WarnMsg "Could not list PHP releases: $($_.Exception.Message)"
+    return $null
+  }
+
+  # Prefer newest 8.3/8.4 NTS VS16/VS17 x64 zip (not development/src)
+  $pattern = 'href="(php-(8\.[3-4]\.\d+)-nts-Win32-vs1[67]-x64\.zip)"'
+  $matches = [regex]::Matches($html, $pattern, 'IgnoreCase')
+  if ($matches.Count -eq 0) {
+    Write-WarnMsg "No suitable PHP NTS x64 zip found on windows.php.net releases page"
+    return $null
+  }
+  $file = $matches[0].Groups[1].Value
+  $url = $releasesUrl + $file
+  Write-Info "Fetching $file"
+
+  $tmp = Join-Path ([System.IO.Path]::GetTempPath()) $file
+  try {
+    Invoke-WebRequest -Uri $url -OutFile $tmp -UseBasicParsing
+  } catch {
+    Write-WarnMsg "PHP download failed: $($_.Exception.Message)"
+    return $null
+  }
+
+  if (Test-Path -LiteralPath $targetRoot) {
+    Remove-Item -LiteralPath $targetRoot -Recurse -Force -ErrorAction SilentlyContinue
+  }
+  New-Item -ItemType Directory -Path $targetRoot -Force | Out-Null
+  Expand-Archive -LiteralPath $tmp -DestinationPath $targetRoot -Force
+  Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue
+
+  if (-not (Test-Path -LiteralPath $phpExe)) {
+    Write-WarnMsg "php.exe missing after extract to $targetRoot"
+    return $null
+  }
+
+  # Seed php.ini from development template if needed
+  $ini = Join-Path $targetRoot 'php.ini'
+  $iniDev = Join-Path $targetRoot 'php.ini-development'
+  if (-not (Test-Path -LiteralPath $ini) -and (Test-Path -LiteralPath $iniDev)) {
+    Copy-Item -LiteralPath $iniDev -Destination $ini -Force
+  }
+
+  # extension_dir for portable builds
+  if (Test-Path -LiteralPath $ini) {
+    $raw = Get-Content -LiteralPath $ini -Raw
+    $extDir = Join-Path $targetRoot 'ext'
+    if ($raw -match '(?im)^\s*;?\s*extension_dir\s*=') {
+      $raw = [regex]::Replace($raw, '(?im)^\s*;?\s*extension_dir\s*=.*$', "extension_dir=`"$extDir`"")
+    } else {
+      $raw += "`r`nextension_dir=`"$extDir`"`r`n"
+    }
+    Set-Content -LiteralPath $ini -Value $raw -Encoding UTF8
+  }
+
+  Add-ToUserPath $targetRoot
+  Write-Ok "Portable PHP installed: $phpExe"
+  return $phpExe
+}
+
+function Ensure-PhpInstalled {
+  $existing = Resolve-Php
+  if ($existing) { return $existing }
+
+  # VC runtime often required by PHP builds
+  [void](Install-WingetPackage -Id 'Microsoft.VCRedist.2015+.x64' -DisplayName 'Visual C++ Redistributable')
+
+  $ids = @(
+    'PHP.PHP.NTS.8.3',
+    'PHP.PHP.8.3',
+    'PHP.PHP.NTS.8.4',
+    'PHP.PHP.8.4',
+    'PHP.PHP.NTS.8.2',
+    'PHP.PHP.8.2',
+    'PHP.PHP'
+  )
+
+  # Also try whatever winget search returns
+  if (Get-Command winget -ErrorAction SilentlyContinue) {
+    try {
+      $search = & winget search --id PHP.PHP 2>$null | Out-String
+      $found = [regex]::Matches($search, 'PHP\.PHP(?:\.NTS)?\.\d+\.\d+') | ForEach-Object { $_.Value } | Select-Object -Unique
+      $ids = @($found) + $ids | Select-Object -Unique
+    } catch { }
+  }
+
+  foreach ($id in $ids) {
+    if (Install-WingetPackage -Id $id -DisplayName "PHP ($id)") {
+      $php = Resolve-Php
+      if ($php) { return $php }
+    }
+  }
+
+  Write-WarnMsg "winget could not install PHP; trying portable ZIP fallback..."
+  $portable = Install-PhpPortable
+  if ($portable) { return $portable }
+
   return $null
 }
 
@@ -335,15 +485,21 @@ if (-not $SkipPackageInstall) {
     Refresh-Path
   }
   if (-not (Resolve-Php)) {
-    # Common winget ids vary by publisher; try a few
-    $ok = $false
-    foreach ($id in @('PHP.PHP.8.3', 'PHP.PHP.8.2', 'PHP.PHP')) {
-      if (Install-WingetPackage -Id $id -DisplayName "PHP ($id)") { $ok = $true; break }
+    $phpInstalled = Ensure-PhpInstalled
+    if (-not $phpInstalled) {
+      Write-WarnMsg "Automatic PHP install failed."
+      Write-Host ""
+      Write-Host "Manual fix (pick one):" -ForegroundColor Yellow
+      Write-Host "  A) winget install --id PHP.PHP.NTS.8.3 -e"
+      Write-Host "  B) winget install --id PHP.PHP.8.3 -e"
+      Write-Host "  C) Download ZIP from https://windows.php.net/download/ (VS16/VS17 x64 Non Thread Safe),"
+      Write-Host "     extract to C:\php, add C:\php to PATH, copy php.ini-development to php.ini"
+      Write-Host "  D) Install XAMPP/Laragon and ensure php.exe is on PATH"
+      Write-Host ""
+      Write-Host "Then re-run:"
+      Write-Host "  .\install-windows.ps1 -SkipPackageInstall"
+      Die "PHP not found on PATH"
     }
-    if (-not $ok) {
-      Write-WarnMsg "Could not install PHP automatically. Install PHP 8.2+ manually, then re-run with -SkipPackageInstall if already present."
-    }
-    Refresh-Path
   }
   if (-not (Resolve-Mysql)) {
     $ok = $false
@@ -360,7 +516,12 @@ if (-not $SkipPackageInstall) {
 }
 
 $PhpBin = Resolve-Php
-if (-not $PhpBin) { Die "PHP not found on PATH" }
+if (-not $PhpBin) {
+  Write-Host ""
+  Write-Host "PHP still not found. Close this window, open a NEW PowerShell, then run:" -ForegroundColor Yellow
+  Write-Host "  .\install-windows.ps1 -SkipPackageInstall"
+  Die "PHP not found on PATH (new shell may be required after winget PATH changes)"
+}
 Write-Ok "Using PHP: $PhpBin"
 Enable-PhpExtensions -PhpBin $PhpBin
 
