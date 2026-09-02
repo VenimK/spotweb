@@ -1,5 +1,12 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.7 — Require PHP 8.2+ (Spotweb develop/composer)
+
+- Treat PHP < 8.2 as unusable and force portable NTS 8.3/8.4 install
+- Strip stale `extension=xml` / `extension=zip` lines when DLLs are missing
+
+---
+
 ## v2.2.6 — Prefer portable PHP on Windows
 
 - Detect incomplete WinGet PHP (missing pdo_mysql/xml/zip) and replace with portable NTS build

@@ -1,4 +1,4 @@
-﻿# Spotweb Windows Installer v2.2.6 (Windows PowerShell 5.1 compatible)
+﻿# Spotweb Windows Installer v2.2.7 (Windows PowerShell 5.1 compatible)
 <#
 .SYNOPSIS
   Install Spotweb + VenimK theme pack on Windows (PowerShell).
@@ -137,18 +137,38 @@ function Resolve-Php {
   return $null
 }
 
+function Get-PhpVersion([string]$PhpBin) {
+  if (-not $PhpBin -or -not (Test-Path -LiteralPath $PhpBin)) { return $null }
+  $oldEap = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $ver = (& $PhpBin -r "echo PHP_VERSION;" 2>$null)
+  } finally {
+    $ErrorActionPreference = $oldEap
+  }
+  if (-not $ver) { return $null }
+  return "$ver".Trim()
+}
+
 function Test-PhpUsable([string]$PhpBin) {
   if (-not $PhpBin -or -not (Test-Path -LiteralPath $PhpBin)) { return $false }
   $oldEap = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
   try {
+    $verRaw = (& $PhpBin -r "echo PHP_VERSION;" 2>$null)
     $out = & $PhpBin -m 2>&1 | Out-String
     $code = $LASTEXITCODE
   } finally {
     $ErrorActionPreference = $oldEap
   }
   if ($code -ne 0) { return $false }
-  # Spotweb needs these; WinGet PHP 8.1 packages are often incomplete
+  # Spotweb develop/composer currently requires PHP >= 8.2
+  try {
+    $ver = [version](("$verRaw").Trim() -replace '-.*$','')
+    if ($ver -lt [version]'8.2.0') { return $false }
+  } catch {
+    return $false
+  }
   foreach ($mod in @('pdo_mysql', 'mysqli', 'curl', 'mbstring', 'openssl')) {
     if ($out -notmatch "(?im)^\s*$mod\s*$") { return $false }
   }
@@ -346,6 +366,20 @@ function Enable-PhpExtensions([string]$PhpBin) {
       $raw += "`r`nextension=$ext"
     }
   }
+
+  # Remove stale extension= lines for missing DLLs (left behind by older installer runs)
+  $lines = $raw -split "`r?`n"
+  $cleaned = New-Object System.Collections.Generic.List[string]
+  foreach ($line in $lines) {
+    $em = [regex]::Match($line, '(?im)^\s*extension\s*=\s*(php_)?([A-Za-z0-9_]+)(\.dll)?\s*$')
+    if ($em.Success) {
+      $extName = $em.Groups[2].Value
+      $dllPath = Join-Path $extDir ("php_" + $extName + ".dll")
+      if ($extDir -and -not (Test-Path -LiteralPath $dllPath)) { continue }
+    }
+    $cleaned.Add($line)
+  }
+  $raw = ($cleaned -join "`r`n")
 
   # Deduplicate extension= lines
   $lines = $raw -split "`r?`n"
