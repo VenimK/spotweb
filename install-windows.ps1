@@ -1,4 +1,4 @@
-﻿# Spotweb Windows Installer v2.2.11 (Windows PowerShell 5.1 compatible)
+﻿# Spotweb Windows Installer v2.2.12 (Windows PowerShell 5.1 compatible)
 <#
 .SYNOPSIS
   Install Spotweb + VenimK theme pack on Windows (PowerShell).
@@ -655,24 +655,33 @@ function Install-Spotweb([string]$Dir, [string]$Branch) {
   Write-Ok "Spotweb downloaded"
 }
 
+function Write-Utf8NoBomFile([string]$Path, [string]$Content) {
+  # Spotweb throws if these files emit output (UTF-8 BOM or a closing ?> tag)
+  $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+  [System.IO.File]::WriteAllText($Path, $Content.TrimStart() + "`n", $utf8NoBom)
+}
+
 function Write-DbSettings([string]$Dir, [string]$Name, [string]$User, [string]$Pass) {
   Write-Info "Creating dbsettings.inc.php / ownsettings.php"
-  @"
+  # No closing ?> and no BOM — required by Spotweb
+  $db = @"
 <?php
 `$dbsettings['engine'] = 'mysql';
 `$dbsettings['host'] = '127.0.0.1';
 `$dbsettings['dbname'] = '$Name';
 `$dbsettings['user'] = '$User';
 `$dbsettings['pass'] = '$Pass';
-?>
-"@ | Set-Content -LiteralPath (Join-Path $Dir 'dbsettings.inc.php') -Encoding UTF8
 
-  @"
+"@
+  Write-Utf8NoBomFile -Path (Join-Path $Dir 'dbsettings.inc.php') -Content $db
+
+  $own = @"
 <?php
 error_reporting(E_ALL);
 `$settings['custom_stylesheet'] = '';
-?>
-"@ | Set-Content -LiteralPath (Join-Path $Dir 'ownsettings.php') -Encoding UTF8
+
+"@
+  Write-Utf8NoBomFile -Path (Join-Path $Dir 'ownsettings.php') -Content $own
 }
 
 function Patch-TemplateHeaders([string]$Dir) {

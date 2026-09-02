@@ -1,5 +1,12 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.12 — Fix ownsettings/dbsettings BOM and closing tags
+
+- Write `dbsettings.inc.php` / `ownsettings.php` as UTF-8 **without BOM**
+- Omit PHP closing `?>` tags (Spotweb rejects output before/after PHP tags)
+
+---
+
 ## v2.2.11 — Fix Windows PATH explosion
 
 - Stop duplicating `$env:Path` on every Refresh-Path call (caused "environment variable is too long")

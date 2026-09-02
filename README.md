@@ -109,8 +109,8 @@ Set-ExecutionPolicy -Scope Process Bypass
 Invoke-WebRequest -Headers @{ 'Cache-Control'='no-cache' } `
   -Uri ("https://raw.githubusercontent.com/VenimK/spotweb/themes-only/Install-Spotweb.ps1?" + (Get-Random)) `
   -OutFile .\Install-Spotweb.ps1
-# Confirm you have the latest script (must show v2.2.11):
-Select-String -Path .\Install-Spotweb.ps1 -Pattern 'v2.2.11'
+# Confirm you have the latest script (must show v2.2.12):
+Select-String -Path .\Install-Spotweb.ps1 -Pattern 'v2.2.12'
 .\Install-Spotweb.ps1 -SkipPackageInstall
 ```
 
@@ -118,7 +118,7 @@ If `Select-String` finds nothing, download by commit SHA instead:
 
 ```powershell
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/VenimK/spotweb/4efd6f452dc0419991c233984e8775445f7bccee/Install-Spotweb.ps1" -OutFile .\Install-Spotweb.ps1
-Select-String -Path .\Install-Spotweb.ps1 -Pattern 'v2.2.11'
+Select-String -Path .\Install-Spotweb.ps1 -Pattern 'v2.2.12'
 .\Install-Spotweb.ps1 -SkipPackageInstall
 ```
 
