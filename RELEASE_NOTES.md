@@ -1,5 +1,13 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.13 — XAMPP Apache helper for Windows
+
+- Add `Configure-Spotweb-Xampp.ps1` to serve Spotweb through XAMPP Apache
+- Enables rewrite/headers/expires/deflate, creates vhost + hosts entry
+- Optional winget install of `ApacheFriends.Xampp.8.2`
+
+---
+
 ## v2.2.12 — Fix ownsettings/dbsettings BOM and closing tags
 
 - Write `dbsettings.inc.php` / `ownsettings.php` as UTF-8 **without BOM**

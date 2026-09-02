@@ -122,12 +122,37 @@ Select-String -Path .\Install-Spotweb.ps1 -Pattern 'v2.2.12'
 .\Install-Spotweb.ps1 -SkipPackageInstall
 ```
 
-Start Spotweb afterwards:
+Start Spotweb afterwards (PHP built-in server):
 
 ```powershell
 cd $env:USERPROFILE\Spotweb
 .\Start-Spotweb.ps1
 # http://127.0.0.1:9999/
+```
+
+#### Prefer Apache via XAMPP (recommended for daily use)
+
+After Spotweb is installed, configure XAMPP Apache (run **as Administrator**):
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+cd $env:USERPROFILE\Spotweb
+Invoke-WebRequest -Uri ("https://raw.githubusercontent.com/VenimK/spotweb/themes-only/Configure-Spotweb-Xampp.ps1?" + (Get-Random)) -OutFile .\Configure-Spotweb-Xampp.ps1
+.\Configure-Spotweb-Xampp.ps1 -SpotwebDir $env:USERPROFILE\Spotweb -InstallXampp
+```
+
+Then:
+
+1. Stop `php -S` if it is still running (Ctrl+C)
+2. Start **Apache** in XAMPP Control Panel
+3. Keep your existing MariaDB service running if Spotweb already uses it
+4. Open **http://spotweb.local/** (or **http://127.0.0.1/**)
+
+If port 80 is busy:
+
+```powershell
+.\Configure-Spotweb-Xampp.ps1 -SpotwebDir $env:USERPROFILE\Spotweb -Port 8080
+# then open http://spotweb.local:8080/
 ```
 
 ### Existing MySQL database named `spotweb`
