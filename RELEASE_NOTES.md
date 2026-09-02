@@ -1,5 +1,13 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.5 — Bypass Windows download cache + stricter PS 5.1 quoting
+
+- Add `Install-Spotweb.ps1` (same installer, new name to avoid WinINET cache of old `install-windows.ps1`)
+- Use single-quoted here-strings for SQL/PHP hook snippets
+- Document cache-busting `Invoke-WebRequest` usage
+
+---
+
 ## v2.2.4 — Windows PowerShell 5.1 parse fix
 
 - Fix invalid `\"` escapes (PS 5.1) in template-compat SQL

@@ -105,8 +105,13 @@ bash /tmp/apply-spotweb-overlays.sh "$HOME/Sites/spotweb"
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/VenimK/spotweb/themes-only/install-windows.ps1 -OutFile install-windows.ps1
-.\install-windows.ps1
+# Use a new filename + cache-bust query so Windows does not reuse an old download
+Invoke-WebRequest -Headers @{ 'Cache-Control'='no-cache' } `
+  -Uri ("https://raw.githubusercontent.com/VenimK/spotweb/themes-only/Install-Spotweb.ps1?" + (Get-Random)) `
+  -OutFile .\Install-Spotweb.ps1
+# Confirm you have the fixed script:
+Select-String -Path .\Install-Spotweb.ps1 -Pattern 'v2.2.5'
+.\Install-Spotweb.ps1 -SkipPackageInstall
 ```
 
 Start Spotweb afterwards:
