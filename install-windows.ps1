@@ -225,18 +225,18 @@ function Ensure-PhpInstalled {
     'PHP.PHP.NTS.8.4',
     'PHP.PHP.8.4',
     'PHP.PHP.NTS.8.2',
-    'PHP.PHP.8.2',
-    'PHP.PHP'
+    'PHP.PHP.8.2'
   )
 
-  # Also try whatever winget search returns
+  # Prefer 8.2+ from winget search; avoid picking ancient 8.0/8.1 first
   if (Get-Command winget -ErrorAction SilentlyContinue) {
     try {
       $search = & winget search --id PHP.PHP 2>$null | Out-String
-      $found = [regex]::Matches($search, 'PHP\.PHP(?:\.NTS)?\.\d+\.\d+') | ForEach-Object { $_.Value } | Select-Object -Unique
-      $ids = @($found) + $ids | Select-Object -Unique
+      $found = [regex]::Matches($search, 'PHP\.PHP(?:\.NTS)?\.(8\.[2-9])') | ForEach-Object { $_.Value } | Select-Object -Unique
+      $ids = @($ids) + @($found) | Select-Object -Unique
     } catch { }
   }
+  $ids += @('PHP.PHP.NTS.8.1', 'PHP.PHP.8.1', 'PHP.PHP')  # last resorts
 
   foreach ($id in $ids) {
     if (Install-WingetPackage -Id $id -DisplayName "PHP ($id)") {
@@ -272,23 +272,107 @@ function Resolve-Mysql {
 }
 
 function Enable-PhpExtensions([string]$PhpBin) {
-  $phpIni = & $PhpBin --ini 2>$null | Select-String 'Loaded Configuration File:\s*(.+)$' | ForEach-Object { $_.Matches[0].Groups[1].Value.Trim() }
-  if (-not $phpIni -or $phpIni -eq '(none)' -or -not (Test-Path -LiteralPath $phpIni)) {
-    Write-WarnMsg "Could not locate php.ini; enable pdo_mysql/curl/gd/mbstring/openssl/zip manually if needed"
+  $phpDir = Split-Path -Parent $PhpBin
+  $loaded = & $PhpBin --ini 2>$null | Select-String 'Loaded Configuration File:\s*(.+)$' | ForEach-Object { $_.Matches[0].Groups[1].Value.Trim() }
+  $phpIni = $null
+  if ($loaded -and $loaded -ne '(none)' -and (Test-Path -LiteralPath $loaded)) {
+    $phpIni = $loaded
+  } else {
+    $candidate = Join-Path $phpDir 'php.ini'
+    $dev = Join-Path $phpDir 'php.ini-development'
+    $prod = Join-Path $phpDir 'php.ini-production'
+    if (-not (Test-Path -LiteralPath $candidate)) {
+      if (Test-Path -LiteralPath $dev) {
+        Copy-Item -LiteralPath $dev -Destination $candidate -Force
+        Write-Ok "Created php.ini from php.ini-development"
+      } elseif (Test-Path -LiteralPath $prod) {
+        Copy-Item -LiteralPath $prod -Destination $candidate -Force
+        Write-Ok "Created php.ini from php.ini-production"
+      }
+    }
+    if (Test-Path -LiteralPath $candidate) { $phpIni = $candidate }
+  }
+
+  if (-not $phpIni) {
+    Write-WarnMsg "Could not locate/create php.ini next to $PhpBin"
     return
   }
+
   Write-Info "Ensuring common PHP extensions in $phpIni"
   $raw = Get-Content -LiteralPath $phpIni -Raw
+  $extDir = Join-Path $phpDir 'ext'
+  if (Test-Path -LiteralPath $extDir) {
+    if ($raw -match '(?im)^\s*;?\s*extension_dir\s*=') {
+      $raw = [regex]::Replace($raw, '(?im)^\s*;?\s*extension_dir\s*=.*$', "extension_dir=`"$extDir`"")
+    } else {
+      $raw += "`r`nextension_dir=`"$extDir`""
+    }
+  }
   $exts = @('curl', 'fileinfo', 'gd', 'mbstring', 'mysqli', 'openssl', 'pdo_mysql', 'xml', 'zip')
   foreach ($ext in $exts) {
-    # Uncomment ";extension=ext" or ";extension=php_ext.dll"
     $raw = [regex]::Replace($raw, "(?im)^\s*;\s*extension\s*=\s*(php_)?$ext(\.dll)?\s*$", "extension=$ext")
     if ($raw -notmatch "(?im)^\s*extension\s*=\s*(php_)?$ext(\.dll)?\s*$") {
       $raw += "`r`nextension=$ext"
     }
   }
   Set-Content -LiteralPath $phpIni -Value $raw -Encoding UTF8
-  Write-Ok "Updated php.ini extensions (review if PHP fails to start)"
+  Write-Ok "Updated php.ini extensions"
+}
+
+function Start-MariaDbService {
+  Write-Info "Starting MariaDB/MySQL Windows service (if present)..."
+  $names = Get-Service -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -match 'maria|mysql' -or $_.DisplayName -match 'MariaDB|MySQL' } |
+    Select-Object -ExpandProperty Name -Unique
+
+  if (-not $names -or $names.Count -eq 0) {
+    # Common service names
+    $names = @('MariaDB', 'MySQL', 'MySQL80', 'MySQL57')
+  }
+
+  $started = $false
+  foreach ($name in $names) {
+    $svc = Get-Service -Name $name -ErrorAction SilentlyContinue
+    if (-not $svc) { continue }
+    try {
+      if ($svc.Status -ne 'Running') {
+        Write-Info "Starting service: $($svc.Name) ($($svc.DisplayName))"
+        Start-Service -Name $svc.Name -ErrorAction Stop
+      }
+      Write-Ok "Service running: $($svc.Name)"
+      $started = $true
+    } catch {
+      Write-WarnMsg "Could not start $($svc.Name): $($_.Exception.Message)"
+      Write-WarnMsg "Try elevated PowerShell: Start-Service $($svc.Name)"
+    }
+  }
+
+  if (-not $started) {
+    Write-WarnMsg "No MariaDB/MySQL service was started. Open services.msc and start MariaDB manually."
+  }
+  return $started
+}
+
+function Wait-MysqlReady {
+  param(
+    [string]$MysqlBin,
+    [string]$Password = '',
+    [int]$Tries = 30,
+    [int]$DelaySeconds = 2
+  )
+  Write-Info "Waiting for MariaDB/MySQL to accept connections..."
+  for ($i = 1; $i -le $Tries; $i++) {
+    $args = @('-h127.0.0.1', '-uroot')
+    if (-not [string]::IsNullOrEmpty($Password)) { $args += "-p$Password" }
+    $args += @('-e', 'SELECT 1;')
+    & $MysqlBin @args 2>$null | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+      Write-Ok "MariaDB/MySQL is ready"
+      return $true
+    }
+    Start-Sleep -Seconds $DelaySeconds
+  }
+  return $false
 }
 
 function Invoke-MysqlSql {
@@ -297,9 +381,11 @@ function Invoke-MysqlSql {
     [string]$Sql,
     [string]$User = 'root',
     [string]$Password = '',
-    [string]$Database = ''
+    [string]$Database = '',
+    [string]$HostAddress = '127.0.0.1'
   )
-  $args = @("-u$user")
+  # Prefer TCP 127.0.0.1 on Windows (avoids some named-pipe localhost quirks)
+  $args = @("-h$HostAddress", "-u$user")
   if (-not [string]::IsNullOrEmpty($Password)) { $args += "-p$Password" }
   if ($Database) { $args += $Database }
   $args += @('-e', $Sql)
@@ -333,7 +419,7 @@ function Write-DbSettings([string]$Dir, [string]$Name, [string]$User, [string]$P
   @"
 <?php
 `$dbsettings['engine'] = 'mysql';
-`$dbsettings['host'] = 'localhost';
+`$dbsettings['host'] = '127.0.0.1';
 `$dbsettings['dbname'] = '$Name';
 `$dbsettings['user'] = '$User';
 `$dbsettings['pass'] = '$Pass';
@@ -510,8 +596,6 @@ if (-not $SkipPackageInstall) {
       Write-WarnMsg "Could not install MariaDB/MySQL automatically. Install a local server (or XAMPP/Laragon) and ensure mysql.exe is on PATH."
     }
     Refresh-Path
-    Write-WarnMsg "If MariaDB was just installed, start the service from Services.msc (MariaDB) before continuing."
-    if (-not $NonInteractive) { Read-Host "Press Enter when MariaDB/MySQL is running" | Out-Null }
   }
 }
 
@@ -529,16 +613,34 @@ $MysqlBin = Resolve-Mysql
 if (-not $MysqlBin) { Die "mysql client not found on PATH" }
 Write-Ok "Using mysql: $MysqlBin"
 
-Write-Info "Creating database and user..."
+# MariaDB must be running (ERROR 2002 / 10061 = service not listening)
+[void](Start-MariaDbService)
 $rootPass = ''
 if (-not $NonInteractive) {
   $rootPass = Read-Host "MariaDB/MySQL root password (blank if none)"
 }
+if (-not (Wait-MysqlReady -MysqlBin $MysqlBin -Password $rootPass -Tries 30 -DelaySeconds 2)) {
+  Write-Host ""
+  Write-Host "MariaDB is installed but not accepting connections." -ForegroundColor Yellow
+  Write-Host "Run this in an elevated PowerShell, then re-run the installer:" -ForegroundColor Yellow
+  Write-Host "  Get-Service *maria*,*mysql* | Format-Table Name,Status,DisplayName"
+  Write-Host "  Start-Service MariaDB"
+  Write-Host "  # or: net start MariaDB"
+  Write-Host ""
+  Write-Host "Then:"
+  Write-Host "  .\install-windows.ps1 -SkipPackageInstall"
+  Die "Cannot connect to MariaDB/MySQL on 127.0.0.1 (is the service running?)"
+}
+
+Write-Info "Creating database and user..."
 try {
   Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "CREATE DATABASE IF NOT EXISTS ``$DbName`` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-  Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "CREATE USER IF NOT EXISTS '$DbUser'@'localhost' IDENTIFIED BY '$DbPass';"
-  Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "ALTER USER '$DbUser'@'localhost' IDENTIFIED BY '$DbPass';"
-  Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "GRANT ALL PRIVILEGES ON ``$DbName``.* TO '$DbUser'@'localhost';"
+  # Create user for both localhost and 127.0.0.1 (Windows auth quirks)
+  foreach ($hostName in @('localhost', '127.0.0.1')) {
+    try { Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "CREATE USER IF NOT EXISTS '$DbUser'@'$hostName' IDENTIFIED BY '$DbPass';" } catch { }
+    try { Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "ALTER USER '$DbUser'@'$hostName' IDENTIFIED BY '$DbPass';" } catch { }
+    Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "GRANT ALL PRIVILEGES ON ``$DbName``.* TO '$DbUser'@'$hostName';"
+  }
   Invoke-MysqlSql -MysqlBin $MysqlBin -Password $rootPass -Sql "FLUSH PRIVILEGES;"
   Write-Ok "Database configured"
 } catch {

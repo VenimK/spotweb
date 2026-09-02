@@ -1,5 +1,14 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.2 — Auto-start MariaDB + seed php.ini
+
+- Start MariaDB/MySQL Windows service automatically and wait until it accepts connections
+- Create `php.ini` from `php.ini-development` for WinGet PHP packages (fixes missing pdo_mysql)
+- Prefer PHP 8.2+ package IDs; use 127.0.0.1 for DB host on Windows
+- Clearer recovery when ERROR 2002 / 10061 occurs
+
+---
+
 ## v2.2.1 — Windows PHP install fallbacks
 
 - Stronger PHP discovery after winget (WinGet Packages folder, PATH refresh)
