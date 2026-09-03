@@ -483,6 +483,51 @@ function Get-MariaDbInstallDir {
   return ($hits | Sort-Object FullName -Descending | Select-Object -First 1).FullName
 }
 
+function Test-IsAdmin {
+  try {
+    $id = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $p = New-Object Security.Principal.WindowsPrincipal($id)
+    return $p.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+  } catch {
+    return $false
+  }
+}
+
+function Invoke-Elevated {
+  <#
+    Run a script block in an elevated PowerShell process.
+    Returns $true if the elevated process exited 0, $false otherwise.
+    If already admin, runs the block inline.
+  #>
+  param([scriptblock]$Block, [string]$Description = 'elevated operation')
+  if (Test-IsAdmin) {
+    try {
+      & $Block
+      return ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE)
+    } catch {
+      Write-WarnMsg "$Description failed: $($_.Exception.Message)"
+      return $false
+    }
+  }
+  $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($Block.ToString()))
+  Write-Info "Requesting elevation for: $Description"
+  try {
+    $proc = Start-Process -FilePath 'powershell.exe' `
+      -ArgumentList @('-NoProfile', '-NonInteractive', '-EncodedCommand', $encoded) `
+      -Verb RunAs -Wait -PassThru -WindowStyle Hidden
+    if ($proc.ExitCode -eq 0) {
+      Write-Ok "Elevated operation succeeded: $Description"
+      return $true
+    } else {
+      Write-WarnMsg "Elevated operation returned exit code $($proc.ExitCode): $Description"
+      return $false
+    }
+  } catch {
+    Write-WarnMsg "Could not elevate (UAC declined?): $($_.Exception.Message)"
+    return $false
+  }
+}
+
 function Ensure-MariaDbWindowsService {
   <#
     Winget often installs MariaDB files without a running service.
@@ -523,14 +568,14 @@ function Ensure-MariaDbWindowsService {
     }
 
     Write-Info "Registering Windows service via: $mysqld --install"
-    try {
-      $oldEap = $ErrorActionPreference
-      $ErrorActionPreference = 'Continue'
+    $installOk = Invoke-Elevated -Description 'mysqld --install' -Block {
       & $mysqld --install 2>&1 | Out-Host
-      $ErrorActionPreference = $oldEap
-    } catch {
-      Write-WarnMsg "mysqld --install failed: $($_.Exception.Message)"
-      Write-WarnMsg "Re-run this installer from an elevated PowerShell (Run as administrator)."
+      exit $LASTEXITCODE
+    }
+    if (-not $installOk) {
+      Write-WarnMsg "mysqld --install failed or UAC was declined."
+      Write-WarnMsg "To do it manually, open an elevated PowerShell and run:"
+      Write-WarnMsg "  & '$mysqld' --install"
       return $false
     }
 
@@ -565,7 +610,15 @@ function Ensure-MariaDbWindowsService {
     try {
       if ($svc.Status -ne 'Running') {
         Write-Info "Starting service: $($svc.Name) ($($svc.DisplayName))"
-        Start-Service -Name $svc.Name -ErrorAction Stop
+        $svcName = $svc.Name
+        $startOk = Invoke-Elevated -Description "Start-Service $svcName" -Block {
+          Start-Service -Name $svcName -ErrorAction Stop
+        }
+        if (-not $startOk) {
+          Write-WarnMsg "Could not start $svcName via elevation."
+          Write-WarnMsg "Open an elevated PowerShell and run: Start-Service $svcName"
+          continue
+        }
       }
       $svc.Refresh()
       if ($svc.Status -eq 'Running') {
