@@ -1,5 +1,16 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.14 — IIS + PHP FastCGI for Windows
+
+- Add `Configure-Spotweb-IIS.ps1` to serve Spotweb through IIS with PHP FastCGI
+- Enables IIS + CGI features via DISM, registers PHP as FastCGI handler
+- Creates dedicated app pool + site with `web.config` (handler mappings, MIME types, security headers)
+- Optionally installs IIS URL Rewrite module for clean-URL support
+- Sets `IIS_IUSRS` permissions on Spotweb root and cache directory
+- Best Windows performance: multi-process FastCGI, kernel-mode caching, process recycling
+
+---
+
 ## v2.2.13 — XAMPP Apache helper for Windows
 
 - Add `Configure-Spotweb-Xampp.ps1` to serve Spotweb through XAMPP Apache
