@@ -153,6 +153,7 @@ write_dbsettings() {
   local db_pass="$4"
 
   print_info "Creating dbsettings.inc.php"
+  # No closing ?> — Spotweb rejects settings files that emit output
   cat > "${spotweb_dir}/dbsettings.inc.php" <<EOF
 <?php
 \$dbsettings['engine'] = 'mysql';
@@ -160,7 +161,6 @@ write_dbsettings() {
 \$dbsettings['dbname'] = '${db_name}';
 \$dbsettings['user'] = '${db_user}';
 \$dbsettings['pass'] = '${db_pass}';
-?>
 EOF
   chmod 640 "${spotweb_dir}/dbsettings.inc.php" || true
 
@@ -169,7 +169,6 @@ EOF
 <?php
 error_reporting(E_ALL);
 $settings['custom_stylesheet'] = '';
-?>
 EOF
   chmod 644 "${spotweb_dir}/ownsettings.php" || true
 }
@@ -482,14 +481,37 @@ main() {
   apply_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/apply-spotweb-overlays.sh"
   if [[ ! -f "${apply_script}" ]]; then
     print_info "Downloading apply-spotweb-overlays.sh..."
-    apply_script="$(mktemp)"
-    curl -fsSL "${GITHUB_RAW_BASE}/apply-spotweb-overlays.sh" -o "${apply_script}" || apply_script=""
+    apply_script="$(mktemp /tmp/apply-spotweb-overlays.XXXXXX.sh)"
+    if curl -fsSL "${GITHUB_RAW_BASE}/apply-spotweb-overlays.sh" -o "${apply_script}"; then
+      chmod +x "${apply_script}" || true
+    else
+      apply_script=""
+    fi
   fi
   if [[ -n "${apply_script}" && -f "${apply_script}" ]]; then
     print_info "Applying Spotweb overlays (NZB panel fix, router, modern UX helpers)..."
-    bash "${apply_script}" "${spotweb_dir}" || print_warn "Overlay apply reported errors (continuing)"
+    bash "${apply_script}" "${spotweb_dir}" || print_warn "Overlay apply reported errors"
   else
-    print_warn "apply-spotweb-overlays.sh unavailable; skipping overlays"
+    print_warn "apply-spotweb-overlays.sh unavailable"
+  fi
+  # Guarantee key overlay files exist even if apply script failed (curl-based install)
+  mkdir -p "${spotweb_dir}/bin"
+  if [[ ! -f "${spotweb_dir}/router.php" ]]; then
+    print_info "Fetching router.php overlay directly..."
+    curl -fsSL "${GITHUB_RAW_BASE}/overlays/spotweb/router.php" -o "${spotweb_dir}/router.php" || print_warn "router.php download failed"
+  fi
+  if [[ ! -f "${spotweb_dir}/bin/dev-server.sh" ]]; then
+    print_info "Fetching bin/dev-server.sh overlay directly..."
+    curl -fsSL "${GITHUB_RAW_BASE}/overlays/spotweb/bin/dev-server.sh" -o "${spotweb_dir}/bin/dev-server.sh" || print_warn "dev-server.sh download failed"
+  fi
+  if [[ ! -f "${spotweb_dir}/bin/doctor.php" ]]; then
+    curl -fsSL "${GITHUB_RAW_BASE}/overlays/spotweb/bin/doctor.php" -o "${spotweb_dir}/bin/doctor.php" || true
+  fi
+  chmod +x "${spotweb_dir}/bin/"*.sh "${spotweb_dir}/bin/doctor.php" 2>/dev/null || true
+  if [[ -f "${spotweb_dir}/bin/dev-server.sh" && -f "${spotweb_dir}/router.php" ]]; then
+    print_success "Overlays ready (router.php + bin/dev-server.sh)"
+  else
+    print_warn "Overlays incomplete; you can still start with: ${PHP_BIN} -S 127.0.0.1:9999 -t \"${spotweb_dir}\""
   fi
 
   init_spotweb_db "${spotweb_dir}"
