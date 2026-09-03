@@ -201,7 +201,7 @@ http://YOUR_IP/spotweb
 ```
 
 - Look for 🎨 theme button (top right)
-- Click it - should show 7 pre-installed themes
+- Click it - should show 11 pre-installed themes
 - Switch between themes - should work
 - Check browser console - no errors
 

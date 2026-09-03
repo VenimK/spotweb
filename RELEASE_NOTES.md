@@ -4,7 +4,7 @@
 
 A complete theme system for Spotweb featuring:
 
-- **8 Beautiful Pre-installed Themes**
+- **11 Beautiful Pre-installed Themes**
   - Light (Default)
   - Dark
   - Midnight Ocean
@@ -13,6 +13,10 @@ A complete theme system for Spotweb featuring:
   - Dracula
   - Forest
   - Sunset
+  - Spring
+  - Summer
+  - Autumn
+  - Winter
 
 - **Smart Theme Switcher** - One-click theme changes with auto-detection
 - **Theme Customizer** - Visual tool to create custom themes

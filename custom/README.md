@@ -147,6 +147,6 @@ chown -R www-data:www-data custom/
 
 ## 📝 Version
 
-Custom Extensions Version: 1.0.0
+Custom Extensions Version: 2.0.0
 Compatible with: Spotweb 1.5+
 Last Updated: December 2025

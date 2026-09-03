@@ -4,7 +4,7 @@
 
 Transform your Spotweb interface with professionally designed themes featuring an intelligent theme switcher, customization tools, and automatic theme detection. All themes are update-safe and won't be overwritten when you update Spotweb!
 
-[![Themes](https://img.shields.io/badge/themes-8_preinstalled-blue)](#-available-themes)
+[![Themes](https://img.shields.io/badge/themes-11_preinstalled-blue)](#-available-themes)
 [![Install](https://img.shields.io/badge/install-one--command-green)](#-installation)
 [![Update Safe](https://img.shields.io/badge/updates-100%25_safe-brightgreen)](#-update-safe-design)
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/VenimK)

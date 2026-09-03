@@ -101,7 +101,7 @@ function sanitizeThemeName($name) {
 
 function getInstalledThemes() {
     $themes = [];
-    $defaultThemes = ['dark', 'midnight-ocean', 'cyberpunk', 'nord', 'dracula', 'forest', 'sunset'];
+    $defaultThemes = ['dark', 'midnight-ocean', 'cyberpunk', 'nord', 'dracula', 'forest', 'sunset', 'spring', 'summer', 'autumn', 'winter'];
     
     $files = glob(THEME_DIR . '/theme-*.css');
     foreach ($files as $file) {
