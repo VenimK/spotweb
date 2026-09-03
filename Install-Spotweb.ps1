@@ -637,24 +637,86 @@ function Wait-MysqlReady {
   param(
     [string]$MysqlBin,
     [string]$Password = '',
-    [int]$Tries = 30,
-    [int]$DelaySeconds = 2
+    [int]$Tries = 40,
+    [int]$DelaySeconds = 3
   )
   Write-Info "Waiting for MariaDB/MySQL to accept connections..."
+
+  $mysqlDir = Split-Path -Parent $MysqlBin
+  $mysqladmin = Join-Path $mysqlDir 'mysqladmin.exe'
+
+  # Try both TCP (127.0.0.1) and named-pipe (localhost)
+  $hostOptions = @('127.0.0.1', 'localhost')
+
+  # Build password variants: try with provided password, then without
+  $passVariants = @()
+  if ($Password) { $passVariants += $Password }
+  $passVariants += ''  # always try blank password as fallback
+
   $oldEap = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
   try {
     for ($i = 1; $i -le $Tries; $i++) {
-      $args = @('-h127.0.0.1', '-uroot')
-      if (-not [string]::IsNullOrEmpty($Password)) { $args += "-p$Password" }
-      $args += @('-e', 'SELECT 1;')
-      $null = & $MysqlBin @args 2>&1
-      if ($LASTEXITCODE -eq 0) {
-        Write-Ok "MariaDB/MySQL is ready"
-        return $true
+
+      # First check: is port 3306 even listening? (diagnostic only)
+      if ($i -eq 1 -or $i -eq 5 -or $i -eq 15) {
+        $portOpen = $false
+        try {
+          $tcp = New-Object Net.Sockets.TcpClient
+          $iar = $tcp.BeginConnect('127.0.0.1', 3306, $null, $null)
+          $success = $iar.AsyncWaitHandle.WaitOne(2000, $false)
+          if ($success -and $tcp.Connected) { $portOpen = $true }
+          $tcp.Close()
+        } catch { }
+        if ($portOpen) {
+          Write-Info "  TCP port 3306 is open on 127.0.0.1"
+        } else {
+          Write-Info "  TCP port 3306 not open yet (may be using named pipes)"
+        }
       }
-      Write-Info "  attempt $i/$Tries - not ready yet..."
-      Start-Sleep -Seconds $DelaySeconds
+
+      # Try mysqladmin ping first (lighter than a full query)
+      if (Test-Path -LiteralPath $mysqladmin) {
+        foreach ($hostName in $hostOptions) {
+          foreach ($pass in $passVariants) {
+            $maArgs = @("-h$hostName", '-uroot')
+            if ($pass) { $maArgs += "-p$pass" }
+            $maArgs += 'ping'
+            $maOut = & $mysqladmin @maArgs 2>&1 | Out-String
+            if ($LASTEXITCODE -eq 0 -or $maOut -match 'alive') {
+              Write-Ok "MariaDB/MySQL is ready (via mysqladmin ping on $hostName)"
+              return $true
+            }
+          }
+        }
+      }
+
+      # Fall back to mysql SELECT 1
+      foreach ($hostName in $hostOptions) {
+        foreach ($pass in $passVariants) {
+          $mArgs = @("-h$hostName", '-uroot')
+          if ($pass) { $mArgs += "-p$pass" }
+          $mArgs += @('-e', 'SELECT 1;')
+          $mOut = & $MysqlBin @mArgs 2>&1 | Out-String
+          if ($LASTEXITCODE -eq 0) {
+            Write-Ok "MariaDB/MySQL is ready (via mysql on $hostName)"
+            return $true
+          }
+        }
+      }
+
+      # Show a hint on first failure
+      if ($i -eq 1) {
+        $errLine = ($mOut -split "`n" | Where-Object { $_ -match 'ERROR|Access|Can''t' } | Select-Object -First 1).Trim()
+        if ($errLine) {
+          Write-Info "  Last error: $errLine"
+        }
+      }
+
+      if ($i -lt $Tries) {
+        Write-Info "  attempt $i/$Tries - not ready yet..."
+        Start-Sleep -Seconds $DelaySeconds
+      }
     }
   } finally {
     $ErrorActionPreference = $oldEap
@@ -950,16 +1012,23 @@ $rootPass = ''
 if (-not $NonInteractive) {
   $rootPass = Read-Host "MariaDB/MySQL root password (blank if none)"
 }
-if (-not (Wait-MysqlReady -MysqlBin $MysqlBin -Password $rootPass -Tries 30 -DelaySeconds 2)) {
+if (-not (Wait-MysqlReady -MysqlBin $MysqlBin -Password $rootPass)) {
   Write-Host ""
   Write-Host "MariaDB is installed but not accepting connections." -ForegroundColor Yellow
-  Write-Host "Run these in an elevated PowerShell (Run as administrator):" -ForegroundColor Yellow
-  Write-Host '  cd "C:\Program Files\MariaDB 12.3\bin"'
-  Write-Host "  .\mysqld --install"
-  Write-Host "  Get-Service *maria*,*mysql* | Format-Table Name,Status,DisplayName"
-  Write-Host "  Start-Service MySQL"
-  Write-Host "  # if service name is MariaDB: Start-Service MariaDB"
-  Write-Host '  & ".\mysql.exe" -h127.0.0.1 -uroot -e "SELECT 1;"'
+  Write-Host ""
+  Write-Host "Diagnostics:" -ForegroundColor Yellow
+  Write-Host "  1) Check service status:"
+  Write-Host '     Get-Service *maria*,*mysql* | Format-Table Name,Status,DisplayName'
+  Write-Host "  2) Try connecting manually:"
+  Write-Host '     mysql -h127.0.0.1 -uroot -e "SELECT 1;"'
+  Write-Host '     mysql -hlocalhost -uroot -e "SELECT 1;"'
+  Write-Host "  3) Check if port 3306 is listening:"
+  Write-Host '     netstat -an | findstr 3306'
+  Write-Host "  4) Check MariaDB error log:"
+  Write-Host '     Get-Content "C:\Program Files\MariaDB*\data\*.err" -Tail 20'
+  Write-Host ""
+  Write-Host "If the service is not running, start it (elevated):"
+  Write-Host "  Start-Service MySQL   # or: Start-Service MariaDB"
   Write-Host ""
   Write-Host "Then re-run:"
   Write-Host "  .\install-windows.ps1 -SkipPackageInstall"
