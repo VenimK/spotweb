@@ -29,9 +29,11 @@ param(
   [string]$ThemeMode = 'pack',
   [ValidateSet('master', 'develop')]
   [string]$SpotwebBranch = 'master',
-  [int]$Port = 9999,
+  [int]$Port = 80,
   [ValidateSet('ask', 'reuse', 'wipe', 'create')]
   [string]$DbAction = 'ask',
+  [ValidateSet('iis', 'php-s')]
+  [string]$ServerMode = 'iis',
   [switch]$SkipPackageInstall,
   [switch]$NonInteractive
 )
@@ -804,7 +806,18 @@ if (-not $NonInteractive) {
     default { $ThemeMode = 'pack' }
   }
 
-  $Port = [int](Read-Default "Local web port for PHP built-in server" "$Port")
+  Write-Host ""
+  Write-Host "Web Server:"
+  Write-Host "  1) IIS + PHP FastCGI (recommended - best performance)"
+  Write-Host "  2) PHP built-in server (dev only - single threaded)"
+  $serverChoice = Read-Default "Select web server" '1'
+  switch ($serverChoice) {
+    '2' { $ServerMode = 'php-s'; $Port = 9999 }
+    default { $ServerMode = 'iis'; $Port = 80 }
+  }
+
+  $portLabel = if ($ServerMode -eq 'iis') { 'IIS site port' } else { 'PHP built-in server port' }
+  $Port = [int](Read-Default "$portLabel" "$Port")
 
   Write-Host ""
   Write-Host "Spotweb Version:"
@@ -1012,7 +1025,7 @@ Write-DbSettings -Dir $SpotwebDir -Name $DbName -User $DbUser -Pass $DbPass
 Install-Themes -Dir $SpotwebDir -Mode $ThemeMode
 Apply-Overlays -Dir $SpotwebDir
 
-# Copy Windows starter next to Spotweb for convenience
+# Copy Windows starter next to Spotweb for convenience (fallback for php -S)
 $startSrc = Join-Path $ScriptDir 'Start-Spotweb.ps1'
 if (-not (Test-Path -LiteralPath $startSrc)) {
   try {
@@ -1020,6 +1033,72 @@ if (-not (Test-Path -LiteralPath $startSrc)) {
   } catch { Write-WarnMsg "Could not download Start-Spotweb.ps1" }
 } else {
   Copy-Item -LiteralPath $startSrc -Destination (Join-Path $SpotwebDir 'Start-Spotweb.ps1') -Force
+}
+
+# Track whether IIS setup succeeded (for final output)
+$IisConfigured = $false
+
+# Configure IIS + PHP FastCGI if selected
+if ($ServerMode -eq 'iis') {
+  Write-Host ""
+  Write-Info "Configuring IIS + PHP FastCGI (recommended for production)..."
+
+  # Check admin privileges (required for IIS)
+  $isAdmin = $false
+  try {
+    $id = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $p = New-Object Security.Principal.WindowsPrincipal($id)
+    $isAdmin = $p.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+  } catch { }
+
+  if (-not $isAdmin) {
+    Write-WarnMsg "IIS setup requires Administrator privileges."
+    Write-WarnMsg "Falling back to PHP built-in server (php -S)."
+    Write-WarnMsg "To configure IIS later, run as Admin:"
+    Write-WarnMsg "  .\Configure-Spotweb-IIS.ps1 -SpotwebDir `"$SpotwebDir`" -Port $Port"
+    $ServerMode = 'php-s'
+    if ($Port -eq 80) { $Port = 9999 }
+  } else {
+    # Get or download Configure-Spotweb-IIS.ps1
+    $iisScript = Join-Path $ScriptDir 'Configure-Spotweb-IIS.ps1'
+    if (-not (Test-Path -LiteralPath $iisScript)) {
+      $iisScript = Join-Path $SpotwebDir 'Configure-Spotweb-IIS.ps1'
+      if (-not (Test-Path -LiteralPath $iisScript)) {
+        try {
+          Download-File "$GithubRawBase/Configure-Spotweb-IIS.ps1" $iisScript
+        } catch {
+          Write-WarnMsg "Could not download Configure-Spotweb-IIS.ps1: $($_.Exception.Message)"
+          $iisScript = $null
+        }
+      }
+    }
+
+    if ($iisScript -and (Test-Path -LiteralPath $iisScript)) {
+      $iisArgs = @('-SpotwebDir', $SpotwebDir, '-Port', $Port, '-PhpBin', $PhpBin)
+      Write-Info "Running: $iisScript $([string]::Join(' ', $iisArgs))"
+      try {
+        & $iisScript @iisArgs
+        if ($LASTEXITCODE -eq 0) {
+          $IisConfigured = $true
+          Write-Ok "IIS + PHP FastCGI configured successfully"
+        } else {
+          Write-WarnMsg "IIS setup returned exit code $LASTEXITCODE"
+          Write-WarnMsg "Falling back to PHP built-in server (php -S)."
+          $ServerMode = 'php-s'
+          if ($Port -eq 80) { $Port = 9999 }
+        }
+      } catch {
+        Write-WarnMsg "IIS setup failed: $($_.Exception.Message)"
+        Write-WarnMsg "Falling back to PHP built-in server (php -S)."
+        $ServerMode = 'php-s'
+        if ($Port -eq 80) { $Port = 9999 }
+      }
+    } else {
+      Write-WarnMsg "Configure-Spotweb-IIS.ps1 not found. Falling back to php -S."
+      $ServerMode = 'php-s'
+      if ($Port -eq 80) { $Port = 9999 }
+    }
+  }
 }
 
 Write-Info "Initializing Spotweb database schema..."
@@ -1043,22 +1122,45 @@ $elapsed = (Get-Date) - $StartTime
 Write-Host ""
 Write-Ok "Installation complete"
 Write-Host ""
-Write-Host "Access Spotweb (PHP built-in server):"
-Write-Host "  1) Start server:"
-Write-Host "     cd `"$SpotwebDir`""
-Write-Host "     .\Start-Spotweb.ps1 -Port $Port"
-Write-Host "     # or: `"$PhpBin`" -S 127.0.0.1:$Port -t `"$SpotwebDir`" `"$SpotwebDir\router.php`""
-Write-Host "  2) Open:"
-Write-Host "     http://127.0.0.1:$Port/"
-Write-Host ""
+if ($IisConfigured) {
+  Write-Host "Access Spotweb (IIS + PHP FastCGI):"
+  Write-Host "  Open:"
+  if ($Port -eq 80) {
+    Write-Host "    http://spotweb.local/"
+    Write-Host "    http://127.0.0.1/"
+  } else {
+    Write-Host "    http://spotweb.local:$Port/"
+    Write-Host "    http://127.0.0.1:$Port/"
+  }
+  Write-Host ""
+  Write-Host "Manage IIS:"
+  Write-Host "  - IIS Manager: inetmgr"
+  Write-Host "  - Stop site:   appcmd stop site spotweb.local"
+  Write-Host "  - Start site:  appcmd start site spotweb.local"
+  Write-Host ""
+} else {
+  Write-Host "Access Spotweb (PHP built-in server):"
+  Write-Host "  1) Start server:"
+  Write-Host "     cd `"$SpotwebDir`""
+  Write-Host "     .\Start-Spotweb.ps1 -Port $Port"
+  Write-Host "     # or: `"$PhpBin`" -S 127.0.0.1:$Port -t `"$SpotwebDir`" `"$SpotwebDir\router.php`""
+  Write-Host "  2) Open:"
+  Write-Host "     http://127.0.0.1:$Port/"
+  Write-Host ""
+}
 Write-Host "Admin login:"
 Write-Host "  Username: admin"
 Write-Host "  Password: spotweb"
 Write-Host ""
 if ($ThemeMode -eq 'pack') {
   Write-Host "Theme tools:"
-  Write-Host "  Customizer: http://127.0.0.1:$Port/custom/tools/theme-customizer.html"
-  Write-Host "  Upload:     http://127.0.0.1:$Port/custom/tools/theme-upload.php"
+  if ($IisConfigured -and $Port -eq 80) {
+    Write-Host "  Customizer: http://spotweb.local/custom/tools/theme-customizer.html"
+    Write-Host "  Upload:     http://spotweb.local/custom/tools/theme-upload.php"
+  } else {
+    Write-Host "  Customizer: http://127.0.0.1:$Port/custom/tools/theme-customizer.html"
+    Write-Host "  Upload:     http://127.0.0.1:$Port/custom/tools/theme-upload.php"
+  }
   Write-Host ""
 }
 Write-Host "Health check:"
@@ -1066,6 +1168,8 @@ Write-Host "  `"$PhpBin`" `"$SpotwebDir\bin\doctor.php`""
 Write-Host ""
 Write-Host ("Completed in {0}m {1}s" -f [int]$elapsed.TotalMinutes, $elapsed.Seconds) -ForegroundColor Green
 Write-Host ""
-Write-WarnMsg "Tip: for production on Windows, use IIS + PHP FastCGI or Apache instead of php -S."
-Write-Host "  IIS:  .\Configure-Spotweb-IIS.ps1 -SpotwebDir `"$SpotwebDir`""
-Write-Host "  XAMPP: .\Configure-Spotweb-Xampp.ps1 -SpotwebDir `"$SpotwebDir`""
+if (-not $IisConfigured) {
+  Write-WarnMsg "Tip: for production on Windows, use IIS + PHP FastCGI or Apache instead of php -S."
+  Write-Host "  IIS:   .\Configure-Spotweb-IIS.ps1 -SpotwebDir `"$SpotwebDir`""
+  Write-Host "  XAMPP: .\Configure-Spotweb-Xampp.ps1 -SpotwebDir `"$SpotwebDir`""
+}

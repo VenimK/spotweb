@@ -1,9 +1,12 @@
 # Spotweb Multi-Theme System — Release Notes
 
-## v2.2.14 — IIS + PHP FastCGI for Windows
+## v2.2.14 — IIS + PHP FastCGI is now the default Windows server
 
 - Add `Configure-Spotweb-IIS.ps1` to serve Spotweb through IIS with PHP FastCGI
-- Enables IIS + CGI features via DISM, registers PHP as FastCGI handler
+- `Install-Spotweb.ps1` now defaults to IIS + FastCGI (option 1) instead of `php -S`
+- Installer prompts for web server choice (IIS recommended, php -S as fallback)
+- Graceful fallback: if not admin or IIS unavailable, falls back to `php -S` on port 9999
+- IIS setup: enables IIS + CGI features via DISM, registers PHP as FastCGI handler
 - Creates dedicated app pool + site with `web.config` (handler mappings, MIME types, security headers)
 - Optionally installs IIS URL Rewrite module for clean-URL support
 - Sets `IIS_IUSRS` permissions on Spotweb root and cache directory
