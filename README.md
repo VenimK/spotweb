@@ -81,13 +81,90 @@ chmod +x install-macos.sh
 ./install-macos.sh
 ```
 
-After installation, start Spotweb locally (the installer will print the exact command):
+After installation, start Spotweb locally (the installer will print the exact command). Preferred:
 
 ```bash
-/opt/homebrew/opt/php@8.2/bin/php -S 127.0.0.1:8080 -t "$HOME/Sites/spotweb"
+"$HOME/Sites/spotweb/bin/dev-server.sh"
+# http://127.0.0.1:9999/
 ```
 
-### Option 3: Add to Existing Spotweb
+Or manually with the caching router:
+
+```bash
+/opt/homebrew/opt/php@8.2/bin/php -S 127.0.0.1:9999 -t "$HOME/Sites/spotweb" "$HOME/Sites/spotweb/router.php"
+```
+
+To refresh Spotweb UI/NZB fixes later without reinstalling themes:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/VenimK/spotweb/themes-only/apply-spotweb-overlays.sh -o /tmp/apply-spotweb-overlays.sh
+bash /tmp/apply-spotweb-overlays.sh "$HOME/Sites/spotweb"
+```
+
+### Option 3: Native Windows (PowerShell)
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+# Cache-bust download (Windows often reuses stale GitHub raw files)
+Invoke-WebRequest -Headers @{ 'Cache-Control'='no-cache' } `
+  -Uri ("https://raw.githubusercontent.com/VenimK/spotweb/themes-only/Install-Spotweb.ps1?" + (Get-Random)) `
+  -OutFile .\Install-Spotweb.ps1
+# Confirm you have the latest script (must show v2.2.12):
+Select-String -Path .\Install-Spotweb.ps1 -Pattern 'v2.2.12'
+.\Install-Spotweb.ps1 -SkipPackageInstall
+```
+
+If `Select-String` finds nothing, download by commit SHA instead:
+
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/VenimK/spotweb/4efd6f452dc0419991c233984e8775445f7bccee/Install-Spotweb.ps1" -OutFile .\Install-Spotweb.ps1
+Select-String -Path .\Install-Spotweb.ps1 -Pattern 'v2.2.12'
+.\Install-Spotweb.ps1 -SkipPackageInstall
+```
+
+Start Spotweb afterwards (PHP built-in server):
+
+```powershell
+cd $env:USERPROFILE\Spotweb
+.\Start-Spotweb.ps1
+# http://127.0.0.1:9999/
+```
+
+#### Prefer Apache via XAMPP (recommended for daily use)
+
+After Spotweb is installed, configure XAMPP Apache (run **as Administrator**):
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+cd $env:USERPROFILE\Spotweb
+Invoke-WebRequest -Uri ("https://raw.githubusercontent.com/VenimK/spotweb/themes-only/Configure-Spotweb-Xampp.ps1?" + (Get-Random)) -OutFile .\Configure-Spotweb-Xampp.ps1
+.\Configure-Spotweb-Xampp.ps1 -SpotwebDir $env:USERPROFILE\Spotweb -InstallXampp
+```
+
+Then:
+
+1. Stop `php -S` if it is still running (Ctrl+C)
+2. Start **Apache** in XAMPP Control Panel
+3. Keep your existing MariaDB service running if Spotweb already uses it
+4. Open **http://spotweb.local/** (or **http://127.0.0.1/**)
+
+If port 80 is busy:
+
+```powershell
+.\Configure-Spotweb-Xampp.ps1 -SpotwebDir $env:USERPROFILE\Spotweb -Port 8080
+# then open http://spotweb.local:8080/
+```
+
+### Existing MySQL database named `spotweb`
+
+The installer creates a **database** named `spotweb` (with many tables like `spots`, `users`, `settings`). That is not the same as a single **table** named `spotweb`.
+
+If the `spotweb` database already exists, the Windows installer asks whether to:
+1. **Reuse** it (schema upgrade; optional admin password reset)
+2. **Wipe** it (DROP + recreate — destroys data)
+3. Use a **different database name**
+
+### Option 4: Add to Existing Spotweb
 
 Already have Spotweb? See **[MIGRATION-GUIDE.md](MIGRATION-GUIDE.md)** for installation steps.
 

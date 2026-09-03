@@ -902,6 +902,15 @@ PHPEOF
     echo "✓ Dark mode installed 🌙"
     echo "  → Theme: custom/themes/preinstalled/theme-dark.css"
 fi
+
+# Apply VenimK Spotweb overlays (NZBGet panel fix, modern UX, helpers)
+echo "→ Applying Spotweb overlays..."
+curl -fsSL "${GITHUB_REPO}/apply-spotweb-overlays.sh" -o /tmp/apply-spotweb-overlays.sh \
+  && bash /tmp/apply-spotweb-overlays.sh "${SPOTWEB_DIR}" \
+  && rm -f /tmp/apply-spotweb-overlays.sh \
+  || echo "  ⚠ Overlay apply skipped/failed"
+chown -R www-data:www-data "${SPOTWEB_DIR}/bin" "${SPOTWEB_DIR}/templates/modern" "${SPOTWEB_DIR}/router.php" 2>/dev/null || true
+chmod +x "${SPOTWEB_DIR}/bin/"*.sh "${SPOTWEB_DIR}/bin/"*.php 2>/dev/null || true
 THEME_SCRIPT
 
     # Replace placeholder with actual theme choice
