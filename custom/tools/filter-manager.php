@@ -428,10 +428,17 @@ try {
           <label>Category</label>
           <select name="category">
             <option value="">All categories</option>
-            <option value="cat0_z0">Image</option>
-            <option value="cat0_z1">Video</option>
-            <option value="cat0_z2">Audio</option>
-            <option value="cat0_z3">Applications / Games</option>
+            <optgroup label="Image (cat0)">
+              <option value="cat0_z0">Movies</option>
+              <option value="cat0_z1">Series</option>
+              <option value="cat0_z2">Books</option>
+              <option value="cat0_z3">Erotica</option>
+              <option value="cat0_z4">Pictures</option>
+              <option value="cat0">All Image</option>
+            </optgroup>
+            <option value="cat1">Audio / Music</option>
+            <option value="cat2">Games</option>
+            <option value="cat3">Applications</option>
           </select>
         </div>
         <div>
@@ -472,9 +479,12 @@ try {
       then click <code>Add Filter</code>. The filter appears in Spotweb's sidebar under <strong>Filters</strong>.
       <br><br>
       <strong>Examples:</strong>
-      <br>&bull; Name: <code>4K Movies</code>, Category: <code>Video</code>, Search: <code>4K</code>
-      <br>&bull; Name: <code>eBooks</code>, Category: <code>Image</code>, Search: <code>eBook</code>
-      <br>&bull; Name: <code>Music</code>, Category: <code>Audio</code> (no search text = all audio)
+      <br>&bull; Name: <code>4K Movies</code>, Category: <code>Movies</code>, Search: <code>4K</code>
+      <br>&bull; Name: <code>TV Series</code>, Category: <code>Series</code>, Search: <code>S01</code>
+      <br>&bull; Name: <code>eBooks</code>, Category: <code>Books</code>, Search: <code>eBook</code>
+      <br>&bull; Name: <code>Music</code>, Category: <code>Audio / Music</code> (no search = all music)
+      <br>&bull; Name: <code>PC Games</code>, Category: <code>Games</code>, Search: <code>PC</code>
+      <br>&bull; Name: <code>Windows Apps</code>, Category: <code>Applications</code>, Search: <code>Windows</code>
     </div>
   </div>
 
