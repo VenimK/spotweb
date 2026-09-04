@@ -235,6 +235,9 @@ install_themes() {
     curl -fsSL "${GITHUB_RAW_BASE}/custom/js/theme-switcher.js" \
       -o "${spotweb_dir}/custom/js/theme-switcher.js" || \
       print_warn "Failed to download theme-switcher.js"
+    curl -fsSL "${GITHUB_RAW_BASE}/custom/js/filter-manager-link.js" \
+      -o "${spotweb_dir}/custom/js/filter-manager-link.js" || \
+      print_warn "Failed to download filter-manager-link.js"
 
     print_info "Downloading tools"
     curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/theme-customizer.html" \
@@ -243,6 +246,9 @@ install_themes() {
     curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/theme-upload.php" \
       -o "${spotweb_dir}/custom/tools/theme-upload.php" || \
       print_warn "Failed to download theme-upload.php"
+    curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/filter-manager.php" \
+      -o "${spotweb_dir}/custom/tools/filter-manager.php" || \
+      print_warn "Failed to download filter-manager.php"
     curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/.htaccess" \
       -o "${spotweb_dir}/custom/tools/.htaccess" || true
 
@@ -539,6 +545,7 @@ main() {
     echo "Theme tools:"
     echo "  Customizer: http://127.0.0.1:${port}/custom/tools/theme-customizer.html"
     echo "  Upload:     http://127.0.0.1:${port}/custom/tools/theme-upload.php"
+    echo "  Filters:    http://127.0.0.1:${port}/custom/tools/filter-manager.php"
   fi
   echo ""
   echo "Health check:"
