@@ -243,10 +243,22 @@ if (isset($_POST['action']) && $_POST['action'] === 'add') {
         $tree = $category !== '' ? $category : '';
 
         // Build valuelist (text search)
+        // Spotweb format: fieldname:operator:booloper:value
+        // Multiple values joined with &
+        // Field names: Titel (Title), Poster, Tag, etc.
+        // Operators: =, >, <, >=, <=
+        // BoolOps: DEF (default), OR, AND
         $valuelist = '';
         if ($searchText !== '') {
             $searchType = trim($_POST['search_type'] ?? 'Title');
-            $valuelist = $searchType . ':=:DEF:' . $searchText;
+            // Map our UI labels to Spotweb field names
+            $fieldMap = [
+                'Title'   => 'Titel',
+                'Poster'  => 'Poster',
+                'Tag'     => 'Tag',
+            ];
+            $fieldName = $fieldMap[$searchType] ?? 'Titel';
+            $valuelist = $fieldName . ':=:DEF:' . $searchText;
         }
 
         try {
@@ -259,7 +271,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'add') {
                 'INSERT INTO filters (userid, filtertype, title, icon, torder, tparent, tree, valuelist, sorton, sortorder, enablenotify)
                  VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, ?, 0)'
             );
-            $stmt->execute([$userId, 'index_filter', $title, $icon, $torder, $tree, $valuelist, $sorton, $sortorder]);
+            $stmt->execute([$userId, 'filter', $title, $icon, $torder, $tree, $valuelist, $sorton, $sortorder]);
             $message = "Filter '$title' added successfully!";
             $messageType = 'success';
         } catch (Exception $e) {
@@ -330,8 +342,8 @@ if (isset($_POST['action']) && in_array($_POST['action'], ['moveup', 'movedown']
 // ---------------------------------------------------------------------------
 try {
     $stmt = $pdo->prepare(
-        'SELECT id, title, icon, torder, tree, valuelist, sorton, sortorder
-         FROM filters WHERE userid = ? AND tparent = 0 ORDER BY torder ASC'
+        "SELECT id, title, icon, torder, tree, valuelist, sorton, sortorder
+         FROM filters WHERE userid = ? AND tparent = 0 AND filtertype = 'filter' ORDER BY torder ASC"
     );
     $stmt->execute([$userId]);
     $filters = $stmt->fetchAll(PDO::FETCH_ASSOC);
