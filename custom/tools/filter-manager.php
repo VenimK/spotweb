@@ -38,16 +38,94 @@ require_once $dbengFile;
 // Connect to the database
 try {
     $dbsettings = $GLOBALS['dbsettings'];
+    // Normalize engine name: 'mysql' and 'pdo_mysql' both use mysql PDO driver
+    $engine = $dbsettings['engine'];
+    if ($engine === 'mysql' || $engine === 'pdo_mysql') {
+        $pdoDriver = 'mysql';
+    } elseif ($engine === 'pdo_pgsql' || $engine === 'postgres') {
+        $pdoDriver = 'pgsql';
+    } else {
+        $pdoDriver = $engine;
+    }
     $dsn = sprintf(
-        '%s:host=%s;dbname=%s;charset=utf8mb4',
-        $dbsettings['engine'] === 'mysql' ? 'mysql' : $dbsettings['engine'],
+        '%s:host=%s;port=%s;dbname=%s;charset=utf8mb4',
+        $pdoDriver,
         $dbsettings['host'],
+        $dbsettings['port'] ?? '3306',
         $dbsettings['dbname']
     );
     $pdo = new PDO($dsn, $dbsettings['user'], $dbsettings['pass']);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (Exception $e) {
     die('<h2>Database connection failed:</h2><pre>' . htmlspecialchars($e->getMessage()) . '</pre>');
+}
+
+// Debug mode: add ?debug=1 to URL to see diagnostics
+$debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
+$debugInfo = [];
+
+if ($debugMode) {
+    $debugInfo[] = 'Spotweb root: ' . htmlspecialchars($spotwebRoot);
+    $debugInfo[] = 'DB engine: ' . htmlspecialchars($dbsettings['engine'] ?? 'unknown');
+    $debugInfo[] = 'DB host: ' . htmlspecialchars($dbsettings['host'] ?? 'unknown');
+    $debugInfo[] = 'DB name: ' . htmlspecialchars($dbsettings['dbname'] ?? 'unknown');
+    $debugInfo[] = 'DB port: ' . htmlspecialchars($dbsettings['port'] ?? '3306');
+
+    // Check users table structure
+    try {
+        $cols = $pdo->query('SHOW COLUMNS FROM users')->fetchAll(PDO::FETCH_ASSOC);
+        $debugInfo[] = 'Users table columns: ' . implode(', ', array_column($cols, 'Field'));
+    } catch (Exception $e) {
+        $debugInfo[] = 'Cannot read users table: ' . $e->getMessage();
+    }
+
+    // Check settings table for pass_salt
+    try {
+        $stmt = $pdo->query("SELECT name, value FROM settings WHERE name = 'pass_salt'");
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $debugInfo[] = 'pass_salt found in settings (length: ' . strlen($row['value']) . ')';
+            $debugInfo[] = 'pass_salt raw value: ' . htmlspecialchars(bin2hex($row['value']));
+        } else {
+            $debugInfo[] = 'pass_salt NOT found in settings table';
+        }
+    } catch (Exception $e) {
+        $debugInfo[] = 'Cannot read settings table: ' . $e->getMessage();
+    }
+
+    // List all users
+    try {
+        $users = $pdo->query('SELECT id, username, deleted FROM users ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+        $debugInfo[] = 'Users in database: ' . count($users);
+        foreach ($users as $u) {
+            $debugInfo[] = sprintf('  - id=%d username=%s deleted=%d', $u['id'], $u['username'], $u['deleted']);
+        }
+    } catch (Exception $e) {
+        $debugInfo[] = 'Cannot list users: ' . $e->getMessage();
+    }
+
+    // Show what hash a test password would produce
+    try {
+        $stmt = $pdo->query("SELECT value FROM settings WHERE name = 'pass_salt' LIMIT 1");
+        $passSalt = $stmt->fetchColumn();
+        if ($passSalt) {
+            $testPass = 'spotweb';
+            $reversedSalt = strrev(substr($passSalt, 1, 3));
+            $testHash = sha1($reversedSalt . $testPass . $passSalt);
+            $debugInfo[] = 'Test hash for "spotweb": ' . $testHash;
+
+            // Show admin's actual passhash
+            $stmt2 = $pdo->prepare('SELECT id, username, passhash FROM users WHERE username = ? LIMIT 1');
+            $stmt2->execute(['admin']);
+            $admin = $stmt2->fetch(PDO::FETCH_ASSOC);
+            if ($admin) {
+                $debugInfo[] = 'Admin passhash in DB: ' . $admin['passhash'];
+                $debugInfo[] = 'Hash match: ' . ($testHash === $admin['passhash'] ? 'YES' : 'NO');
+            }
+        }
+    } catch (Exception $e) {
+        $debugInfo[] = 'Hash test failed: ' . $e->getMessage();
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -476,6 +554,10 @@ function showLogin($error = '') {
   button { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #0fbcf9; color: #0d1117; font-size: 14px; font-weight: 600; cursor: pointer; }
   button:hover { background: #0ea5e9; }
   .error { color: #e74c3c; font-size: 13px; margin-bottom: 12px; }
+  .debug { margin-top: 20px; padding: 16px; background: #0d1117; border-radius: 8px; border: 1px solid #2a2a4e; font-family: monospace; font-size: 12px; color: #0fbcf9; white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow-y: auto; }
+  .debug h3 { color: #e0e0e0; margin-bottom: 8px; font-family: -apple-system, sans-serif; }
+  .debug-hint { margin-top: 16px; font-size: 12px; color: #666; text-align: center; }
+  .debug-hint a { color: #0fbcf9; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -493,6 +575,16 @@ function showLogin($error = '') {
     <input type="hidden" name="login" value="1">
     <button type="submit">Login</button>
   </form>
+<?php if (!empty($GLOBALS['debugInfo'])): ?>
+  <div class="debug">
+    <h3>Debug Diagnostics</h3>
+<?php foreach ($GLOBALS['debugInfo'] as $line): ?>
+    <?php echo $line; ?>
+
+<?php endforeach; ?>
+  </div>
+<?php endif; ?>
+  <div class="debug-hint">Login not working? Open <a href="filter-manager.php?debug=1">?debug=1</a> for diagnostics</div>
 </div>
 </body>
 </html>
