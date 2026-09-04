@@ -64,50 +64,46 @@ if (isset($_POST['login'])) {
 
     try {
         // Fetch user from Spotweb's users table
-        $stmt = $pdo->prepare('SELECT id, username, password FROM users WHERE username = ? LIMIT 1');
+        // Spotweb uses column 'passhash' (NOT 'password')
+        $stmt = $pdo->prepare('SELECT id, username, passhash FROM users WHERE username = ? AND deleted = 0 LIMIT 1');
         $stmt->execute([$u]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            $dbPass = $user['password'];
+            $dbHash = $user['passhash'];
             $loggedIn = false;
 
-            // Method 1: PHP password_hash() (modern Spotweb)
-            if (password_verify($p, $dbPass)) {
-                $loggedIn = true;
+            // Fetch pass_salt from Spotweb settings table
+            try {
+                $saltStmt = $pdo->query("SELECT value FROM settings WHERE name = 'pass_salt' LIMIT 1");
+                $passSalt = $saltStmt ? $saltStmt->fetchColumn() : '';
+            } catch (Exception $e) {
+                $passSalt = '';
             }
 
-            // Method 2: Spotweb sha1 with pass_salt (classic Spotweb)
-            if (!$loggedIn) {
-                try {
-                    $saltStmt = $pdo->query("SELECT value FROM settings WHERE name = 'pass_salt' LIMIT 1");
-                    $passSalt = $saltStmt ? $saltStmt->fetchColumn() : '';
-                } catch (Exception $e) {
-                    $passSalt = '';
+            // Method 1: Spotweb's actual hash formula:
+            //   sha1(strrev(substr(pass_salt, 1, 3)) . password . pass_salt)
+            if ($passSalt) {
+                $reversedSalt = strrev(substr($passSalt, 1, 3));
+                $computedHash = sha1($reversedSalt . $p . $passSalt);
+                if (hash_equals($computedHash, $dbHash)) {
+                    $loggedIn = true;
                 }
+            }
 
-                // Spotweb hashes: sha1(pass_salt + password + pass_salt)
-                if ($passSalt && hash_equals(sha1($passSalt . $p . $passSalt), $dbPass)) {
-                    $loggedIn = true;
-                }
-                // Also try: sha1(password + pass_salt)
-                if (!$loggedIn && $passSalt && hash_equals(sha1($p . $passSalt), $dbPass)) {
-                    $loggedIn = true;
-                }
-                // Also try: sha1(pass_salt + password)
-                if (!$loggedIn && $passSalt && hash_equals(sha1($passSalt . $p), $dbPass)) {
-                    $loggedIn = true;
-                }
+            // Method 2: PHP password_hash() (if someone migrated)
+            if (!$loggedIn && password_verify($p, $dbHash)) {
+                $loggedIn = true;
             }
 
             // Method 3: Plain sha1 without salt (very old Spotweb)
-            if (!$loggedIn && hash_equals(sha1($p), $dbPass)) {
+            if (!$loggedIn && hash_equals(sha1($p), $dbHash)) {
                 $loggedIn = true;
             }
 
-            // Method 4: Plaintext (shouldn't happen, but just in case)
-            if (!$loggedIn && hash_equals($p, $dbPass)) {
-                $loggedIn = true;
+            // Method 4: Empty passhash (anonymous user or unconfigured)
+            if (!$loggedIn && $dbHash === '' && $u !== 'anonymous') {
+                // Skip - don't allow login with empty hash
             }
 
             if ($loggedIn) {
@@ -125,14 +121,10 @@ if (isset($_POST['login'])) {
     // Fallback: default admin credentials (admin / spotweb)
     if (!$isAuth && $u === 'admin' && $p === 'spotweb') {
         $_SESSION['filter_mgr_auth'] = true;
-        $_SESSION['filter_mgr_userid'] = 1;
+        $_SESSION['filter_mgr_userid'] = 2; // Spotweb admin is userid 2
         $_SESSION['filter_mgr_username'] = 'admin';
         $isAuth = true;
         $loginError = '';
-    }
-
-    if (!$isAuth && $loginError) {
-        // keep error message
     }
 }
 
