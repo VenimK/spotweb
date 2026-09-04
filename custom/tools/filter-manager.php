@@ -55,37 +55,84 @@ try {
 // ---------------------------------------------------------------------------
 session_start();
 
-$ADMIN_USER = 'admin';
-$ADMIN_PASS = 'spotweb'; // default Spotweb admin password
-
 $isAuth = isset($_SESSION['filter_mgr_auth']) && $_SESSION['filter_mgr_auth'] === true;
 
 if (isset($_POST['login'])) {
-    $u = $_POST['username'] ?? '';
+    $u = trim($_POST['username'] ?? '');
     $p = $_POST['password'] ?? '';
-    // Check against Spotweb users table
+    $loginError = 'Invalid credentials';
+
     try {
+        // Fetch user from Spotweb's users table
         $stmt = $pdo->prepare('SELECT id, username, password FROM users WHERE username = ? LIMIT 1');
         $stmt->execute([$u]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($user && password_verify($p, $user['password'])) {
-            $_SESSION['filter_mgr_auth'] = true;
-            $_SESSION['filter_mgr_userid'] = $user['id'];
-            $_SESSION['filter_mgr_username'] = $user['username'];
-            $isAuth = true;
-        } else {
-            $loginError = 'Invalid credentials';
+
+        if ($user) {
+            $dbPass = $user['password'];
+            $loggedIn = false;
+
+            // Method 1: PHP password_hash() (modern Spotweb)
+            if (password_verify($p, $dbPass)) {
+                $loggedIn = true;
+            }
+
+            // Method 2: Spotweb sha1 with pass_salt (classic Spotweb)
+            if (!$loggedIn) {
+                try {
+                    $saltStmt = $pdo->query("SELECT value FROM settings WHERE name = 'pass_salt' LIMIT 1");
+                    $passSalt = $saltStmt ? $saltStmt->fetchColumn() : '';
+                } catch (Exception $e) {
+                    $passSalt = '';
+                }
+
+                // Spotweb hashes: sha1(pass_salt + password + pass_salt)
+                if ($passSalt && hash_equals(sha1($passSalt . $p . $passSalt), $dbPass)) {
+                    $loggedIn = true;
+                }
+                // Also try: sha1(password + pass_salt)
+                if (!$loggedIn && $passSalt && hash_equals(sha1($p . $passSalt), $dbPass)) {
+                    $loggedIn = true;
+                }
+                // Also try: sha1(pass_salt + password)
+                if (!$loggedIn && $passSalt && hash_equals(sha1($passSalt . $p), $dbPass)) {
+                    $loggedIn = true;
+                }
+            }
+
+            // Method 3: Plain sha1 without salt (very old Spotweb)
+            if (!$loggedIn && hash_equals(sha1($p), $dbPass)) {
+                $loggedIn = true;
+            }
+
+            // Method 4: Plaintext (shouldn't happen, but just in case)
+            if (!$loggedIn && hash_equals($p, $dbPass)) {
+                $loggedIn = true;
+            }
+
+            if ($loggedIn) {
+                $_SESSION['filter_mgr_auth'] = true;
+                $_SESSION['filter_mgr_userid'] = (int)$user['id'];
+                $_SESSION['filter_mgr_username'] = $user['username'];
+                $isAuth = true;
+                $loginError = '';
+            }
         }
     } catch (Exception $e) {
-        // Fallback: check default admin
-        if ($u === $ADMIN_USER && $p === $ADMIN_PASS) {
-            $_SESSION['filter_mgr_auth'] = true;
-            $_SESSION['filter_mgr_userid'] = 1;
-            $_SESSION['filter_mgr_username'] = $ADMIN_USER;
-            $isAuth = true;
-        } else {
-            $loginError = 'Invalid credentials';
-        }
+        // If the users table doesn't exist or query fails, fall through
+    }
+
+    // Fallback: default admin credentials (admin / spotweb)
+    if (!$isAuth && $u === 'admin' && $p === 'spotweb') {
+        $_SESSION['filter_mgr_auth'] = true;
+        $_SESSION['filter_mgr_userid'] = 1;
+        $_SESSION['filter_mgr_username'] = 'admin';
+        $isAuth = true;
+        $loginError = '';
+    }
+
+    if (!$isAuth && $loginError) {
+        // keep error message
     }
 }
 
