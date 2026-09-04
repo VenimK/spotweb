@@ -281,6 +281,7 @@
       { id: 'home', title: 'Go to overview', hint: 'h', group: 'Actions', run: function () { window.location.href = cfg.homeUrl || '/'; } },
       { id: 'watchlist', title: 'Open watchlist', hint: '', group: 'Actions', run: function () { if (cfg.watchlistUrl) window.location.href = cfg.watchlistUrl; } },
       { id: 'prefs', title: 'Change preferences', hint: '', group: 'Actions', run: function () { if (cfg.prefsUrl) window.location.href = cfg.prefsUrl; } },
+      { id: 'filtermgr', title: 'Open filter manager', hint: '', group: 'Actions', run: function () { if (cfg.filterManagerUrl) window.open(cfg.filterManagerUrl, '_blank', 'noopener'); } },
       { id: 'settings', title: 'Settings', hint: '', group: 'Actions', run: function () { if (cfg.settingsUrl) window.location.href = cfg.settingsUrl; } },
       { id: 'new', title: 'Show new spots only', hint: '', group: 'Actions', run: function () {
         var url = new URL(window.location.href);
@@ -314,6 +315,7 @@
     return list.filter(function (c) {
       if (c.id === 'watchlist' && !cfg.watchlistUrl) return false;
       if (c.id === 'prefs' && !cfg.prefsUrl) return false;
+      if (c.id === 'filtermgr' && !cfg.filterManagerUrl) return false;
       if (c.id === 'settings' && !cfg.settingsUrl) return false;
       return true;
     });

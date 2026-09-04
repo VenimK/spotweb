@@ -56,6 +56,12 @@ if (file_exists($themeSwitcherJs)) {
     echo "<script src='custom/js/theme-switcher.js'></script>\n";
 }
 
+// Filter Manager overlay/toolbar hook (same pattern as the NZB panel overlay)
+$filterManagerJs = $jsPath . '/filter-manager-link.js';
+if (file_exists($filterManagerJs) && file_exists($customBase . '/tools/filter-manager.php')) {
+    echo "<script src='custom/js/filter-manager-link.js'></script>\n";
+}
+
 // Add theme switcher styles (inline to avoid extra file)
 ?>
 <style>
@@ -339,10 +345,20 @@ if (file_exists($themeSwitcherJs)) {
 :root[data-sw-theme] div.sidebarPanel.advancedSearch ul.dynatree-container,
 :root[data-sw-theme] div.sidebarPanel.advancedSearch .ui-slider,
 :root[data-sw-theme] div.sidebarPanel.advancedSearch .ui-slider-range,
-:root[data-sw-theme] div.sidebarPanel.advancedSearch a.greyButton.addFilter {
+:root[data-sw-theme] div.sidebarPanel.advancedSearch a.greyButton.addFilter,
+:root[data-sw-theme] div.sidebarPanel.advancedSearch a.greyButton.filterManager {
     background: var(--color-surface-2, #f9fafb) !important;
     border-color: var(--color-border, rgba(226, 232, 240, 0.9)) !important;
     color: var(--color-text, #111827) !important;
+}
+
+:root[data-sw-theme] div.sidebarPanel.advancedSearch a.greyButton.filterManager {
+    margin-top: 6px;
+    display: block;
+}
+
+div.toolbarButton.filterManagerBtn p a {
+    background: url('templates/modern/img/iconsprite.png') no-repeat 0 -432px;
 }
 
 :root[data-sw-theme] div.sidebarPanel.advancedSearch ul.dynatree-container a,

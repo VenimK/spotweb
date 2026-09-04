@@ -160,6 +160,7 @@ $prefsUrl = $tplHelper->allowed(SpotSecurity::spotsec_edit_own_userprefs, '')
     <a href="<?php echo $retrieveUrl; ?>" class="sw-dash-btn" data-sw-action="retrieve" title="<?php echo htmlspecialchars(_('Retrieve new spots'), ENT_QUOTES, 'UTF-8'); ?>"><?php echo _('Retrieve'); ?> <kbd>r</kbd></a>
 <?php } ?>
     <a href="<?php echo $newUrl; ?>" class="sw-dash-btn"><?php echo _('New spots'); ?></a>
+    <a href="<?php echo htmlspecialchars($tplHelper->makeFilterManagerUrl(), ENT_QUOTES, 'UTF-8'); ?>" class="sw-dash-btn" target="_blank" rel="noopener" title="<?php echo htmlspecialchars(_('Open the filter manager'), ENT_QUOTES, 'UTF-8'); ?>"><?php echo _('Filters'); ?></a>
 <?php if ($nzbHasApi) { ?>
     <button type="button" class="sw-dash-btn" data-sw-action="dlpanel" title="<?php echo htmlspecialchars(sprintf(_('Open %s panel'), $tplHelper->getNzbHandlerName()), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($tplHelper->getNzbHandlerName(), ENT_QUOTES, 'UTF-8'); ?></button>
 <?php } elseif ($prefsUrl !== '' && !$nzbConfigured) { ?>

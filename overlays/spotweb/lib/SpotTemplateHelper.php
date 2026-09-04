@@ -224,6 +224,21 @@ class SpotTemplateHelper
 
     // makeBaseurl
 
+    /**
+     * URL of the custom filter manager tool (opens in a new tab from overlays).
+     */
+    public function makeFilterManagerUrl()
+    {
+        $path = rtrim((string) $this->makeBaseUrl('path'), '/');
+        if ($path === '' || $path === '\\') {
+            return '/custom/tools/filter-manager.php';
+        }
+
+        return $path.'/custom/tools/filter-manager.php';
+    }
+
+    // makeFilterManagerUrl
+
     /*
      * Creeert een linkje naar de sabnzbd API zoals gedefinieerd in de
      * settings

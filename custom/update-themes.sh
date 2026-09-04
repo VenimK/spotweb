@@ -51,6 +51,7 @@ echo ""
 echo "⬇️  Downloading latest theme switcher..."
 cd "${CUSTOM_DIR}/js"
 curl -fsSL "${GITHUB_REPO}/custom/js/theme-switcher.js" -o "theme-switcher.js"
+curl -fsSL "${GITHUB_REPO}/custom/js/filter-manager-link.js" -o "filter-manager-link.js"
 
 # Update tools
 echo ""
@@ -58,6 +59,7 @@ echo "⬇️  Downloading latest tools..."
 cd "${CUSTOM_DIR}/tools"
 curl -fsSL "${GITHUB_REPO}/custom/tools/theme-customizer.html" -o "theme-customizer.html"
 curl -fsSL "${GITHUB_REPO}/custom/tools/theme-upload.php" -o "theme-upload.php"
+curl -fsSL "${GITHUB_REPO}/custom/tools/filter-manager.php" -o "filter-manager.php"
 curl -fsSL "${GITHUB_REPO}/custom/tools/.htaccess" -o ".htaccess" 2>/dev/null || true
 
 # Update theme loader

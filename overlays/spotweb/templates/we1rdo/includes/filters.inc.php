@@ -84,20 +84,6 @@
 				<div class="toolbarButton addspot"><p><a onclick="return openDialog('editdialogdiv', '<?php echo _('Add spot'); ?>', '<?php echo $tplHelper->getPageUrl('postspot'); ?>', function() { new SpotPosting().postNewSpot(this.form, postSpotUiStart, postSpotUiDone); return false; }, 'autoclose', null, null);" title='<?php echo _('Add spot'); ?>'><?php echo _('Add spot'); ?></a></p></div>
 <?php } ?>
 
-<?php
-    // Queue panel toggle for cards + table (not only the SAB column header in table view)
-    $nzbActionToolbar = $currentSession['user']['prefs']['nzbhandling']['action'] ?? 'disable';
-    if (
-        $tplHelper->allowed(SpotSecurity::spotsec_use_sabapi, '') &&
-        $tplHelper->getNzbHandlerApiSupport() !== false &&
-        $nzbActionToolbar !== 'disable' &&
-        $nzbActionToolbar !== 'save'
-    ) {
-?>
-				<div class="toolbarButton dlpanel"><p><a href="#" onclick="toggleSidebarPanel('.sabnzbdPanel'); return false;" title="<?php echo htmlspecialchars(sprintf(_('Open %s panel'), $tplHelper->getNzbHandlerName()), ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($tplHelper->getNzbHandlerName(), ENT_QUOTES, 'UTF-8'); ?></a></p></div>
-<?php } ?>
-				<div class="toolbarButton filterManagerBtn"><p><a href="<?php echo htmlspecialchars($tplHelper->makeFilterManagerUrl(), ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener" title="<?php echo htmlspecialchars(_('Open the filter manager'), ENT_QUOTES, 'UTF-8'); ?>"><?php echo _('Filters'); ?></a></p></div>
-
 			<span class="scroll"><input type="checkbox" name="filterscroll" id="filterscroll" value="Scroll" title="<?php echo _('Switch between static or scrolling sidebar'); ?>"><label>&nbsp;</label></span>
 
 <?php if ($tplHelper->allowed(SpotSecurity::spotsec_perform_search, '')) { ?>
@@ -263,22 +249,18 @@
 			</form>
 <?php } // if perform search?>
 
-				<div class="sidebarPanel sabnzbdPanel" data-handler="<?php echo htmlspecialchars((string) $tplHelper->getNzbHandlerType(), ENT_QUOTES, 'UTF-8'); ?>">
+				<div class="sidebarPanel sabnzbdPanel">
 <?php if ($tplHelper->allowed(SpotSecurity::spotsec_use_sabapi, '')) { ?>
-					<h4><a class="toggle" onclick="toggleSidebarPanel('.sabnzbdPanel')" title='<?php echo htmlspecialchars(sprintf(_('Close "%s" panel'), $tplHelper->getNzbHandlerName()), ENT_QUOTES, 'UTF-8'); ?>'>[x]</a><?php echo htmlspecialchars($tplHelper->getNzbHandlerName(), ENT_QUOTES, 'UTF-8'); ?></h4>
+					<h4><a class="toggle" onclick="toggleSidebarPanel('.sabnzbdPanel')" title='<?php echo _('Sluit "'.$tplHelper->getNzbHandlerName().'paneel"'); ?>'>[x]</a><?php echo $tplHelper->getNzbHandlerName(); ?></h4>
 <?php
         $apikey = $tplHelper->apiToHash($currentSession['user']['apikey']);
         echo "<input class='apikey' type='hidden' value='".$apikey."'>";
         if ($tplHelper->getNzbHandlerApiSupport() === false) {?>
-					<table class="sabInfo" summary="<?php echo htmlspecialchars($tplHelper->getNzbHandlerName(), ENT_QUOTES, 'UTF-8'); ?>">
+					<table class="sabInfo" summary="SABnzbd infomatie">
 						<tr><td><?php echo _('Selected NZB download methode doesn\'t support sidepanel'); ?></td></tr>
-<?php if (($currentSession['user']['prefs']['nzbhandling']['action'] ?? '') === 'save') { ?>
-						<tr><td class="sw-panel-hint"><?php echo _('Tip: switch NZB handling to NZBGet or SABnzbd in preferences to see live queue info.'); ?></td></tr>
-<?php } ?>
-					</table>
+					</table>			
 <?php	} else {
-            ?>					<table class="sabInfo" summary="<?php echo htmlspecialchars($tplHelper->getNzbHandlerName(), ENT_QUOTES, 'UTF-8'); ?> info">
-						<tr class="sw-handler-meta"><td><?php echo _('Client:'); ?></td><td class="handlername"><strong><?php echo htmlspecialchars($tplHelper->getNzbHandlerName(), ENT_QUOTES, 'UTF-8'); ?></strong> <span class="handlerversion"></span></td></tr>
+            ?>					<table class="sabInfo" summary="SABnzbd infomatie">
 						<tr><td><?php echo _('Status:'); ?></td><td class="state"></td></tr>
 						<tr><td><?php echo _('Free storage:'); ?></td><td class="diskspace"></td></tr>
 						<tr><td><?php echo _('Speed:'); ?></td><td class="speed"></td></tr>
@@ -286,14 +268,11 @@
 						<tr><td><?php echo _('To go:'); ?></td><td class="timeleft"></td></tr>
 						<tr><td><?php echo _('ETA:'); ?></td><td class="eta"></td></tr>
 						<tr><td><?php echo _('Queue:'); ?></td><td class="mb"></td></tr>
-						<tr class="sw-nzbget-extra"><td><?php echo _('Post-process:'); ?></td><td class="postjobs">—</td></tr>
-						<tr class="sw-nzbget-extra"><td><?php echo _('Uptime:'); ?></td><td class="uptime">—</td></tr>
 					</table>
-					<div class="sw-panel-error" style="display:none;"></div>
 					<canvas id="graph" width="215" height="125"></canvas>
-					<table class="sabGraphData" summary="Download Graph Data" style="display:none;"><tbody><tr><td></td></tr></tbody></table>
+					<table class="sabGraphData" summary="SABnzbd Graph Data" style="display:none;"><tbody><tr><td></td></tr></tbody></table>
 					<h4><?php echo _('Queue'); ?></h4>
-					<table class="sabQueue" summary="Download queue"><tbody><tr><td></td></tr></tbody></table>
+					<table class="sabQueue" summary="SABnzbd queue"><tbody><tr><td></td></tr></tbody></table>
 <?php
         }
       } ?>

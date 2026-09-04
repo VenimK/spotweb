@@ -11,25 +11,13 @@ custom/
 │   └── preinstalled/    # Pre-installed custom themes
 ├── js/                  # Custom JavaScript
 │   └── theme-switcher.js
-├── tools/               # Theme & filter management tools
+├── tools/               # Theme management tools
 │   ├── theme-customizer.html
-│   ├── theme-upload.php
-│   └── filter-manager.php
+│   └── theme-upload.php
 ├── includes/            # Integration hooks
 │   └── theme-loader.inc.php
 └── README.md           # This file
 ```
-
-### Filter Manager
-
-The **Filter Manager** (`tools/filter-manager.php`) provides a simple web UI to:
-- Add sidebar filters (name + category + search text)
-- Delete filters
-- Reorder filters (move up/down)
-- No need to navigate Spotweb's advanced search dialog
-
-Access: `http://your-spotweb/custom/tools/filter-manager.php`
-Login with your Spotweb account credentials.
 
 ## ✅ Update-Safe Design
 
@@ -83,6 +71,16 @@ Visual theme creation tool:
 - Live preview
 - Gradient & glow effects
 - Export as CSS file
+
+### Filter Manager
+**URL:** `http://your-server/spotweb/custom/tools/filter-manager.php`
+
+Sidebar filter editor (add, nest, reorder, delete). Loaded automatically when
+`custom/` is present: `theme-loader.inc.php` injects a **Filters** toolbar
+button and a link inside the Advanced Search overlay — same hook as the NZB
+panel overlay.
+
+Login with your Spotweb account.
 
 ### Theme Upload Tool
 **URL:** `http://your-server/spotweb/custom/tools/theme-upload.php`

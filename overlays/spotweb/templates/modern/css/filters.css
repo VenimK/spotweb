@@ -482,7 +482,8 @@ div.sidebarPanel.advancedSearch table.search td,
 div.sidebarPanel.advancedSearch ul.dynatree-container,
 div.sidebarPanel.advancedSearch .ui-slider,
 div.sidebarPanel.advancedSearch .ui-slider-range,
-div.sidebarPanel.advancedSearch a.greyButton.addFilter {
+div.sidebarPanel.advancedSearch a.greyButton.addFilter,
+div.sidebarPanel.advancedSearch a.greyButton.filterManager {
   background: #f9fafb !important;
   border: 1px solid rgba(226, 232, 240, 0.9) !important;
   color: var(--color-text) !important;
@@ -521,10 +522,15 @@ div.sidebarPanel.advancedSearch div.search input.searchbox {
   color: var(--color-text);
 }
 
-div.sidebarPanel.advancedSearch a.greyButton.addFilter {
+div.sidebarPanel.advancedSearch a.greyButton.addFilter,
+div.sidebarPanel.advancedSearch a.greyButton.filterManager {
   color: #fff !important;
   background: var(--color-accent) !important;
   border-color: var(--color-accent) !important;
+}
+div.sidebarPanel.advancedSearch a.greyButton.filterManager {
+  margin-top: 6px;
+  display: block;
 }
 
 html[data-theme="dark"] div.sidebarPanel.advancedSearch {

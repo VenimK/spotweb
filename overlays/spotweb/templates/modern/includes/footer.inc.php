@@ -42,6 +42,7 @@
         'markReadUrl'  => html_entity_decode($puMarkReadUrl, ENT_QUOTES, 'UTF-8'),
         'watchlistUrl' => html_entity_decode($puWatchlistUrl, ENT_QUOTES, 'UTF-8'),
         'homeUrl'      => html_entity_decode($tplHelper->makeBaseUrl('path'), ENT_QUOTES, 'UTF-8'),
+        'filterManagerUrl' => $tplHelper->makeFilterManagerUrl(),
         'themeToggle'  => true,
     ];
 ?>

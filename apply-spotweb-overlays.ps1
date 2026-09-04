@@ -70,7 +70,7 @@ try {
   }
 
   Write-Ok "Applied $copied overlay file(s)"
-  Write-Info "Includes: NZBGet panel overlap fix, modern Power UX, router.php, doctor helpers, NZBGet API improvements"
+  Write-Info "Includes: NZBGet panel overlay, Filter Manager, modern Power UX, router.php, doctor helpers, NZBGet API improvements"
   Write-Host ""
   Write-Host "Start Spotweb on Windows:"
   Write-Host "  .\Start-Spotweb.ps1 -SpotwebDir `"$SpotwebDir`""
