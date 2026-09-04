@@ -11,13 +11,25 @@ custom/
 │   └── preinstalled/    # Pre-installed custom themes
 ├── js/                  # Custom JavaScript
 │   └── theme-switcher.js
-├── tools/               # Theme management tools
+├── tools/               # Theme & filter management tools
 │   ├── theme-customizer.html
-│   └── theme-upload.php
+│   ├── theme-upload.php
+│   └── filter-manager.php
 ├── includes/            # Integration hooks
 │   └── theme-loader.inc.php
 └── README.md           # This file
 ```
+
+### Filter Manager
+
+The **Filter Manager** (`tools/filter-manager.php`) provides a simple web UI to:
+- Add sidebar filters (name + category + search text)
+- Delete filters
+- Reorder filters (move up/down)
+- No need to navigate Spotweb's advanced search dialog
+
+Access: `http://your-spotweb/custom/tools/filter-manager.php`
+Login with your Spotweb account credentials.
 
 ## ✅ Update-Safe Design
 

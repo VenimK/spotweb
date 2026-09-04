@@ -1,5 +1,15 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.15 — Filter Manager tool
+
+- Add `custom/tools/filter-manager.php` — simple web UI to manage sidebar filters
+- Add filters with name + category + search text in one form (no advanced search dialog needed)
+- Delete and reorder filters with up/down buttons
+- Login with Spotweb account credentials (checks users table)
+- Same dark UI style as the theme tools
+
+---
+
 ## v2.2.14 — IIS + PHP FastCGI is now the default Windows server
 
 - Add `Configure-Spotweb-IIS.ps1` to serve Spotweb through IIS with PHP FastCGI
