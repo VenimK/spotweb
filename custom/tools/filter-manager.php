@@ -301,6 +301,20 @@ if (isset($_POST['action']) && $_POST['action'] === 'delete') {
     }
 }
 
+// --- Clean up old broken index_filter entries ---
+if (isset($_POST['action']) && $_POST['action'] === 'cleanup') {
+    try {
+        $count = $pdo->prepare("DELETE FROM filters WHERE userid = ? AND filtertype = 'index_filter' AND title != 'Index filter'");
+        $count->execute([$userId]);
+        $deleted = $count->rowCount();
+        $message = $deleted > 0 ? "Removed $deleted old broken filter(s)" : 'No old filters to clean up';
+        $messageType = 'success';
+    } catch (Exception $e) {
+        $message = 'Error cleaning up: ' . $e->getMessage();
+        $messageType = 'error';
+    }
+}
+
 // --- Move filter up/down ---
 if (isset($_POST['action']) && in_array($_POST['action'], ['moveup', 'movedown'])) {
     $filterId = (int)($_POST['filter_id'] ?? 0);
@@ -349,6 +363,52 @@ try {
     $filters = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $filters = [];
+}
+
+// Map Spotweb tree codes to readable names
+$treeNames = [
+    ''           => 'All categories',
+    'cat0'       => 'Image (all)',
+    'cat0_z0'    => 'Movies',
+    'cat0_z1'    => 'Series',
+    'cat0_z2'    => 'Books',
+    'cat0_z3'    => 'Erotica',
+    'cat0_z4'    => 'Pictures',
+    'cat1'       => 'Audio / Music',
+    'cat2'       => 'Games',
+    'cat3'       => 'Applications',
+];
+
+function treeToName($tree, $map) {
+    $tree = trim($tree ?? '');
+    if ($tree === '') return 'All';
+    // Try exact match first
+    if (isset($map[$tree])) return $map[$tree];
+    // Try with ~ prefix (strongnot)
+    if (substr($tree, 0, 1) === '~') {
+        $clean = substr($tree, 1);
+        if (isset($map[$clean])) return 'NOT ' . $map[$clean];
+    }
+    // Unknown - show raw
+    return htmlspecialchars($tree);
+}
+
+// Map valuelist to readable search text
+function valuelistToText($vl) {
+    $vl = trim($vl ?? '');
+    if ($vl === '') return '';
+    // Format: Titel:=:DEF:searchtext (possibly multiple joined with &)
+    $parts = explode('&', $vl);
+    $result = [];
+    foreach ($parts as $part) {
+        $pieces = explode(':', urldecode($part), 4);
+        if (count($pieces) >= 4) {
+            $field = $pieces[0];
+            $value = $pieces[3];
+            $result[] = $field . ': ' . $value;
+        }
+    }
+    return implode(', ', $result);
 }
 
 // ---------------------------------------------------------------------------
@@ -490,6 +550,10 @@ try {
       <strong>How it works:</strong> Fill in a name, optionally add search text or pick a category,
       then click <code>Add Filter</code>. The filter appears in Spotweb's sidebar under <strong>Filters</strong>.
       <br><br>
+      <strong>Note:</strong> Filters are shown as a flat list in the sidebar, ordered by position.
+      Use the &uarr; / &darr; buttons to reorder them. The category you pick determines what content
+      the filter shows when clicked &mdash; it does not group the filter under that category in the sidebar.
+      <br><br>
       <strong>Examples:</strong>
       <br>&bull; Name: <code>4K Movies</code>, Category: <code>Movies</code>, Search: <code>4K</code>
       <br>&bull; Name: <code>TV Series</code>, Category: <code>Series</code>, Search: <code>S01</code>
@@ -502,7 +566,14 @@ try {
 
   <!-- Existing Filters -->
   <div class="card">
-    <h2>Current Filters (<?php echo count($filters); ?>)</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h2>Current Filters (<?php echo count($filters); ?>)</h2>
+      <form method="post" action="filter-manager.php" style="display:inline"
+            onsubmit="return confirm('Remove old broken filters created by previous versions?')">
+        <input type="hidden" name="action" value="cleanup">
+        <button type="submit" class="btn-sm" title="Remove old broken index_filter entries">Clean old filters</button>
+      </form>
+    </div>
 <?php if (empty($filters)): ?>
     <div class="empty">No filters yet. Add one above to get started.</div>
 <?php else: ?>
@@ -515,8 +586,8 @@ try {
         <tr>
           <td><?php echo $i + 1; ?></td>
           <td><span class="filter-icon">&#128269;</span><?php echo htmlspecialchars($f['title']); ?></td>
-          <td><?php echo $f['tree'] ? htmlspecialchars($f['tree']) : 'All'; ?></td>
-          <td><?php echo $f['valuelist'] ? htmlspecialchars($f['valuelist']) : '&mdash;'; ?></td>
+          <td><?php echo treeToName($f['tree'], $treeNames); ?></td>
+          <td><?php echo $f['valuelist'] ? htmlspecialchars(valuelistToText($f['valuelist'])) : '&mdash;'; ?></td>
           <td><?php echo htmlspecialchars($f['sorton'] ?? 'stamp'); ?></td>
           <td class="actions">
             <form method="post" action="filter-manager.php" style="display:inline">
