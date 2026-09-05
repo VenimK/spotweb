@@ -115,17 +115,35 @@ wait_for_mysql() {
   return 1
 }
 
+MYSQL_USE_SUDO=""
+
 mysql_exec() {
   local sql="$1"
+
+  # If we already know sudo is needed, use it directly
+  if [[ "${MYSQL_USE_SUDO}" == "yes" ]]; then
+    sudo mysql "${MYSQL_ARGS[@]}" -e "${sql}"
+    return $?
+  fi
+
+  # Try without sudo first
   if mysql "${MYSQL_ARGS[@]}" -e "${sql}" >/dev/null 2>&1; then
     return 0
   fi
 
   # On some Homebrew MariaDB installs, the DB root user is restricted to
-  # socket auth as the macOS root user (ERROR 1698). Retry once via sudo.
+  # socket auth as the macOS root user (ERROR 1698). Retry via sudo.
   print_warn "MariaDB root authentication failed; retrying via sudo..."
   require_cmd sudo
+  if sudo mysql "${MYSQL_ARGS[@]}" -e "${sql}" >/dev/null 2>&1; then
+    MYSQL_USE_SUDO="yes"
+    print_success "Using sudo for MariaDB (socket auth detected)"
+    return 0
+  fi
+
+  # Last resort: show the actual error
   sudo mysql "${MYSQL_ARGS[@]}" -e "${sql}"
+  return $?
 }
 
 install_spotweb() {
@@ -487,7 +505,7 @@ main() {
   apply_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/apply-spotweb-overlays.sh"
   if [[ ! -f "${apply_script}" ]]; then
     print_info "Downloading apply-spotweb-overlays.sh..."
-    apply_script="$(mktemp /tmp/apply-spotweb-overlays.XXXXXX.sh)"
+    apply_script="$(mktemp /tmp/apply-spotweb-overlays.XXXXXX.sh 2>/dev/null || mktemp -t apply-spotweb-overlays)"
     if curl -fsSL "${GITHUB_RAW_BASE}/apply-spotweb-overlays.sh" -o "${apply_script}"; then
       chmod +x "${apply_script}" || true
     else
