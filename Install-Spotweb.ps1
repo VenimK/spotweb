@@ -1300,7 +1300,6 @@ Write-Host ""
 Write-Host ("Completed in {0}m {1}s" -f [int]$elapsed.TotalMinutes, $elapsed.Seconds) -ForegroundColor Green
 Write-Host ""
 if (-not $IisConfigured) {
-  Write-WarnMsg "Tip: for production on Windows, use IIS + PHP FastCGI or Apache instead of php -S."
+  Write-WarnMsg "Tip: for production on Windows, use IIS + PHP FastCGI instead of php -S."
   Write-Host "  IIS:   .\Configure-Spotweb-IIS.ps1 -SpotwebDir `"$SpotwebDir`""
-  Write-Host "  XAMPP: .\Configure-Spotweb-Xampp.ps1 -SpotwebDir `"$SpotwebDir`""
 }

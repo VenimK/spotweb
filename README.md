@@ -130,30 +130,21 @@ cd $env:USERPROFILE\Spotweb
 # http://127.0.0.1:9999/
 ```
 
-#### Prefer Apache via XAMPP (recommended for daily use)
+#### Prefer IIS for production (recommended for daily use)
 
-After Spotweb is installed, configure XAMPP Apache (run **as Administrator**):
+After Spotweb is installed, configure IIS + PHP FastCGI (run **as Administrator**):
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
 cd $env:USERPROFILE\Spotweb
-Invoke-WebRequest -Uri ("https://raw.githubusercontent.com/VenimK/spotweb/themes-only/Configure-Spotweb-Xampp.ps1?" + (Get-Random)) -OutFile .\Configure-Spotweb-Xampp.ps1
-.\Configure-Spotweb-Xampp.ps1 -SpotwebDir $env:USERPROFILE\Spotweb -InstallXampp
+Invoke-WebRequest -Uri ("https://raw.githubusercontent.com/VenimK/spotweb/themes-only/Configure-Spotweb-IIS.ps1?" + (Get-Random)) -OutFile .\Configure-Spotweb-IIS.ps1
+.\Configure-Spotweb-IIS.ps1 -SpotwebDir $env:USERPROFILE\Spotweb
 ```
 
 Then:
 
 1. Stop `php -S` if it is still running (Ctrl+C)
-2. Start **Apache** in XAMPP Control Panel
-3. Keep your existing MariaDB service running if Spotweb already uses it
-4. Open **http://spotweb.local/** (or **http://127.0.0.1/**)
-
-If port 80 is busy:
-
-```powershell
-.\Configure-Spotweb-Xampp.ps1 -SpotwebDir $env:USERPROFILE\Spotweb -Port 8080
-# then open http://spotweb.local:8080/
-```
+2. Open **http://spotweb.local/** (or **http://127.0.0.1/**)
 
 ### Existing MySQL database named `spotweb`
 

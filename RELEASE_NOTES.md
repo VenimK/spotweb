@@ -24,11 +24,11 @@
 
 ---
 
-## v2.2.13 — XAMPP Apache helper for Windows
+## v2.2.13 — XAMPP Apache helper for Windows (deprecated)
 
-- Add `Configure-Spotweb-Xampp.ps1` to serve Spotweb through XAMPP Apache
-- Enables rewrite/headers/expires/deflate, creates vhost + hosts entry
-- Optional winget install of `ApacheFriends.Xampp.8.2`
+- ~~Add `Configure-Spotweb-Xampp.ps1` to serve Spotweb through XAMPP Apache~~
+- Removed XAMPP recommendation due to recurring issues — use IIS instead
+- `Configure-Spotweb-IIS.ps1` is the recommended production setup for Windows
 
 ---
 
