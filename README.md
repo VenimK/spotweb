@@ -284,19 +284,27 @@ git config --global --add safe.directory /var/www/html/spotweb
 git pull  # Safe! Won't touch /custom/
 ```
 
-### Update Theme Pack:
+### Update Theme Pack (Linux/macOS):
 
 ```bash
 cd /var/www/html/spotweb/custom
 ./update-themes.sh
 ```
 
+### Update Theme Pack (Windows):
+
+```powershell
+cd C:\path\to\spotweb\custom
+.\update-themes.ps1
+```
+
 **Update script:**
 - ✅ Downloads latest themes from GitHub
-- ✅ Downloads latest tools and switcher
+- ✅ Downloads latest tools, JS, and includes
 - ✅ **Preserves your custom themes**
 - ✅ Updates itself
 - ✅ Shows verbose output
+- ✅ Available for both Linux (`.sh`) and Windows (`.ps1`)
 
 ---
 

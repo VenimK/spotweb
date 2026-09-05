@@ -853,7 +853,8 @@ function Install-Themes([string]$Dir, [string]$Mode) {
       @('custom/tools/.htaccess', 'custom\tools\.htaccess'),
       @('custom/includes/theme-loader.inc.php', 'custom\includes\theme-loader.inc.php'),
       @('custom/README.md', 'custom\README.md'),
-      @('custom/update-themes.sh', 'custom\update-themes.sh')
+      @('custom/update-themes.sh', 'custom\update-themes.sh'),
+      @('custom/update-themes.ps1', 'custom\update-themes.ps1')
     )) {
       try { Download-File "$GithubRawBase/$($pair[0])" (Join-Path $Dir $pair[1]) } catch { Write-WarnMsg "Failed: $($pair[0])" }
     }
@@ -1291,6 +1292,10 @@ if ($ThemeMode -eq 'pack') {
 }
 Write-Host "Health check:"
 Write-Host "  `"$PhpBin`" `"$SpotwebDir\bin\doctor.php`""
+Write-Host ""
+Write-Host "Updates:"
+Write-Host "  Spotweb core:  cd `"$SpotwebDir`"; git pull origin develop"
+Write-Host "  Theme pack:    cd `"$SpotwebDir\custom`"; .\update-themes.ps1"
 Write-Host ""
 Write-Host ("Completed in {0}m {1}s" -f [int]$elapsed.TotalMinutes, $elapsed.Seconds) -ForegroundColor Green
 Write-Host ""
