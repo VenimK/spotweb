@@ -292,41 +292,68 @@ if [[ -n "${VLAN_TAG}" ]]; then
     NET0="${NET0},tag=${VLAN_TAG}"
 fi
 
-pct create $CTID $TEMPLATE_PATH \
-    --hostname $HOSTNAME \
-    --cores $CORES \
-    --memory $MEMORY \
-    --rootfs ${STORAGE}:${DISK_SIZE} \
-    --net0 ${NET0} \
+if ! pct create "$CTID" "$TEMPLATE_PATH" \
+    --hostname "$HOSTNAME" \
+    --cores "$CORES" \
+    --memory "$MEMORY" \
+    --rootfs "${STORAGE}:${DISK_SIZE}" \
+    --net0 "$NET0" \
     --unprivileged 1 \
     --features nesting=1 \
-    --onboot 1 \
-    --start 1
+    --onboot 1; then
+    echo -e "${RED}Error: Failed to create container ${CTID}.${NC}"
+    exit 1
+fi
 
 echo -e "${GREEN}✓ Container created (ID: $CTID)${NC}"
 else
 echo -e "${BLUE}Using existing LXC container (ID: $CTID)...${NC}"
-if ! pct status $CTID 2>/dev/null | grep -qi running; then
-    pct start $CTID >/dev/null 2>&1 || true
-fi
 fi
 
 # Wait for container to start
+if ! pct status "$CTID" 2>/dev/null | grep -qi running; then
+    echo -e "${BLUE}Starting container ${CTID}...${NC}"
+    if ! pct start "$CTID"; then
+        echo -e "${RED}Error: Container ${CTID} failed to start. Installation aborted.${NC}"
+        echo -e "${YELLOW}Run 'pct start ${CTID} --debug' for detailed Proxmox diagnostics.${NC}"
+        exit 1
+    fi
+fi
+
 echo -e "${BLUE}Waiting for container to start...${NC}"
-sleep 5
+for i in {1..15}; do
+    if pct status "$CTID" 2>/dev/null | grep -qi running; then
+        break
+    fi
+    sleep 2
+done
+if ! pct status "$CTID" 2>/dev/null | grep -qi running; then
+    echo -e "${RED}Error: Container ${CTID} is not running. Installation aborted.${NC}"
+    exit 1
+fi
 
 # Wait for network
 echo -e "${BLUE}Waiting for network...${NC}"
+NETWORK_READY=false
 for i in {1..30}; do
-    if pct exec $CTID -- ping -c 1 8.8.8.8 >/dev/null 2>&1; then
+    if pct exec "$CTID" -- ping -c 1 8.8.8.8 >/dev/null 2>&1; then
+        NETWORK_READY=true
         echo -e "${GREEN}✓ Network is ready${NC}"
         break
     fi
     sleep 2
 done
+if [[ "${NETWORK_READY}" != "true" ]]; then
+    echo -e "${RED}Error: Container ${CTID} has no working network connection. Installation aborted.${NC}"
+    exit 1
+fi
 
 # Get container IP
-IP=$(pct exec $CTID -- hostname -I | awk '{print $1}')
+IP=$(pct exec "$CTID" -- hostname -I | awk '{print $1}')
+if [[ -z "${IP}" ]]; then
+    echo -e "${RED}Error: Could not determine the IP address of container ${CTID}. Installation aborted.${NC}"
+    exit 1
+fi
 echo -e "${GREEN}✓ Container IP: $IP${NC}"
 echo ""
 
@@ -341,7 +368,7 @@ echo -e "${BLUE}╚════════════════════�
 echo ""
 
 # Create installation script inside container
-pct exec $CTID -- env WEBSERVER="${WEBSERVER}" SPOTWEB_REF="${SPOTWEB_REF}" bash <<'INSTALLER_SCRIPT'
+if ! pct exec "$CTID" -- env WEBSERVER="${WEBSERVER}" SPOTWEB_REF="${SPOTWEB_REF}" bash <<'INSTALLER_SCRIPT'
 #!/bin/bash
 set -e
 
@@ -704,6 +731,10 @@ echo ""
 fix_retrieve_php
 
 INSTALLER_SCRIPT
+then
+    echo -e "${RED}Error: Spotweb installation failed inside container ${CTID}.${NC}"
+    exit 1
+fi
 
 if [[ "${WEBSERVER}" == "apache" ]]; then
     echo -e "${BLUE}Configuring PHP timezone...${NC}"
@@ -932,16 +963,25 @@ THEME_SCRIPT
     sed -i "s/INSTALL_THEMES_PLACEHOLDER/${INSTALL_THEMES}/g" /tmp/install-themes-${CTID}.sh
     
     # Copy script to container and execute
-    pct push $CTID /tmp/install-themes-${CTID}.sh /tmp/install-themes.sh
-    pct exec $CTID -- chmod +x /tmp/install-themes.sh
-    pct exec $CTID -- bash /tmp/install-themes.sh
-    pct exec $CTID -- rm /tmp/install-themes.sh
+    if ! pct push "$CTID" /tmp/install-themes-${CTID}.sh /tmp/install-themes.sh \
+        || ! pct exec "$CTID" -- chmod +x /tmp/install-themes.sh \
+        || ! pct exec "$CTID" -- bash /tmp/install-themes.sh; then
+        echo -e "${RED}Error: Theme installation failed inside container ${CTID}.${NC}"
+        exit 1
+    fi
+    pct exec "$CTID" -- rm /tmp/install-themes.sh
     
     # Cleanup local temp file
     rm /tmp/install-themes-${CTID}.sh
 fi
 
 # Get the credentials
+# Get credentials from container
+if ! CREDS=$(pct exec "$CTID" -- cat /root/spotweb-credentials.txt 2>/dev/null) || [[ -z "${CREDS}" ]]; then
+    echo -e "${RED}Error: Installation did not produce the expected credentials file.${NC}"
+    exit 1
+fi
+
 echo ""
 echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║         Spotweb Installation Complete!                    ║${NC}"
@@ -953,9 +993,6 @@ echo -e "  Hostname:      ${HOSTNAME}"
 echo -e "  IP Address:    ${IP}"
 echo -e "  Web Server:    ${WEBSERVER}"
 echo ""
-
-# Get credentials from container
-CREDS=$(pct exec $CTID -- cat /root/spotweb-credentials.txt 2>/dev/null)
 
 echo -e "${YELLOW}Database Credentials:${NC}"
 echo ""

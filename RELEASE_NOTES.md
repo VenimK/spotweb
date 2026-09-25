@@ -6,6 +6,7 @@
 - Keep existing Debian 12 containers supported with PHP 8.2
 - Detect the container release through `/etc/os-release` and reject unsupported releases before PHP installation
 - Recommend Proxmox VE 9 for Debian 13 LXC deployments
+- Abort immediately when container creation, startup, networking, Spotweb installation, or theme installation fails
 
 ---
 
