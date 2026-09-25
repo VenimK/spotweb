@@ -7,6 +7,7 @@
 - Detect the container release through `/etc/os-release` and reject unsupported releases before PHP installation
 - Recommend Proxmox VE 9 for Debian 13 LXC deployments
 - Abort immediately when container creation, startup, networking, Spotweb installation, or theme installation fails
+- Select the Debian template matching the Proxmox host architecture instead of accidentally choosing ARM64 on AMD64
 
 ---
 

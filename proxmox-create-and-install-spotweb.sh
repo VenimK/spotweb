@@ -268,10 +268,11 @@ echo -e "${YELLOW}Finding Debian ${OSVERSION} template...${NC}"
 pveam update
 
 # Get the latest configured Debian template name
-TEMPLATE=$(pveam available | grep "debian-${OSVERSION}" | grep "standard" | tail -n1 | awk '{print $2}')
+HOST_ARCH=$(dpkg --print-architecture)
+TEMPLATE=$(pveam available | awk -v version="debian-${OSVERSION}-standard" -v arch="_${HOST_ARCH}.tar" '$2 ~ version && index($2, arch) {template=$2} END {print template}')
 
 if [ -z "$TEMPLATE" ]; then
-    echo -e "${RED}Error: Could not find Debian ${OSVERSION} template${NC}"
+    echo -e "${RED}Error: Could not find Debian ${OSVERSION} template for ${HOST_ARCH}${NC}"
     echo -e "${YELLOW}Available templates:${NC}"
     pveam available | grep debian
     exit 1
