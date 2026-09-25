@@ -267,6 +267,9 @@ install_themes() {
     curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/filter-manager.php" \
       -o "${spotweb_dir}/custom/tools/filter-manager.php" || \
       print_warn "Failed to download filter-manager.php"
+    curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/health-dashboard.php" \
+      -o "${spotweb_dir}/custom/tools/health-dashboard.php" || \
+      print_warn "Failed to download health-dashboard.php"
     curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/.htaccess" \
       -o "${spotweb_dir}/custom/tools/.htaccess" || true
 
@@ -564,6 +567,7 @@ main() {
     echo "  Customizer: http://127.0.0.1:${port}/custom/tools/theme-customizer.html"
     echo "  Upload:     http://127.0.0.1:${port}/custom/tools/theme-upload.php"
     echo "  Filters:    http://127.0.0.1:${port}/custom/tools/filter-manager.php"
+    echo "  Health:     http://127.0.0.1:${port}/custom/tools/health-dashboard.php"
   fi
   echo ""
   echo "Health check:"

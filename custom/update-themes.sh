@@ -60,6 +60,7 @@ cd "${CUSTOM_DIR}/tools"
 curl -fsSL "${GITHUB_REPO}/custom/tools/theme-customizer.html" -o "theme-customizer.html"
 curl -fsSL "${GITHUB_REPO}/custom/tools/theme-upload.php" -o "theme-upload.php"
 curl -fsSL "${GITHUB_REPO}/custom/tools/filter-manager.php" -o "filter-manager.php"
+curl -fsSL "${GITHUB_REPO}/custom/tools/health-dashboard.php" -o "health-dashboard.php"
 curl -fsSL "${GITHUB_REPO}/custom/tools/.htaccess" -o ".htaccess" 2>/dev/null || true
 
 # Update theme loader

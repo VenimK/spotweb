@@ -850,6 +850,7 @@ function Install-Themes([string]$Dir, [string]$Mode) {
       @('custom/tools/theme-customizer.html', 'custom\tools\theme-customizer.html'),
       @('custom/tools/theme-upload.php', 'custom\tools\theme-upload.php'),
       @('custom/tools/filter-manager.php', 'custom\tools\filter-manager.php'),
+      @('custom/tools/health-dashboard.php', 'custom\tools\health-dashboard.php'),
       @('custom/tools/.htaccess', 'custom\tools\.htaccess'),
       @('custom/includes/theme-loader.inc.php', 'custom\includes\theme-loader.inc.php'),
       @('custom/README.md', 'custom\README.md'),
@@ -1283,10 +1284,12 @@ if ($ThemeMode -eq 'pack') {
     Write-Host "  Customizer: http://spotweb.local/custom/tools/theme-customizer.html"
     Write-Host "  Upload:     http://spotweb.local/custom/tools/theme-upload.php"
     Write-Host "  Filters:    http://spotweb.local/custom/tools/filter-manager.php"
+    Write-Host "  Health:     http://spotweb.local/custom/tools/health-dashboard.php"
   } else {
     Write-Host "  Customizer: http://127.0.0.1:$Port/custom/tools/theme-customizer.html"
     Write-Host "  Upload:     http://127.0.0.1:$Port/custom/tools/theme-upload.php"
     Write-Host "  Filters:    http://127.0.0.1:$Port/custom/tools/filter-manager.php"
+    Write-Host "  Health:     http://127.0.0.1:$Port/custom/tools/health-dashboard.php"
   }
   Write-Host ""
 }

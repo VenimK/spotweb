@@ -19,14 +19,18 @@
     }
   }
 
-  function makeLink(className, label) {
+  function healthUrl() {
+    return managerUrl().replace(/filter-manager\.php(?:\?.*)?$/, 'health-dashboard.php');
+  }
+
+  function makeLink(className, label, url) {
     var a = document.createElement('a');
-    a.href = managerUrl();
+    a.href = url || managerUrl();
     a.className = className;
     a.target = '_blank';
     a.rel = 'noopener';
     a.textContent = label;
-    a.title = 'Open the filter manager';
+    a.title = label === 'Health' ? 'Open the health dashboard' : 'Open the filter manager';
     return a;
   }
 
@@ -34,6 +38,7 @@
     var url = managerUrl();
     window.spotwebPowerUx = window.spotwebPowerUx || {};
     window.spotwebPowerUx.filterManagerUrl = url;
+    window.spotwebPowerUx.healthDashboardUrl = healthUrl();
   }
 
   function injectAdvancedSearch() {
@@ -87,12 +92,33 @@
     }
   }
 
+  function injectHealthToolbar() {
+    var toolbar = document.querySelector('#toolbar');
+    if (!toolbar || toolbar.querySelector('.toolbarButton.healthDashboardBtn')) {
+      return;
+    }
+    var wrap = document.createElement('div');
+    wrap.className = 'toolbarButton healthDashboardBtn';
+    var p = document.createElement('p');
+    p.appendChild(makeLink('', 'Health', healthUrl()));
+    wrap.appendChild(p);
+    var filter = toolbar.querySelector('.toolbarButton.filterManagerBtn');
+    if (filter && filter.parentNode) {
+      filter.parentNode.insertBefore(wrap, filter.nextSibling);
+    } else {
+      toolbar.appendChild(wrap);
+    }
+  }
+
   function injectDashboard() {
     var dash = document.querySelector('.sw-dashboard .sw-dash-actions');
     if (!dash || dash.querySelector('a[href*="filter-manager.php"]')) {
       return;
     }
     dash.insertBefore(makeLink('sw-dash-btn', 'Filters'), dash.firstChild);
+    if (!dash.querySelector('a[href*="health-dashboard.php"]')) {
+      dash.insertBefore(makeLink('sw-dash-btn', 'Health', healthUrl()), dash.firstChild);
+    }
   }
 
   function injectPrefs() {
@@ -117,6 +143,7 @@
     publishUrl();
     injectAdvancedSearch();
     injectToolbar();
+    injectHealthToolbar();
     injectDashboard();
     injectPrefs();
     injectEditDialog();

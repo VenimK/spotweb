@@ -27,6 +27,7 @@ Transform your Spotweb interface with professionally designed themes featuring a
 - 🔒 **Update-Safe** - Themes survive Spotweb core updates
 - 💾 **Theme Persistence** - Remembers your selected theme
 - 🚀 **Easy Updates** - One-command theme pack updates
+- 🩺 **Health Dashboard** - Admin-only runtime, database, retrieval, storage, and log monitoring
 
 ---
 
@@ -172,6 +173,7 @@ Already have Spotweb? See **[MIGRATION-GUIDE.md](MIGRATION-GUIDE.md)** for insta
 - ✅ **Auto-Detection** - Custom themes appear in dropdown automatically
 - ✅ **Update Script** - One-command theme updates
 - ✅ **Complete Docs** - Full documentation included
+- ✅ **Health Dashboard** - Read-only system checks and bounded retrieval log viewer at `/custom/tools/health-dashboard.php`
 
 ### Theme Switcher UI:
 

@@ -809,6 +809,9 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
     curl -fsSL "${GITHUB_REPO}/custom/tools/filter-manager.php" \
         -o "${SPOTWEB_DIR}/custom/tools/filter-manager.php" 2>/dev/null || \
         echo "    ⚠ Failed to download filter-manager.php"
+    curl -fsSL "${GITHUB_REPO}/custom/tools/health-dashboard.php" \
+        -o "${SPOTWEB_DIR}/custom/tools/health-dashboard.php" 2>/dev/null || \
+        echo "    ⚠ Failed to download health-dashboard.php"
     curl -fsSL "${GITHUB_REPO}/custom/tools/.htaccess" \
         -o "${SPOTWEB_DIR}/custom/tools/.htaccess" 2>/dev/null || \
         echo "    ⚠ Failed to download .htaccess"
@@ -888,6 +891,7 @@ PHPEOF
     echo "  → Customizer: http://YOUR_IP/custom/tools/theme-customizer.html"
     echo "  → Upload: http://YOUR_IP/custom/tools/theme-upload.php"
     echo "  → Filters: http://YOUR_IP/custom/tools/filter-manager.php"
+    echo "  → Health: http://YOUR_IP/custom/tools/health-dashboard.php"
     echo "  → Update themes: cd /var/www/html/spotweb/custom && ./update-themes.sh"
     
 else

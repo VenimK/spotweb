@@ -118,6 +118,7 @@ Write-Host "  Downloading latest tools..." -ForegroundColor Yellow
 Download-File "$GithubRawBase/custom/tools/theme-customizer.html" (Join-Path $ToolsDir "theme-customizer.html")
 Download-File "$GithubRawBase/custom/tools/theme-upload.php" (Join-Path $ToolsDir "theme-upload.php")
 Download-File "$GithubRawBase/custom/tools/filter-manager.php" (Join-Path $ToolsDir "filter-manager.php")
+Download-File "$GithubRawBase/custom/tools/health-dashboard.php" (Join-Path $ToolsDir "health-dashboard.php")
 Download-File "$GithubRawBase/custom/tools/.htaccess" (Join-Path $ToolsDir ".htaccess")
 Write-Host ""
 

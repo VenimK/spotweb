@@ -1,5 +1,13 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.17 — Unified Health Dashboard
+
+- Add an admin-only, read-only health dashboard for runtime, database, retrieval, NNTP, storage, and custom tooling
+- Add a bounded and escaped retrieval log viewer without arbitrary file access
+- Distribute and link the dashboard on Proxmox, macOS, and Windows installations
+
+---
+
 ## v2.2.16 — Debian 13 and PHP 8.4
 
 - Use Debian 13 as the default Proxmox LXC template with PHP 8.4

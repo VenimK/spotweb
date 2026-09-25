@@ -13,7 +13,9 @@ custom/
 │   └── theme-switcher.js
 ├── tools/               # Theme management tools
 │   ├── theme-customizer.html
-│   └── theme-upload.php
+│   ├── theme-upload.php
+│   ├── filter-manager.php
+│   └── health-dashboard.php
 ├── includes/            # Integration hooks
 │   └── theme-loader.inc.php
 └── README.md           # This file
@@ -81,6 +83,11 @@ button and a link inside the Advanced Search overlay — same hook as the NZB
 panel overlay.
 
 Login with your Spotweb account.
+
+### Health Dashboard
+**URL:** `http://your-server/spotweb/custom/tools/health-dashboard.php`
+
+Admin-only, read-only status for PHP, database, retrieval, NNTP, storage, custom tooling, and the latest bounded retrieval log. Credentials and downloader secrets are never displayed.
 
 ### Theme Upload Tool
 **URL:** `http://your-server/spotweb/custom/tools/theme-upload.php`
