@@ -45,7 +45,7 @@ resolve_overlay_src() {
     return 0
   fi
 
-  print_info "Downloading overlays from GitHub (themes-only)..."
+  print_info "Downloading overlays from GitHub (themes-only)..." >&2
   TMP="$(mktemp -d)"
   if command -v curl >/dev/null 2>&1; then
     curl -fsSL "${GITHUB_TAR_URL}" | tar -xz -C "${TMP}"
