@@ -45,7 +45,7 @@ MEMORY="2048"
 BRIDGE="vmbr0"
 VLAN_TAG=""
 OSTYPE="debian"
-OSVERSION="12"
+OSVERSION="13"
 WEBSERVER="apache"  # or nginx
 SPOTWEB_REF="master"
 
@@ -131,7 +131,7 @@ fi
 
 echo -e "${CYAN}Spotweb LXC Container Setup${NC}"
 echo ""
-echo -e "${YELLOW}This will create a Debian 12 LXC container and install Spotweb${NC}"
+echo -e "${YELLOW}This will create a Debian ${OSVERSION} LXC container and install Spotweb${NC}"
 echo ""
 echo -e "${GREEN}Default settings:${NC}"
 echo -e "  Container ID: ${DISPLAY_CTID}"
@@ -263,11 +263,11 @@ echo ""
 if [[ "${CT_MODE}" == "new" ]]; then
 echo -e "${BLUE}Creating LXC container...${NC}"
 
-# Find the latest Debian 12 template
+# Find the latest configured Debian template
 echo -e "${YELLOW}Finding Debian ${OSVERSION} template...${NC}"
 pveam update
 
-# Get the latest Debian 12 template name
+# Get the latest configured Debian template name
 TEMPLATE=$(pveam available | grep "debian-${OSVERSION}" | grep "standard" | tail -n1 | awk '{print $2}')
 
 if [ -z "$TEMPLATE" ]; then
@@ -404,14 +404,22 @@ apt-get install -y curl wget git unzip ca-certificates gnupg2
 print_success "Basic tools installed"
 
 # Detect Debian version and set PHP version
-DEBIAN_VERSION=$(cat /etc/debian_version | cut -d. -f1)
-if [ "$DEBIAN_VERSION" -ge 12 ]; then
-    PHP_VERSION="8.2"
-else
-    PHP_VERSION="7.4"
+if [[ ! -r /etc/os-release ]]; then
+    print_warning "Cannot detect Debian version: /etc/os-release is missing"
+    exit 1
 fi
 
-print_info "Using PHP $PHP_VERSION"
+. /etc/os-release
+case "${ID:-}:${VERSION_ID:-}" in
+    debian:13) PHP_VERSION="8.4" ;;
+    debian:12) PHP_VERSION="8.2" ;;
+    *)
+        print_warning "Unsupported operating system: ${PRETTY_NAME:-unknown}. Supported versions: Debian 12 and 13"
+        exit 1
+        ;;
+esac
+
+print_info "Using PHP $PHP_VERSION on Debian ${VERSION_ID}"
 
 # Install PHP
 print_info "Installing PHP ${PHP_VERSION} and extensions..."

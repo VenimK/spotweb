@@ -301,8 +301,8 @@ cd C:\path\to\spotweb\custom
 
 ## 📋 Requirements
 
-- **Proxmox VE** 7.0+ (or any Linux with LXC containers)
-- **Container OS**: Debian 12 or Ubuntu 22.04 LTS
+- **Proxmox VE** 9 recommended for Debian 13 LXC
+- **Container OS**: Debian 13 with PHP 8.4 (default); existing Debian 12 containers remain supported with PHP 8.2
 - **Resources**: 1 CPU, 512MB RAM, 8GB storage (minimum)
 - **Network**: Internet access during installation
 

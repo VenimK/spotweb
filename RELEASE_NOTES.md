@@ -1,5 +1,14 @@
 # Spotweb Multi-Theme System — Release Notes
 
+## v2.2.16 — Debian 13 and PHP 8.4
+
+- Use Debian 13 as the default Proxmox LXC template with PHP 8.4
+- Keep existing Debian 12 containers supported with PHP 8.2
+- Detect the container release through `/etc/os-release` and reject unsupported releases before PHP installation
+- Recommend Proxmox VE 9 for Debian 13 LXC deployments
+
+---
+
 ## v2.2.15 — Filter Manager tool
 
 - Add `custom/tools/filter-manager.php` — simple web UI to manage sidebar filters
