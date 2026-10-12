@@ -160,6 +160,25 @@ If the `spotweb` database already exists, the Windows installer asks whether to:
 
 Already have Spotweb? See **[MIGRATION-GUIDE.md](MIGRATION-GUIDE.md)** for installation steps.
 
+### Uninstalling
+
+macOS (`install-macos.sh`) and Linux / Proxmox LXC (`proxmox-create-and-install-spotweb.sh`):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/VenimK/spotweb/themes-only/uninstall-spotweb.sh -o uninstall-spotweb.sh
+chmod +x uninstall-spotweb.sh
+./uninstall-spotweb.sh                    # inventory only, changes nothing
+./uninstall-spotweb.sh --all --dry-run    # show the removal plan
+./uninstall-spotweb.sh --all              # backup DB, then remove schedule, DB, web config, app folder
+./uninstall-spotweb.sh --all --remove-packages   # also remove PHP / MariaDB / web server packages
+
+# On the Proxmox host:
+./uninstall-spotweb.sh --ctid 105 --all              # clean up inside container 105
+./uninstall-spotweb.sh --ctid 105 --destroy-container # or delete the whole container
+```
+
+Windows: `.\Uninstall-Spotweb.ps1 -DryRun` (see `Get-Help .\Uninstall-Spotweb.ps1 -Full`).
+
 ---
 
 ## 🎯 What You Get
@@ -213,7 +232,7 @@ Click any theme → **instant switch** with smooth transitions!
 
 1. Create a `theme-yourname.css` file
 2. Open `http://YOUR_IP/custom/tools/theme-upload.php`
-3. Enter password (default: `spotweb123`)
+3. Sign in with a Spotweb administrator account
 4. Upload your CSS file
 5. **Done!** Your theme appears in the dropdown automatically
 

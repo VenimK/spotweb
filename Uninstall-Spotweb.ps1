@@ -34,6 +34,11 @@
     -RemoveMysqlService unregister the MariaDB/MySQL Windows service (mysqld --remove)
     -RemoveWingetPkgs   winget uninstall PHP / MariaDB packages
     -RemoveIIS          remove IIS site, app pool, fastCgi handler, web.config, hosts entry
+    -RemoveShortcuts    delete Spotweb*.lnk shortcuts and Spotweb* scheduled tasks
+    -StopRuntime        stop the PHP server listening on -Port
+
+  Administrator rights (UAC) are only requested for -RemoveMysqlService, -RemoveIIS,
+  -RemoveWingetPkgs and -RemoveShortcuts.
 
   Idempotent - safe to re-run. Missing pieces are skipped. Use -DryRun (or -WhatIf)
   to see the plan without changing anything.
@@ -85,7 +90,8 @@ param(
   [switch]$CleanPath,
   [switch]$RemoveMysqlService,
   [switch]$RemoveWingetPkgs,
-  [switch]$RemoveIIS
+  [switch]$RemoveIIS,
+  [switch]$RemoveShortcuts
 )
 
 $ErrorActionPreference = 'Stop'
@@ -106,16 +112,22 @@ function Test-IsAdmin {
   return ([Security.Principal.WindowsPrincipal]$id).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-$needsAdmin = ($RemoveMysqlService -or $RemoveIIS -or $CleanPath -or $DropDatabase)
+function ConvertTo-QuotedArg([string]$Value) {
+  $escaped = [regex]::Replace($Value, '(\\*)"', { param($m) ($m.Groups[1].Value * 2) + '\"' })
+  $escaped = [regex]::Replace($escaped, '(\\+)$', { param($m) $m.Groups[1].Value * 2 })
+  return '"' + $escaped + '"'
+}
 
-if (-not (Test-IsAdmin) -and -not $NoElevate -and -not $DryRun) {
+$needsAdmin = ($RemoveMysqlService -or $RemoveIIS -or $RemoveWingetPkgs -or $RemoveShortcuts)
+
+if ($needsAdmin -and -not (Test-IsAdmin) -and -not $NoElevate -and -not $DryRun) {
   Write-Host 'Requesting Administrator privileges (UAC) ...' -ForegroundColor Yellow
-  $argList = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$ScriptPath`"")
-  foreach ($sw in @('DryRun','Force','NonInteractive','NoElevate','StopRuntime','DropDatabase','BackupDatabase','RemoveSpotwebDir','RemoveToolchain','CleanPath','RemoveMysqlService','RemoveWingetPkgs','RemoveIIS')) {
+  $argList = @('-NoProfile', '-NoExit', '-ExecutionPolicy', 'Bypass', '-File', (ConvertTo-QuotedArg $ScriptPath))
+  foreach ($sw in @('DryRun','Force','NonInteractive','NoElevate','StopRuntime','DropDatabase','BackupDatabase','RemoveSpotwebDir','RemoveToolchain','CleanPath','RemoveMysqlService','RemoveWingetPkgs','RemoveIIS','RemoveShortcuts')) {
     if ($PSBoundParameters.ContainsKey($sw)) { $argList += "-$sw" }
   }
   foreach ($p in @('SpotwebDir','DbName','DbUser','DbPass','RootPass','Port','MysqlBin','BackupTo')) {
-    if ($PSBoundParameters.ContainsKey($p)) { $argList += "-$p"; $argList += "`"$($PSBoundParameters[$p])`"" }
+    if ($PSBoundParameters.ContainsKey($p)) { $argList += "-$p"; $argList += (ConvertTo-QuotedArg ([string]$PSBoundParameters[$p])) }
   }
   if ($WhatIfPreference) { $argList += '-DryRun' }
   try {
@@ -188,22 +200,48 @@ function Resolve-MysqlBin {
   return $null
 }
 
-function Invoke-MysqlSql {
-  param([string]$MysqlBin, [string]$Sql, [string]$User = 'root', [string]$Password = '')
-  $args = @('--host=127.0.0.1', '--protocol=TCP', "--user=$User")
-  if ($Password) { $args += "-p$Password" }
-  $args += @('-e', $Sql)
+function Resolve-MysqldumpBin {
+  param([string]$MysqlBin)
+  if (-not $MysqlBin) { return $null }
+  $dir = Split-Path -Parent $MysqlBin
+  foreach ($name in @('mysqldump.exe', 'mariadb-dump.exe')) {
+    $candidate = Join-Path $dir $name
+    if (Test-Path -LiteralPath $candidate) { return $candidate }
+  }
+  foreach ($name in @('mysqldump', 'mariadb-dump')) {
+    $cmd = Get-Command $name -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+  }
+  return $null
+}
+
+function Invoke-MysqlTool {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password', Justification = 'Value comes from the plain -RootPass/-DbPass script parameters and must be exported to MYSQL_PWD as plain text.')]
+  param([string]$Bin, [string[]]$ToolArgs, [string]$Password = '')
   $oldEap = $ErrorActionPreference
+  $oldPwd = $env:MYSQL_PWD
   $ErrorActionPreference = 'SilentlyContinue'
   try {
-    $out = & $MysqlBin @args 2>&1 | Out-String
+    if ($Password) { $env:MYSQL_PWD = $Password } else { Remove-Item Env:MYSQL_PWD -ErrorAction SilentlyContinue }
+    $out = & $Bin @ToolArgs 2>&1 | Out-String
     $code = $LASTEXITCODE
-  } finally { $ErrorActionPreference = $oldEap }
-  if ($code -ne 0) { throw "mysql failed ($code): $Sql`n$($out.Trim())" }
-  return ($out.Trim())
+  } finally {
+    $ErrorActionPreference = $oldEap
+    if ($null -eq $oldPwd) { Remove-Item Env:MYSQL_PWD -ErrorAction SilentlyContinue } else { $env:MYSQL_PWD = $oldPwd }
+  }
+  return @{ Code = $code; Output = $out.Trim() }
+}
+
+function Invoke-MysqlSql {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password', Justification = 'Passed through to Invoke-MysqlTool, which exports it to MYSQL_PWD.')]
+  param([string]$MysqlBin, [string]$Sql, [string]$User = 'root', [string]$Password = '')
+  $r = Invoke-MysqlTool -Bin $MysqlBin -Password $Password -ToolArgs @('--host=127.0.0.1', '--protocol=TCP', "--user=$User", '-e', $Sql)
+  if ($r.Code -ne 0) { throw "mysql failed ($($r.Code)): $Sql`n$($r.Output)" }
+  return $r.Output
 }
 
 function Get-RowCount {
+  [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'Password', Justification = 'Passed through to Invoke-MysqlTool, which exports it to MYSQL_PWD.')]
   param([string]$MysqlBin, [string]$Db, [string]$Table, [string]$User, [string]$Password)
   $out = Invoke-MysqlSql -MysqlBin $MysqlBin -User $User -Password $Password -Sql "SELECT COUNT(*) FROM ``$Db``.``$Table``;"
   return (($out -split "`r?`n" | Select-Object -Last 1).Trim())
@@ -242,7 +280,7 @@ Write-Host "  Database:          $DbName (user $DbUser)"
 Write-Host "  mysql client:      $(if ($MysqlBin) { $MysqlBin } else { 'not found' })"
 Write-Host ''
 Write-Host '  Destructive switches (opt-in):' -ForegroundColor DarkGray
-foreach ($sw in @('StopRuntime','BackupDatabase','DropDatabase','RemoveSpotwebDir','RemoveToolchain','CleanPath','RemoveMysqlService','RemoveWingetPkgs','RemoveIIS')) {
+foreach ($sw in @('StopRuntime','BackupDatabase','DropDatabase','RemoveSpotwebDir','RemoveToolchain','CleanPath','RemoveMysqlService','RemoveWingetPkgs','RemoveIIS','RemoveShortcuts')) {
   $on = [bool](Get-Variable -Name $sw -ValueOnly)
   Write-Host ("    -{0,-17} {1}" -f $sw, $(if ($on) { 'YES' } else { 'no' }))
 }
@@ -253,25 +291,27 @@ Write-Host ''
 # ---------------------------------------------------------------------------
 Write-Step 'Phase 1: Stop running processes'
 
-$phpProcs = @(Get-Process php,php-cgi,php-win -ErrorAction SilentlyContinue)
+$listenPids = @(Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique)
+$serverProcs = @($listenPids | ForEach-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue } | Where-Object { $_.Name -match '^php(-cgi|-win)?$' })
+$otherPhp = @(Get-Process php,php-cgi,php-win -ErrorAction SilentlyContinue | Where-Object { $serverProcs.Id -notcontains $_.Id })
 
-if ($phpProcs.Count -eq 0) {
-  Write-Skip 'no PHP process running'
+if ($serverProcs.Count -eq 0) {
+  Write-Skip "no PHP server listening on port $Port"
 } elseif ($StopRuntime) {
-  foreach ($p in $phpProcs) {
+  foreach ($p in $serverProcs) {
     if (-not $Cmdlet.ShouldProcess("pid $($p.Id)", 'Stop process')) { continue }
     Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
-    Write-Ok "stopped $($p.Name) pid $($p.Id)"
+    Write-Ok "stopped $($p.Name) pid $($p.Id) (port $Port)"
   }
 } else {
-  Write-Warn "$($phpProcs.Count) PHP process(es) running; pass -StopRuntime to stop them"
-  foreach ($p in $phpProcs) { Write-Info "  pid $($p.Id): $($p.Name)" }
+  Write-Warn "PHP server running on port $Port; pass -StopRuntime to stop it"
+  foreach ($p in $serverProcs) { Write-Info "  pid $($p.Id): $($p.Name)" }
 }
-
-if (-not $DryRun) {
-  $listen = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
-  if ($listen) { Write-Info "  port $Port still listening (pid $($listen[0].OwningProcess))" }
+if ($otherPhp.Count -gt 0) {
+  Write-Info "  $($otherPhp.Count) other PHP process(es) left running (not bound to port $Port)"
 }
+$nonPhpListeners = @($listenPids | Where-Object { $serverProcs.Id -notcontains $_ })
+if ($nonPhpListeners.Count -gt 0) { Write-Info "  port $Port is also held by non-PHP pid(s): $($nonPhpListeners -join ', ')" }
 
 # mysqld started by the installer (--standalone, no service)
 $mysqldProcs = @(Get-Process mysqld, mariadbd -ErrorAction SilentlyContinue)
@@ -288,11 +328,11 @@ if (-not $MysqlBin) {
   Write-Skip 'no mysql client found - database cannot be inspected or dropped'
 } else {
   try {
-    $dbs = Invoke-MysqlSql -MysqlBin $MysqlBin -Sql "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='$DbName';"
+    $dbs = Invoke-MysqlSql -MysqlBin $MysqlBin -Password $RootPass -Sql "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='$DbName';"
     if ($dbs -notmatch "$DbName") {
       Write-Skip "database '$DbName' does not exist"
     } else {
-      $statsLine = ((Invoke-MysqlSql -MysqlBin $MysqlBin -Sql "SELECT COUNT(*), ROUND(SUM(data_length+index_length)/1048576,1) FROM information_schema.TABLES WHERE TABLE_SCHEMA='$DbName';") -split "`r?`n" | Select-Object -Last 1)
+      $statsLine = ((Invoke-MysqlSql -MysqlBin $MysqlBin -Password $RootPass -Sql "SELECT COUNT(*), ROUND(SUM(data_length+index_length)/1048576,1) FROM information_schema.TABLES WHERE TABLE_SCHEMA='$DbName';") -split "`r?`n" | Select-Object -Last 1)
       Write-Info "  $DbName : $statsLine (tables, MB)"
       foreach ($tbl in @('spots','users','settings')) {
         try {
@@ -304,38 +344,48 @@ if (-not $MysqlBin) {
         }
       }
 
+      $backupOk = $false
       if ($BackupDatabase) {
         $outDir = if ($BackupTo) { $BackupTo } else { Join-Path $env:USERPROFILE 'Spotweb-backup' }
         $sqlFile = Join-Path $outDir ("{0}-{1}.sql" -f $DbName, (Get-Date -Format 'yyyyMMdd-HHmmss'))
-        if (-not (Test-Path -LiteralPath $outDir)) {
-          if ($Cmdlet.ShouldProcess($outDir, 'Create folder')) { New-Item -ItemType Directory -Path $outDir -Force | Out-Null }
-        }
-        if ($Cmdlet.ShouldProcess($sqlFile, 'Write mysqldump')) {
-          $bargs = @('--host=127.0.0.1', '--protocol=TCP', '--user=root', '--default-character-set=utf8mb4', '--result-file=' + $sqlFile, $DbName)
-          if ($RootPass) { $bargs += "-p$RootPass" }
-          $oldEap = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-          & $MysqlBin @bargs 2>&1 | Out-Null
-          $code = $LASTEXITCODE
-          $ErrorActionPreference = $oldEap
-          if ($code -eq 0) { Write-Ok "backup written: $sqlFile" } else { Write-Warn "mysqldump failed (exit $code)" }
+        $dumpBin = Resolve-MysqldumpBin -MysqlBin $MysqlBin
+        if (-not $dumpBin) {
+          Write-Err 'mysqldump / mariadb-dump not found next to the mysql client or on PATH - backup not written'
+        } else {
+          if (-not (Test-Path -LiteralPath $outDir)) {
+            if ($Cmdlet.ShouldProcess($outDir, 'Create folder')) { New-Item -ItemType Directory -Path $outDir -Force | Out-Null }
+          }
+          if ($Cmdlet.ShouldProcess($sqlFile, 'Write mysqldump')) {
+            $r = Invoke-MysqlTool -Bin $dumpBin -Password $RootPass -ToolArgs @('--host=127.0.0.1', '--protocol=TCP', '--user=root', '--default-character-set=utf8mb4', '--single-transaction', '--routines', '--result-file=' + $sqlFile, $DbName)
+            if ($r.Code -eq 0 -and (Test-Path -LiteralPath $sqlFile) -and (Get-Item -LiteralPath $sqlFile).Length -gt 0) {
+              $backupOk = $true
+              Write-Ok "backup written: $sqlFile"
+            } else {
+              Write-Err "mysqldump failed (exit $($r.Code)): $($r.Output)"
+            }
+          } else {
+            $backupOk = $true
+          }
         }
       }
 
-      if ($DropDatabase) {
+      if ($DropDatabase -and $BackupDatabase -and -not $backupOk) {
+        Write-Err "Database '$DbName' NOT dropped because the backup failed."
+      } elseif ($DropDatabase) {
         Write-Warn "This will DESTROY all Spotweb data in '$DbName'."
         if (-not (Confirm-Action "Drop database '$DbName'?")) {
           Write-Host '  Database drop skipped.'
         } else {
           if ($Cmdlet.ShouldProcess($DbName, 'Drop database')) {
-            Invoke-MysqlSql -MysqlBin $MysqlBin -Sql "DROP DATABASE IF EXISTS ``$DbName``;"
+            Invoke-MysqlSql -MysqlBin $MysqlBin -Password $RootPass -Sql "DROP DATABASE IF EXISTS ``$DbName``;"
             Write-Ok "dropped database $DbName"
           }
           foreach ($h in @('localhost', '127.0.0.1')) {
             if ($Cmdlet.ShouldProcess("$DbUser@$h", 'Drop user')) {
-              try { Invoke-MysqlSql -MysqlBin $MysqlBin -Sql "DROP USER IF EXISTS '$DbUser'@'$h';" } catch { Write-Warn "drop user $DbUser@$h : $($_.Exception.Message)" }
+              try { Invoke-MysqlSql -MysqlBin $MysqlBin -Password $RootPass -Sql "DROP USER IF EXISTS '$DbUser'@'$h';" } catch { Write-Warn "drop user $DbUser@$h : $($_.Exception.Message)" }
             }
           }
-          try { Invoke-MysqlSql -MysqlBin $MysqlBin -Sql 'FLUSH PRIVILEGES;' } catch { }
+          try { Invoke-MysqlSql -MysqlBin $MysqlBin -Password $RootPass -Sql 'FLUSH PRIVILEGES;' } catch { }
         }
       } else {
         Write-Skip "database '$DbName' kept (pass -DropDatabase, or -BackupDatabase to dump it first)"
@@ -530,22 +580,33 @@ foreach ($f in @((Join-Path ([System.IO.Path]::GetTempPath()) 'rewrite_amd64.msi
 Get-ChildItem ([System.IO.Path]::GetTempPath()) -Filter 'apply-spotweb-overlays-*.ps1' -ErrorAction SilentlyContinue |
   ForEach-Object { Remove-PathSafe $_.FullName 'overlay script copy' }
 
-foreach ($d in @((Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'), (Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs'), "$env:USERPROFILE\Desktop")) {
-  if (-not (Test-Path -LiteralPath $d)) { continue }
-  Get-ChildItem -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue |
-    Where-Object { $_.Name -match 'Spotweb' } |
-    ForEach-Object { Remove-PathSafe $_.FullName 'Spotweb shortcut' }
+$shortcuts = @()
+foreach ($d in @((Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'), (Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs'), [Environment]::GetFolderPath('Desktop'))) {
+  if (-not $d -or -not (Test-Path -LiteralPath $d)) { continue }
+  $shortcuts += @(Get-ChildItem -LiteralPath $d -Recurse -Force -File -Filter '*.lnk' -ErrorAction SilentlyContinue |
+    Where-Object { $_.BaseName -match '^(?i)Spotweb\b' })
 }
+$tasks = @(Get-ScheduledTask -ErrorAction SilentlyContinue | Where-Object { $_.TaskName -match '^(?i)Spotweb\b' })
 
-$task = Get-ScheduledTask -ErrorAction SilentlyContinue | Where-Object { $_.TaskName -match 'spotweb' -or $_.Actions.Execute -match 'spotweb' }
-if ($task) {
-  foreach ($t in $task) {
-    if ($Cmdlet.ShouldProcess($t.TaskName, 'Unregister task')) {
-      Unregister-ScheduledTask -TaskName $t.TaskName -Confirm:$false
-      Write-Ok "removed scheduled task $($t.TaskName)"
+if ($shortcuts.Count -eq 0) { Write-Skip 'no Spotweb*.lnk shortcuts' }
+if ($tasks.Count -eq 0) { Write-Skip 'no Spotweb* scheduled task' }
+foreach ($s in $shortcuts) { Write-Info "  shortcut: $($s.FullName)" }
+foreach ($t in $tasks) { Write-Info "  scheduled task: $($t.TaskPath)$($t.TaskName)" }
+
+if (($shortcuts.Count + $tasks.Count) -gt 0) {
+  if (-not $RemoveShortcuts) {
+    Write-Skip 'shortcuts and scheduled tasks kept (pass -RemoveShortcuts to delete them)'
+  } elseif (Confirm-Action 'Delete the shortcuts and scheduled tasks listed above?') {
+    foreach ($s in $shortcuts) {
+      if (-not $Cmdlet.ShouldProcess($s.FullName, 'Delete shortcut')) { continue }
+      try { Remove-Item -LiteralPath $s.FullName -Force -ErrorAction Stop; Write-Ok "removed $($s.FullName)" } catch { Write-Warn "could not remove $($s.FullName) : $($_.Exception.Message)" }
+    }
+    foreach ($t in $tasks) {
+      if (-not $Cmdlet.ShouldProcess("$($t.TaskPath)$($t.TaskName)", 'Unregister task')) { continue }
+      try { Unregister-ScheduledTask -TaskName $t.TaskName -TaskPath $t.TaskPath -Confirm:$false -ErrorAction Stop; Write-Ok "removed scheduled task $($t.TaskName)" } catch { Write-Warn "could not remove task $($t.TaskName) : $($_.Exception.Message)" }
     }
   }
-} else { Write-Skip 'no Spotweb scheduled task' }
+}
 
 Write-Step 'Done'
 Write-Host ''

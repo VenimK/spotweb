@@ -485,7 +485,7 @@ function read_pass_salt(PDO $pdo): string
         }
         $value = (string) $row['value'];
         if (!empty($row['serialized'])) {
-            $un = @unserialize($value);
+            $un = @unserialize($value, ['allowed_classes' => false]);
             if (is_string($un)) {
                 $value = $un;
             }
@@ -504,18 +504,25 @@ function verify_spotweb_password(string $password, string $dbHash, string $passS
     if ($passSalt !== '' && hash_equals($dbHash, pass_to_hash($passSalt, $password))) {
         return true;
     }
-    if (password_verify($password, $dbHash)) {
-        return true;
-    }
-    if (hash_equals($dbHash, sha1($password))) {
-        return true;
-    }
-    return false;
+    return password_verify($password, $dbHash);
 }
 
-function show_login(string $error = '', array $debugInfo = []): void
+function is_admin_user(PDO $pdo, int $userId): bool
 {
-    $debug = $debugInfo;
+    if ($userId === 2) {
+        return true;
+    }
+    try {
+        $stmt = $pdo->prepare("SELECT 1 FROM usergroups ug INNER JOIN securitygroups sg ON sg.id = ug.groupid WHERE ug.userid = ? AND sg.name = 'Administrators'");
+        $stmt->execute([$userId]);
+        return (bool) $stmt->fetchColumn();
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+function show_login(string $error = ''): void
+{
     ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -535,10 +542,6 @@ function show_login(string $error = '', array $debugInfo = []): void
   button { width: 100%; padding: 12px; border: none; border-radius: 8px; background: #0fbcf9; color: #0d1117; font-size: 14px; font-weight: 600; cursor: pointer; }
   button:hover { background: #0ea5e9; }
   .error { color: #e74c3c; font-size: 13px; margin-bottom: 12px; }
-  .debug { margin-top: 20px; padding: 16px; background: #0d1117; border-radius: 8px; border: 1px solid #2a2a4e; font-family: ui-monospace, monospace; font-size: 12px; color: #0fbcf9; white-space: pre-wrap; word-break: break-all; max-height: 280px; overflow-y: auto; }
-  .debug h3 { color: #e0e0e0; margin-bottom: 8px; font-family: -apple-system, sans-serif; }
-  .debug-hint { margin-top: 16px; font-size: 12px; color: #666; text-align: center; }
-  .debug-hint a { color: #0fbcf9; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -556,16 +559,6 @@ function show_login(string $error = '', array $debugInfo = []): void
     <input type="hidden" name="login" value="1">
     <button type="submit">Login</button>
   </form>
-<?php if ($debug): ?>
-  <div class="debug">
-    <h3>Diagnostics</h3>
-<?php foreach ($debug as $line): ?>
-    <?php echo h($line); ?>
-
-<?php endforeach; ?>
-  </div>
-<?php endif; ?>
-  <div class="debug-hint">Login not working? Open <a href="filter-manager.php?debug=1">?debug=1</a></div>
 </div>
 </body>
 </html>
@@ -581,38 +574,6 @@ try {
     http_response_code(500);
     echo '<h2>Database connection failed</h2><pre>' . h($e->getMessage()) . '</pre>';
     exit;
-}
-
-$debugMode = isset($_GET['debug']) && $_GET['debug'] === '1';
-$debugInfo = [];
-if ($debugMode) {
-    $debugInfo[] = 'Spotweb root: ' . $spotwebRoot;
-    $debugInfo[] = 'DB engine: ' . ($GLOBALS['dbsettings']['engine'] ?? 'unknown');
-    $debugInfo[] = 'DB host: ' . ($GLOBALS['dbsettings']['host'] ?? 'unknown');
-    $debugInfo[] = 'DB name: ' . ($GLOBALS['dbsettings']['dbname'] ?? 'unknown');
-    try {
-        $cols = $pdo->query('SHOW COLUMNS FROM users')->fetchAll();
-        $debugInfo[] = 'Users columns: ' . implode(', ', array_column($cols, 'Field'));
-    } catch (Exception $e) {
-        $debugInfo[] = 'Cannot read users table: ' . $e->getMessage();
-    }
-    try {
-        $salt = read_pass_salt($pdo);
-        $debugInfo[] = $salt !== '' ? 'pass_salt present (len ' . strlen($salt) . ')' : 'pass_salt missing';
-        $users = $pdo->query('SELECT id, username, deleted FROM users ORDER BY id')->fetchAll();
-        $debugInfo[] = 'Users: ' . count($users);
-        foreach ($users as $u) {
-            $debugInfo[] = sprintf('  id=%d %s deleted=%s', $u['id'], $u['username'], $u['deleted']);
-        }
-        $stmt = $pdo->prepare('SELECT passhash FROM users WHERE username = ? LIMIT 1');
-        $stmt->execute(['admin']);
-        $adminHash = (string) $stmt->fetchColumn();
-        if ($salt && $adminHash) {
-            $debugInfo[] = 'admin / spotweb hash match: ' . (hash_equals($adminHash, pass_to_hash($salt, 'spotweb')) ? 'YES' : 'NO');
-        }
-    } catch (Exception $e) {
-        $debugInfo[] = 'Diagnostics failed: ' . $e->getMessage();
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -640,7 +601,7 @@ if (isset($_POST['login'])) {
     $p = (string) ($_POST['password'] ?? '');
     $loginError = 'Invalid username or password';
     try {
-        $stmt = $pdo->prepare('SELECT id, username, passhash FROM users WHERE username = ? AND deleted = 0 LIMIT 1');
+        $stmt = $pdo->prepare("SELECT id, username, passhash FROM users WHERE username = ? AND deleted = '0' LIMIT 1");
         $stmt->execute([$u]);
         $user = $stmt->fetch();
         if ($user && strcasecmp((string) $user['username'], 'anonymous') !== 0) {
@@ -658,7 +619,8 @@ if (isset($_POST['login'])) {
             }
         }
     } catch (Exception $e) {
-        $loginError = 'Login failed: ' . $e->getMessage();
+        error_log('filter-manager login failed: ' . $e->getMessage());
+        $loginError = 'Login failed due to a server error. Check the PHP error log.';
     }
 }
 
@@ -674,13 +636,13 @@ if (isset($_GET['logout'])) {
 }
 
 if (!$isAuth) {
-    show_login($loginError, $debugInfo);
+    show_login($loginError);
     exit;
 }
 
 $authUserId = (int) ($_SESSION['filter_mgr_userid'] ?? 0);
 $username = (string) ($_SESSION['filter_mgr_username'] ?? '');
-$isAdmin = ($authUserId === 2);
+$isAdmin = is_admin_user($pdo, $authUserId);
 if ($authUserId < 1) {
     session_destroy();
     redirect();
@@ -689,7 +651,7 @@ if ($authUserId < 1) {
 if (isset($_POST['action']) && $_POST['action'] === 'switch_user' && $isAdmin) {
     require_csrf();
     $target = (int) ($_POST['target_userid'] ?? 0);
-    $stmt = $pdo->prepare('SELECT id, username FROM users WHERE id = ? AND deleted = 0 LIMIT 1');
+    $stmt = $pdo->prepare("SELECT id, username FROM users WHERE id = ? AND deleted = '0' LIMIT 1");
     $stmt->execute([$target]);
     $row = $stmt->fetch();
     if ($row) {
@@ -709,7 +671,7 @@ if (!$isAdmin) {
 $allUsers = [];
 if ($isAdmin) {
     try {
-        $allUsers = $pdo->query('SELECT id, username FROM users WHERE deleted = 0 ORDER BY id')->fetchAll();
+        $allUsers = $pdo->query("SELECT id, username FROM users WHERE deleted = '0' ORDER BY id")->fetchAll();
     } catch (Exception $e) {
         $allUsers = [];
     }

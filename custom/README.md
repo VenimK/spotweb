@@ -97,7 +97,8 @@ Web-based theme management:
 - Auto-adds to theme switcher
 - Auto-adds CSS links to header
 - View/delete installed themes
-- Password protected (default: `spotweb123`)
+- Sign in with a Spotweb administrator account (CSRF-protected)
+- Uploaded CSS is rejected if it contains external URLs, `@import` or HTML
 
 ## 📦 Deployment
 
@@ -158,8 +159,8 @@ chown -R www-data:www-data custom/
 
 ## 🔒 Security
 
-- Theme upload tool is password-protected
-- Change default password in: `custom/tools/theme-upload.php` (line 8)
+- Theme upload, Filter Manager and Health Dashboard use your Spotweb accounts (no hardcoded passwords)
+- Theme upload and Health Dashboard require a Spotweb administrator (built-in admin or the `Administrators` group)
 - Restrict access via Apache `.htaccess` if needed
 
 ## 📝 Version

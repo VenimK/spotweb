@@ -343,7 +343,7 @@ curl -fsSL https://raw.githubusercontent.com/VenimK/spotweb/themes-only/custom/t
 1. **Backup before migrating** - Always backup `templates/we1rdo/css/theme-*.css`
 2. **Test in dev first** - Try migration on test container first
 3. **Document custom themes** - Keep list of custom themes uploaded
-4. **Change upload password** - Change default password in `theme-upload.php`
+4. **Secure the admin account** - The theme upload tool signs in with your Spotweb administrator account
 5. **Use version control** - Keep `/custom/` in git for easy updates
 
 ---

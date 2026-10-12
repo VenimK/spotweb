@@ -45,7 +45,7 @@ foreach ($preinstalledThemes as $theme) {
 $customThemeFiles = glob($customThemesPath . '/theme-*.css');
 if ($customThemeFiles) {
     foreach ($customThemeFiles as $themeFile) {
-        $themeName = basename($themeFile);
+        $themeName = htmlspecialchars(rawurlencode(basename($themeFile)), ENT_QUOTES, 'UTF-8');
         echo "<link rel='stylesheet' type='text/css' href='custom/themes/{$themeName}'>\n";
     }
 }

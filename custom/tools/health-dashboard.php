@@ -48,7 +48,7 @@ function pass_salt(PDO $pdo): string
         }
         $value = (string) $row['value'];
         if (!empty($row['serialized'])) {
-            $decoded = @unserialize($value);
+            $decoded = @unserialize($value, ['allowed_classes' => false]);
             if (is_string($decoded)) {
                 $value = $decoded;
             }
@@ -66,8 +66,21 @@ function valid_password(string $password, string $hash, string $salt): bool
     }
     $legacy = $salt === '' ? '' : sha1(strrev(substr($salt, 1, 3)) . $password . $salt);
     return ($legacy !== '' && hash_equals($hash, $legacy))
-        || password_verify($password, $hash)
-        || hash_equals($hash, sha1($password));
+        || password_verify($password, $hash);
+}
+
+function is_admin_user(PDO $pdo, int $userId): bool
+{
+    if ($userId === 2) {
+        return true;
+    }
+    try {
+        $stmt = $pdo->prepare("SELECT 1 FROM usergroups ug INNER JOIN securitygroups sg ON sg.id = ug.groupid WHERE ug.userid = ? AND sg.name = 'Administrators'");
+        $stmt->execute([$userId]);
+        return (bool) $stmt->fetchColumn();
+    } catch (Throwable $e) {
+        return false;
+    }
 }
 
 function setting_value(PDO $pdo, string $name)
@@ -80,7 +93,7 @@ function setting_value(PDO $pdo, string $name)
     }
     $value = $row['value'];
     if (!empty($row['serialized'])) {
-        $decoded = @unserialize((string) $value);
+        $decoded = @unserialize((string) $value, ['allowed_classes' => false]);
         return $decoded === false && $value !== 'b:0;' ? null : $decoded;
     }
     return $value;
@@ -128,17 +141,22 @@ if (isset($_GET['logout'])) {
 if (isset($_POST['login'])) {
     $username = trim((string) ($_POST['username'] ?? ''));
     $password = (string) ($_POST['password'] ?? '');
-    $stmt = $pdo->prepare('SELECT id, username, passhash FROM users WHERE username = ? AND deleted = 0 LIMIT 1');
-    $stmt->execute([$username]);
-    $user = $stmt->fetch();
-    if ($user && (int) $user['id'] === 2 && valid_password($password, (string) $user['passhash'], pass_salt($pdo))) {
-        session_regenerate_id(true);
-        $_SESSION['health_admin'] = true;
-        $_SESSION['health_username'] = (string) $user['username'];
-        header('Location: health-dashboard.php');
-        exit;
-    }
     $error = 'Invalid administrator credentials.';
+    try {
+        $stmt = $pdo->prepare("SELECT id, username, passhash FROM users WHERE username = ? AND deleted = '0' LIMIT 1");
+        $stmt->execute([$username]);
+        $user = $stmt->fetch();
+        if ($user && is_admin_user($pdo, (int) $user['id']) && valid_password($password, (string) $user['passhash'], pass_salt($pdo))) {
+            session_regenerate_id(true);
+            $_SESSION['health_admin'] = true;
+            $_SESSION['health_username'] = (string) $user['username'];
+            header('Location: health-dashboard.php');
+            exit;
+        }
+    } catch (Throwable $e) {
+        error_log('health-dashboard login failed: ' . $e->getMessage());
+        $error = 'Login failed due to a server error. Check the PHP error log.';
+    }
 }
 if (empty($_SESSION['health_admin'])) {
 ?><!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Spotweb Health</title><style>
@@ -169,12 +187,17 @@ if ($free !== false && $total) {
     $percent = ($free / $total) * 100;
     $add('Storage', 'Free disk', $percent < 10 ? 'fail' : ($percent < 20 ? 'warn' : 'ok'), sprintf('%.1f GB free (%.1f%%)', $free / 1073741824, $percent));
 }
-$mode = substr(sprintf('%o', fileperms($dbFile)), -4);
-$add('Security', 'Database settings', (int) $mode > 640 ? 'warn' : 'ok', 'Readable; mode ' . $mode);
+$perms = fileperms($dbFile) & 0777;
+$mode = sprintf('%04o', $perms);
+if (PHP_OS_FAMILY === 'Windows') {
+    $add('Security', 'Database settings', 'ok', 'Readable; mode ' . $mode . ' (POSIX permissions not enforced on Windows)');
+} else {
+    $add('Security', 'Database settings', ($perms & 0007) ? 'warn' : 'ok', 'Readable; mode ' . $mode . (($perms & 0007) ? ' (world-accessible)' : ''));
+}
 
 try {
     $spots = (int) $pdo->query('SELECT COUNT(*) FROM spots')->fetchColumn();
-    $users = (int) $pdo->query('SELECT COUNT(*) FROM users WHERE deleted = 0')->fetchColumn();
+    $users = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE deleted = '0'")->fetchColumn();
     $add('Database', 'Connection', 'ok', 'Database query successful');
     $add('Database', 'Spots', $spots > 0 ? 'ok' : 'warn', number_format($spots) . ' indexed spots');
     $add('Database', 'Users', 'ok', $users . ' active users');
