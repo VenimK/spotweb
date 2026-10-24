@@ -833,7 +833,8 @@ function Install-Themes([string]$Dir, [string]$Mode) {
     'custom\themes\preinstalled',
     'custom\js',
     'custom\tools',
-    'custom\includes'
+    'custom\includes',
+    'custom\config'
   ) | ForEach-Object { New-Item -ItemType Directory -Path (Join-Path $Dir $_) -Force | Out-Null }
 
   if ($Mode -eq 'pack') {
@@ -847,11 +848,14 @@ function Install-Themes([string]$Dir, [string]$Mode) {
     foreach ($pair in @(
       @('custom/js/theme-switcher.js', 'custom\js\theme-switcher.js'),
       @('custom/js/filter-manager-link.js', 'custom\js\filter-manager-link.js'),
+      @('custom/js/ratings.js', 'custom\js\ratings.js'),
       @('custom/tools/theme-customizer.html', 'custom\tools\theme-customizer.html'),
       @('custom/tools/theme-upload.php', 'custom\tools\theme-upload.php'),
       @('custom/tools/filter-manager.php', 'custom\tools\filter-manager.php'),
       @('custom/tools/health-dashboard.php', 'custom\tools\health-dashboard.php'),
+      @('custom/tools/ratings.php', 'custom\tools\ratings.php'),
       @('custom/tools/.htaccess', 'custom\tools\.htaccess'),
+      @('custom/config/ratings.php', 'custom\config\ratings.php'),
       @('custom/includes/theme-loader.inc.php', 'custom\includes\theme-loader.inc.php'),
       @('custom/README.md', 'custom\README.md'),
       @('custom/update-themes.sh', 'custom\update-themes.sh'),

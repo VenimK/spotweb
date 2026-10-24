@@ -193,6 +193,7 @@ Windows: `.\Uninstall-Spotweb.ps1 -DryRun` (see `Get-Help .\Uninstall-Spotweb.ps
 - ✅ **Update Script** - One-command theme updates
 - ✅ **Complete Docs** - Full documentation included
 - ✅ **Health Dashboard** - Read-only system checks and bounded retrieval log viewer at `/custom/tools/health-dashboard.php`
+- ✅ **IMDb/TMDb Ratings** - Rating badges on the spot detail page (IMDb works out of the box; TMDb needs a free API key in `custom/config/ratings.php`)
 
 ### Theme Switcher UI:
 
@@ -238,6 +239,17 @@ Click any theme → **instant switch** with smooth transitions!
 
 ---
 
+## ⭐ IMDb & TMDb Ratings
+
+Open any spot and rating badges appear next to the title:
+
+- **IMDb** works out of the box — no key needed. The spot's IMDb link is used when present; otherwise the spot title (release-name noise like `1080p`, `x264`, `-GROUP` is stripped automatically) is matched via IMDb's suggestion API and the rating is fetched via Cinemeta.
+- **TMDb** needs a free API key: create one at https://www.themoviedb.org/settings/api and paste the v3 key into `custom/config/ratings.php`.
+
+Lookups run server-side in `custom/tools/ratings.php`, require a normal Spotweb login (your `spotsession` cookie), and are cached in the database (`rating_cache` table): resolved titles for a week, misses for 6 hours. Ratings appear on both the `we1rdo` and `modern` templates; anonymous browsing simply shows no badges.
+
+---
+
 ## 🔒 Update-Safe Design
 
 ### The Problem with Other Solutions:
@@ -267,8 +279,10 @@ Click any theme → **instant switch** with smooth transitions!
 │   │   ├── preinstalled/      ← 7 themes from GitHub
 │   │   └── theme-*.css        ← Your custom themes
 │   ├── js/theme-switcher.js
+│   ├── js/ratings.js          ← IMDb/TMDb badges on spot details
 │   ├── tools/
 │   ├── includes/theme-loader.inc.php
+│   ├── config/ratings.php     ← Optional TMDb API key
 │   ├── update-themes.sh       ← Update script
 │   └── README.md
 │

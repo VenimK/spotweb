@@ -10,12 +10,17 @@ custom/
 │   ├── theme-*.css      # User-created custom themes
 │   └── preinstalled/    # Pre-installed custom themes
 ├── js/                  # Custom JavaScript
-│   └── theme-switcher.js
+│   ├── theme-switcher.js
+│   ├── filter-manager-link.js
+│   └── ratings.js       # IMDb/TMDb badges on spot details
 ├── tools/               # Theme management tools
 │   ├── theme-customizer.html
 │   ├── theme-upload.php
 │   ├── filter-manager.php
-│   └── health-dashboard.php
+│   ├── health-dashboard.php
+│   └── ratings.php      # IMDb/TMDb JSON lookup (login required)
+├── config/              # Tool configuration
+│   └── ratings.php      # Optional TMDb API key
 ├── includes/            # Integration hooks
 │   └── theme-loader.inc.php
 └── README.md           # This file

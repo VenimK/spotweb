@@ -238,7 +238,8 @@ install_themes() {
   mkdir -p "${spotweb_dir}/custom/themes/preinstalled" \
            "${spotweb_dir}/custom/js" \
            "${spotweb_dir}/custom/tools" \
-           "${spotweb_dir}/custom/includes"
+           "${spotweb_dir}/custom/includes" \
+           "${spotweb_dir}/custom/config"
 
   if [[ "${mode}" == "pack" ]]; then
     local themes=("dark" "midnight-ocean" "cyberpunk" "nord" "dracula" "forest" "sunset" "spring" "summer" "autumn" "winter")
@@ -256,6 +257,9 @@ install_themes() {
     curl -fsSL "${GITHUB_RAW_BASE}/custom/js/filter-manager-link.js" \
       -o "${spotweb_dir}/custom/js/filter-manager-link.js" || \
       print_warn "Failed to download filter-manager-link.js"
+    curl -fsSL "${GITHUB_RAW_BASE}/custom/js/ratings.js" \
+      -o "${spotweb_dir}/custom/js/ratings.js" || \
+      print_warn "Failed to download ratings.js"
 
     print_info "Downloading tools"
     curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/theme-customizer.html" \
@@ -270,6 +274,11 @@ install_themes() {
     curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/health-dashboard.php" \
       -o "${spotweb_dir}/custom/tools/health-dashboard.php" || \
       print_warn "Failed to download health-dashboard.php"
+    curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/ratings.php" \
+      -o "${spotweb_dir}/custom/tools/ratings.php" || \
+      print_warn "Failed to download ratings.php"
+    curl -fsSL "${GITHUB_RAW_BASE}/custom/config/ratings.php" \
+      -o "${spotweb_dir}/custom/config/ratings.php" || true
     curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/.htaccess" \
       -o "${spotweb_dir}/custom/tools/.htaccess" || true
 

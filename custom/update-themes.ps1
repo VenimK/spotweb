@@ -106,6 +106,7 @@ if (-not (Test-Path $JsDir)) {
 Write-Host "  Downloading latest JavaScript..." -ForegroundColor Yellow
 Download-File "$GithubRawBase/custom/js/theme-switcher.js" (Join-Path $JsDir "theme-switcher.js")
 Download-File "$GithubRawBase/custom/js/filter-manager-link.js" (Join-Path $JsDir "filter-manager-link.js")
+try { Download-File "$GithubRawBase/custom/js/ratings.js" (Join-Path $JsDir "ratings.js") } catch {}
 Write-Host ""
 
 # --- Update tools ---
@@ -119,7 +120,17 @@ Download-File "$GithubRawBase/custom/tools/theme-customizer.html" (Join-Path $To
 Download-File "$GithubRawBase/custom/tools/theme-upload.php" (Join-Path $ToolsDir "theme-upload.php")
 Download-File "$GithubRawBase/custom/tools/filter-manager.php" (Join-Path $ToolsDir "filter-manager.php")
 Download-File "$GithubRawBase/custom/tools/health-dashboard.php" (Join-Path $ToolsDir "health-dashboard.php")
+try { Download-File "$GithubRawBase/custom/tools/ratings.php" (Join-Path $ToolsDir "ratings.php") } catch {}
 Download-File "$GithubRawBase/custom/tools/.htaccess" (Join-Path $ToolsDir ".htaccess")
+
+# Ratings config (only created when missing so an existing TMDb key survives)
+$ConfigDir = Join-Path $CustomDir "config"
+if (-not (Test-Path $ConfigDir)) {
+  New-Item -ItemType Directory -Path $ConfigDir -Force | Out-Null
+}
+if (-not (Test-Path (Join-Path $ConfigDir "ratings.php"))) {
+  try { Download-File "$GithubRawBase/custom/config/ratings.php" (Join-Path $ConfigDir "ratings.php") } catch {}
+}
 Write-Host ""
 
 # --- Update includes ---

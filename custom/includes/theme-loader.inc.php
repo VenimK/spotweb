@@ -62,6 +62,12 @@ if (file_exists($filterManagerJs) && file_exists($customBase . '/tools/filter-ma
     echo "<script src='custom/js/filter-manager-link.js'></script>\n";
 }
 
+// IMDb/TMDb rating badges on spot detail pages
+$ratingsJs = $jsPath . '/ratings.js';
+if (file_exists($ratingsJs) && file_exists($customBase . '/tools/ratings.php')) {
+    echo "<script src='custom/js/ratings.js'></script>\n";
+}
+
 // Add theme switcher styles (inline to avoid extra file)
 ?>
 <style>

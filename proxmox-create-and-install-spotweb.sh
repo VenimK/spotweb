@@ -779,6 +779,7 @@ mkdir -p "${SPOTWEB_DIR}/custom/themes/preinstalled"
 mkdir -p "${SPOTWEB_DIR}/custom/js"
 mkdir -p "${SPOTWEB_DIR}/custom/tools"
 mkdir -p "${SPOTWEB_DIR}/custom/includes"
+mkdir -p "${SPOTWEB_DIR}/custom/config"
 
 # Download theme files from GitHub based on selection
 if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
@@ -798,6 +799,9 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
     curl -fsSL "${GITHUB_REPO}/custom/js/filter-manager-link.js" \
         -o "${SPOTWEB_DIR}/custom/js/filter-manager-link.js" 2>/dev/null || \
         echo "    ⚠ Failed to download filter-manager-link.js"
+    curl -fsSL "${GITHUB_REPO}/custom/js/ratings.js" \
+        -o "${SPOTWEB_DIR}/custom/js/ratings.js" 2>/dev/null || \
+        echo "    ⚠ Failed to download ratings.js"
     
     echo "  → Downloading theme tools"
     curl -fsSL "${GITHUB_REPO}/custom/tools/theme-customizer.html" \
@@ -815,6 +819,11 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
     curl -fsSL "${GITHUB_REPO}/custom/tools/.htaccess" \
         -o "${SPOTWEB_DIR}/custom/tools/.htaccess" 2>/dev/null || \
         echo "    ⚠ Failed to download .htaccess"
+    curl -fsSL "${GITHUB_REPO}/custom/tools/ratings.php" \
+        -o "${SPOTWEB_DIR}/custom/tools/ratings.php" 2>/dev/null || \
+        echo "    ⚠ Failed to download ratings.php"
+    curl -fsSL "${GITHUB_REPO}/custom/config/ratings.php" \
+        -o "${SPOTWEB_DIR}/custom/config/ratings.php" 2>/dev/null || true
     
     echo "  → Downloading theme-loader.inc.php (integration hook)"
     curl -fsSL "${GITHUB_REPO}/custom/includes/theme-loader.inc.php" \
