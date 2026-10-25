@@ -265,6 +265,26 @@ Browsing a category without a search shows the **newest NZBGeek releases** in th
 | Games (`cat2`) | Console (1000) + PC games (4050) |
 | Applications (`cat3`) | PC (4000) |
 
+Sub-filters narrow it further. Per Spotweb category, the selected sub-filters that have an NZBGeek equivalent are used; if none of them has one (for example a genre like Comedy), the whole category is used:
+
+| Spotweb sub-filter | NZBGeek |
+|---|---|
+| Movie / Series format: DivX, WMV, MPG, DVD5, DVD9 | SD (2030 / 5030) |
+| Movie / Series format: HD other, HD-DVD, WMVHD, x264 | HD (2040 / 5040) |
+| Movie format: Blu-ray / UHD / 3D | BluRay 2050 / UHD 2045 / 3D 2060 |
+| Series format: UHD | UHD 5045 (Blu-ray and 3D: HD 5040) |
+| Series genre: Animation, Anime, Cartoons / Documentary / Sport | Anime 5070 / Documentary 5080 / Sport 5060 |
+| Book: ePub, PDF / Newspaper, Magazine / Comicbook | Ebook 7020 / Mags 7010 / Comics 7030 |
+| Erotic: DVD5, DVD9 / WMV, WMVHD / DivX / x264 | DVD 6010 / WMV 6020 / XviD 6030 / x264 6040 |
+| Sound: MP3 / WAV, EAC, APE, FLAC / DVD | MP3 3010 / Lossless 3040 / Video 3020 |
+| Sound: Audiobook | Audiobook 3030 |
+| Games: Windows, Mac, Linux | PC games 4050 |
+| Games: PSP, Xbox, Xbox 360, NDS/3DS, Wii, PS3, PS4, XBox 1 | 1020, 1040, 1050, 1010, 1030, 1080, 1100, 1090 |
+| Games / Applications: Windows Phone, iOS, Android | Mobile 4040, iOS 4060, Android 4070 |
+| Applications: Macintosh | Mac 4030 |
+
+The panel title shows what was used, for example *newest in Movies (HD, BluRay)*.
+
 If your NZB handling (*Change preferences*) is SABnzbd (push), NZBGet, NZBVortex, save to disk or run a command, each row also gets a green button named after that client. It sends the release through Spotweb's own handler with your existing settings, including the movies/tv category mapping. "Client-sabnzbd" and "display" handling only get the plain NZB link.
 
 Get your NZBGeek API key (Dashboard → API Key on nzbgeek.info) and enter it as **NZBGeek API key** under *Change preferences* in Spotweb. An admin can also set one shared key for all users in `custom/config/nzbgeek.php`; a user's own key takes precedence. The preferences field comes from the overlays (`apply-spotweb-overlays.sh` / `.ps1`); `update-themes` alone only updates `custom/`, so use the config file there.

@@ -75,41 +75,90 @@
         return terms.join(' ').trim();
     }
 
-    /* Spotweb category tree -> Newznab categories (NZBGeek) */
-    var CAT_MAP = {
-        cat0_z0: { cats: ['2000'], label: 'Movies' },
-        cat0_z1: { cats: ['5000'], label: 'Series' },
-        cat0_z2: { cats: ['7000'], label: 'Books' },
-        cat0_z3: { cats: ['6000'], label: 'Erotic' },
-        cat0: { cats: ['2000', '5000'], label: 'Movies & Series' },
-        cat1: { cats: ['3000'], label: 'Sound' },
-        cat2: { cats: ['1000', '4050'], label: 'Games' },
-        cat3: { cats: ['4000'], label: 'Applications' }
+    /* NZBGeek (Newznab) sub-category names, for the panel title */
+    var NZB_NAMES = {
+        1010: 'NDS', 1020: 'PSP', 1030: 'Wii', 1040: 'Xbox', 1050: 'Xbox 360', 1080: 'PS3',
+        1090: 'Xbox One', 1100: 'PS4', 2030: 'SD', 2040: 'HD', 2045: 'UHD', 2050: 'BluRay',
+        2060: '3D', 3010: 'MP3', 3020: 'Video', 3040: 'Lossless', 4030: 'Mac',
+        4040: 'Mobile', 4050: 'PC', 4060: 'iOS', 4070: 'Android', 5030: 'SD', 5040: 'HD',
+        5045: 'UHD', 5060: 'Sport', 5070: 'Anime', 5080: 'Documentary', 6010: 'DVD',
+        6020: 'WMV', 6030: 'XviD', 6040: 'x264', 7010: 'Mags', 7020: 'Ebook', 7030: 'Comics'
     };
 
-    /* Categories Spotweb is currently showing, from search[tree]=cat0_z0_a4,... */
+    /* Maps each Spotweb sub-filter code in a group to one Newznab id */
+    function subs(ids, codes) {
+        var out = {};
+        Object.keys(codes).forEach(function (nzb) {
+            codes[nzb].split(' ').forEach(function (code) {
+                out[code] = ids[nzb] || nzb;
+            });
+        });
+        return out;
+    }
+    /* Spotweb video formats: DivX/WMV/MPG/DVD5/DVD9, HD other/HD-DVD/WMVHD/x264, Blu-ray, UHD, 3D */
+    var VIDEO = { sd: 'a0 a1 a2 a3 a10', hd: 'a4 a7 a8 a9', bd: 'a6', uhd: 'a15', '3d': 'a14' };
+
+    /* Spotweb category tree -> Newznab categories; "sub" refines by Spotweb sub-filter */
+    var CAT_MAP = {
+        cat0_z0: { cats: ['2000'], label: 'Movies', sub: subs(
+            { sd: '2030', hd: '2040', bd: '2050', uhd: '2045', '3d': '2060' }, VIDEO) },
+        cat0_z1: { cats: ['5000'], label: 'Series', sub: subs(
+            { sd: '5030', hd: '5040', bd: '5040', uhd: '5045', '3d': '5040', anime: '5070', doc: '5080', sport: '5060' },
+            { sd: VIDEO.sd, hd: VIDEO.hd, bd: VIDEO.bd, uhd: VIDEO.uhd, '3d': VIDEO['3d'], anime: 'd2 d29 d32', doc: 'd6', sport: 'd18' }) },
+        cat0_z2: { cats: ['7000'], label: 'Books', sub: subs({}, { 7020: 'a5 a11', 7010: 'd43 d44', 7030: 'd31' }) },
+        cat0_z3: { cats: ['6000'], label: 'Erotic', sub: subs({}, { 6010: 'a3 a10', 6020: 'a1 a8', 6030: 'a0', 6040: 'a9' }) },
+        cat0: { cats: ['2000', '5000'], label: 'Movies & Series', sub: {} },
+        cat1: { cats: ['3000'], label: 'Sound', sub: subs({}, { 3010: 'a0', 3040: 'a2 a4 a7 a8', 3020: 'b3' }) },
+        cat1_z3: { cats: ['3030'], label: 'Audiobooks', sub: {} },
+        cat2: { cats: ['1000', '4050'], label: 'Games', sub: subs({}, {
+            4050: 'a0 a1 a2', 1020: 'a5', 1040: 'a6', 1050: 'a7', 1010: 'a10 a16', 1030: 'a11',
+            1080: 'a12', 1100: 'a17', 1090: 'a18', 4040: 'a13', 4060: 'a14', 4070: 'a15' }) },
+        cat3: { cats: ['4000'], label: 'Applications', sub: subs({}, { 4030: 'a1', 4040: 'a4', 4060: 'a6', 4070: 'a7' }) }
+    };
+
+    /*
+     * Categories Spotweb is currently showing, from
+     * search[tree]=cat0_z0_a4,cat0_z0_a9,... Per Spotweb category the
+     * mapped sub-filters are used; when none of them maps, the whole
+     * category. Excluded nodes ("!" / "~" prefix) are skipped.
+     */
     function currentCategories() {
         var tree = new URLSearchParams(window.location.search).get('search[tree]') || '';
-        var cats = [];
-        var labels = [];
+        var groups = {};
+        var order = [];
         tree.split(',').forEach(function (node) {
-            // Excluded nodes are prefixed with "!" or "~"
-            var m = node.trim().match(/^(cat\d)(?:_(z\d))?/);
+            var m = node.trim().match(/^(cat\d)(?:_(z\d))?(?:_([a-d]\d+))?$/);
             if (!m) {
                 return;
             }
-            var hit = CAT_MAP[m[1] + (m[2] ? '_' + m[2] : '')] || CAT_MAP[m[1]];
-            if (!hit) {
+            var key = CAT_MAP[m[1] + (m[2] ? '_' + m[2] : '')] ? m[1] + (m[2] ? '_' + m[2] : '') : m[1];
+            var def = CAT_MAP[key];
+            if (!def) {
                 return;
             }
-            hit.cats.forEach(function (c) {
+            if (!groups[key]) {
+                groups[key] = { def: def, cats: [] };
+                order.push(key);
+            }
+            var nzb = m[3] && def.sub[m[3]];
+            if (nzb && groups[key].cats.indexOf(nzb) === -1) {
+                groups[key].cats.push(nzb);
+            }
+        });
+
+        var cats = [];
+        var labels = [];
+        order.forEach(function (key) {
+            var g = groups[key];
+            var picked = g.cats.length ? g.cats : g.def.cats;
+            picked.forEach(function (c) {
                 if (cats.indexOf(c) === -1) {
                     cats.push(c);
                 }
             });
-            if (labels.indexOf(hit.label) === -1) {
-                labels.push(hit.label);
-            }
+            var names = g.cats.map(function (c) { return NZB_NAMES[c]; })
+                .filter(function (n, i, all) { return n && all.indexOf(n) === i; });
+            labels.push(g.def.label + (names.length ? ' (' + names.join(', ') + ')' : ''));
         });
         return { cats: cats, label: labels.join(', ') };
     }
