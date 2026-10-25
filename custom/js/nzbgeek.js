@@ -48,10 +48,22 @@
                 return;
             }
             var idx = v.lastIndexOf(':=:');
-            var term = idx >= 0 ? v.slice(idx + 3) : v;
-            term = term.trim();
-            if (term && term !== 'NULL') {
-                terms.push(term);
+            if (idx >= 0) {
+                // Field search: "Title:=:DEF:spiderman" -> "spiderman"
+                var term = v.slice(idx + 3).trim();
+                if (term && term !== 'NULL') {
+                    terms.push(term);
+                }
+            } else if (v.indexOf(':') === -1) {
+                // Plain free-text term
+                terms.push(v.trim());
+            } else {
+                // "Field:value" counts as a term only for real text fields;
+                // flags like "New:0", "Watch:0", "SpotterID:x" are skipped
+                var field = v.slice(0, v.indexOf(':'));
+                if (/^(titel|title|poster|tag|cat|genre|search|season|episode|ep|year)$/i.test(field)) {
+                    terms.push(v.slice(field.length + 1).trim());
+                }
             }
         });
         return terms.join(' ').trim();
