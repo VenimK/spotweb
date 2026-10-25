@@ -74,6 +74,12 @@ if (file_exists($nzbGeekJs) && file_exists($customBase . '/tools/nzbgeek.php')) 
     echo "<script src='custom/js/nzbgeek.js?v=" . filemtime($nzbGeekJs) . "'></script>\n";
 }
 
+// List ratings, sort/hide-by-rating and duplicate grouping
+$spotlistJs = $jsPath . '/spotlist.js';
+if (file_exists($spotlistJs) && file_exists($customBase . '/tools/ratings.php')) {
+    echo "<script src='custom/js/spotlist.js?v=" . filemtime($spotlistJs) . "'></script>\n";
+}
+
 // Add theme switcher styles (inline to avoid extra file)
 ?>
 <style>

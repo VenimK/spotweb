@@ -38,14 +38,19 @@ function http_get_json(string $url): ?array
 /*
  * Removes release-name noise (quality tags, scene group suffix, etc.)
  * so a spot title like "Movie.Title.2024.1080p.WEB-DL.x264-GROUP"
- * becomes "Movie Title 2024".
+ * becomes "Movie Title". The year is still read from the raw title
+ * by extract_year() and used for matching, so it is also stripped.
  */
 function clean_title(string $title): string
 {
     $t = html_entity_decode($title, ENT_QUOTES | ENT_HTML5, 'UTF-8');
     $t = preg_replace('/[._]+/', ' ', $t);
     $t = preg_replace('/[[\](){}\'"“”‘’<>]/', ' ', $t);
-    $t = preg_replace('/\bS\d{1,2}(E\d{1,3})?\b/i', ' ', $t);
+    /* Everything after the first year, SxxEyy or resolution is release noise */
+    if (preg_match('/\b(19\d{2}|20\d{2})\b|\bS\d{1,2}E?\d*\b|\b(480|576|720|900|1080|1440|2160|4320)p\b/i', $t, $m, PREG_OFFSET_CAPTURE) && $m[0][1] > 0) {
+        $t = substr($t, 0, $m[0][1]);
+    }
+    $t = preg_replace('/\b(Season|Complete|Part|Disc|CD)\s*\d*\b/i', ' ', $t);
     $t = preg_replace('/\b(Season|Complete|Part|Disc|CD)\s*\d*\b/i', ' ', $t);
     $noise = '480p|576p|720p|900p|1080p|1440p|2160p|4320p|4k|8k|uhd|fhd|hd|sd|'
         . 'hdr10\+?|hdr|dv|dolby|vision|blu-?ray|bd-?remux|remux|bdrip|brrip|bdr|'
@@ -189,6 +194,57 @@ function tmdb_search(string $title, ?int $year, string $apiKey): ?array
     return null;
 }
 
+/*
+ * Poster, plot, runtime, genres, top cast and YouTube trailer for a TMDb
+ * movie or TV show, cached for a week per TMDb id.
+ */
+function tmdb_details(PDO $pdo, string $kind, int $id, string $apiKey): ?array
+{
+    $cacheKey = 'tmdbd:' . $kind . ':' . $id;
+    $cached = cache_get($pdo, $cacheKey, 7 * 24 * 3600);
+    if ($cached !== null) {
+        return $cached ?: null;
+    }
+
+    $data = http_get_json("https://api.themoviedb.org/3/{$kind}/{$id}?append_to_response=videos,credits&api_key="
+        . rawurlencode($apiKey));
+    if (!is_array($data) || empty($data['id'])) {
+        return null;
+    }
+
+    /* Prefer an official YouTube trailer, then any trailer, then a teaser */
+    $trailer = null;
+    $bestRank = 99;
+    foreach ($data['videos']['results'] ?? [] as $video) {
+        if (($video['site'] ?? '') !== 'YouTube' || !preg_match('/^[A-Za-z0-9_-]{6,20}$/', (string) ($video['key'] ?? ''))) {
+            continue;
+        }
+        $rank = (($video['type'] ?? '') === 'Trailer' ? 0 : (($video['type'] ?? '') === 'Teaser' ? 2 : 4))
+            + (empty($video['official']) ? 1 : 0);
+        if ($rank < $bestRank) {
+            $bestRank = $rank;
+            $trailer = (string) $video['key'];
+        }
+    }
+
+    $runtime = (int) ($data['runtime'] ?? ($data['episode_run_time'][0] ?? 0));
+    $date = (string) ($data['release_date'] ?? $data['first_air_date'] ?? '');
+    $details = [
+        'title' => (string) ($data['title'] ?? $data['name'] ?? ''),
+        'year' => preg_match('/^\d{4}/', $date, $y) ? $y[0] : '',
+        'tagline' => (string) ($data['tagline'] ?? ''),
+        'overview' => (string) ($data['overview'] ?? ''),
+        'runtime' => $runtime > 0 ? $runtime : null,
+        'seasons' => isset($data['number_of_seasons']) ? (int) $data['number_of_seasons'] : null,
+        'genres' => array_values(array_map(fn ($g) => (string) $g['name'], $data['genres'] ?? [])),
+        'cast' => array_values(array_map(fn ($c) => (string) $c['name'], array_slice($data['credits']['cast'] ?? [], 0, 6))),
+        'poster' => !empty($data['poster_path']) ? 'https://image.tmdb.org/t/p/w342' . $data['poster_path'] : null,
+        'trailer' => $trailer,
+    ];
+    cache_put($pdo, $cacheKey, $details);
+    return $details;
+}
+
 /* Cache table (created lazily; lookups still work if creation fails) */
 function cache_table(PDO $pdo): void
 {
@@ -204,7 +260,7 @@ function cache_table(PDO $pdo): void
     )');
 }
 
-function cache_get(PDO $pdo, string $key): ?array
+function cache_get(PDO $pdo, string $key, ?int $fixedTtl = null): ?array
 {
     try {
         cache_table($pdo);
@@ -219,7 +275,7 @@ function cache_get(PDO $pdo, string $key): ?array
             return null;
         }
         /* Resolved titles stay fresh for a week, misses for 6 hours */
-        $ttl = !empty($decoded['imdb_id']) ? 7 * 24 * 3600 : 6 * 3600;
+        $ttl = $fixedTtl ?? (!empty($decoded['imdb_id']) ? 7 * 24 * 3600 : 6 * 3600);
         if ((time() - (int) $row['fetched']) < $ttl) {
             return $decoded;
         }
@@ -269,69 +325,102 @@ $cacheKey = ($tmdbKey !== '' ? 't' : '') . ($imdbId !== ''
     : 'title:' . md5(mb_strtolower($rawTitle) . '|' . ($year ?? '')));
 
 $result = cache_get($pdo, $cacheKey);
-if ($result !== null) {
-    tool_out($result + ['cached' => true]);
-}
+if ($result === null) {
+    $title = clean_title($rawTitle);
 
-$title = clean_title($rawTitle);
-
-/* Resolve the IMDb id from the title when none was supplied */
-if ($imdbId === '' && $title !== '') {
-    $hit = imdb_suggest($title, $year);
-    if ($hit !== null) {
-        $imdbId = $hit['id'];
-        $type = in_array($hit['qid'], ['tvSeries', 'tvMiniSeries'], true) ? 'series' : 'movie';
-    }
-}
-
-$response = [
-    'imdb_id' => $imdbId !== '' ? $imdbId : null,
-    'imdb_rating' => null,
-    'tmdb_rating' => null,
-    'type' => null,
-    'name' => null,
-    'tmdb_url' => null,
-];
-
-/* TMDb fallback: find the title even when no IMDb id could be resolved */
-if ($imdbId === '' && $title !== '' && $tmdbKey !== '') {
-    $hit = tmdb_search($title, $year, $tmdbKey);
-    if ($hit !== null) {
-        $response['tmdb_rating'] = $hit['rating'];
-        $response['type'] = $hit['kind'] === 'tv' ? 'series' : 'movie';
-        $response['name'] = $hit['name'] !== '' ? $hit['name'] : null;
-        if ($hit['id'] > 0) {
-            $response['tmdb_url'] = 'https://www.themoviedb.org/' . $hit['kind'] . '/' . $hit['id'];
-        }
-        /* The search result also gives us the IMDb id for the IMDb rating */
-        if ($hit['imdb_id'] !== null) {
-            $imdbId = $hit['imdb_id'];
-            $response['imdb_id'] = $imdbId;
+    /* Resolve the IMDb id from the title when none was supplied */
+    if ($imdbId === '' && $title !== '') {
+        $hit = imdb_suggest($title, $year);
+        if ($hit !== null) {
+            $imdbId = $hit['id'];
+            $type = in_array($hit['qid'], ['tvSeries', 'tvMiniSeries'], true) ? 'series' : 'movie';
         }
     }
-}
 
-if ($imdbId !== '') {
-    $meta = cinemeta_rating($imdbId, $type);
-    if ($meta !== null) {
-        $response['imdb_rating'] = $meta['rating'];
-        if ($response['type'] === null) {
-            $response['type'] = $meta['type'];
-        }
-        if ($response['name'] === null && $meta['name'] !== '') {
-            $response['name'] = $meta['name'];
-        }
-    }
-    if ($tmdbKey !== '' && $response['tmdb_rating'] === null) {
-        $tmdb = tmdb_rating($imdbId, $tmdbKey);
-        if ($tmdb !== null) {
-            $response['tmdb_rating'] = $tmdb['rating'];
-            if ($tmdb['id'] > 0) {
-                $response['tmdb_url'] = 'https://www.themoviedb.org/' . $tmdb['kind'] . '/' . $tmdb['id'];
+    $response = [
+        'imdb_id' => $imdbId !== '' ? $imdbId : null,
+        'imdb_rating' => null,
+        'tmdb_rating' => null,
+        'type' => null,
+        'name' => null,
+        'tmdb_url' => null,
+    ];
+
+    /* TMDb fallback: find the title even when no IMDb id could be resolved */
+    if ($imdbId === '' && $title !== '' && $tmdbKey !== '') {
+        $hit = tmdb_search($title, $year, $tmdbKey);
+        if ($hit !== null) {
+            $response['tmdb_rating'] = $hit['rating'];
+            $response['type'] = $hit['kind'] === 'tv' ? 'series' : 'movie';
+            $response['name'] = $hit['name'] !== '' ? $hit['name'] : null;
+            if ($hit['id'] > 0) {
+                $response['tmdb_url'] = 'https://www.themoviedb.org/' . $hit['kind'] . '/' . $hit['id'];
+            }
+            /* The search result also gives us the IMDb id for the IMDb rating */
+            if ($hit['imdb_id'] !== null) {
+                $imdbId = $hit['imdb_id'];
+                $response['imdb_id'] = $imdbId;
             }
         }
     }
+
+    if ($imdbId !== '') {
+        $meta = cinemeta_rating($imdbId, $type);
+        if ($meta !== null) {
+            $response['imdb_rating'] = $meta['rating'];
+            if ($response['type'] === null) {
+                $response['type'] = $meta['type'];
+            }
+            if ($response['name'] === null && $meta['name'] !== '') {
+                $response['name'] = $meta['name'];
+            }
+        }
+        if ($tmdbKey !== '' && $response['tmdb_rating'] === null) {
+            $tmdb = tmdb_rating($imdbId, $tmdbKey);
+            if ($tmdb !== null) {
+                $response['tmdb_rating'] = $tmdb['rating'];
+                if ($tmdb['id'] > 0) {
+                    $response['tmdb_url'] = 'https://www.themoviedb.org/' . $tmdb['kind'] . '/' . $tmdb['id'];
+                }
+            }
+        }
+    }
+
+    /*
+     * Last resort: the resolved title turned out to have no rating at all
+     * (obscure or wrong match), so let a plain TMDb title search try.
+     */
+    if ($tmdbKey !== '' && $title !== ''
+        && $response['imdb_rating'] === null && $response['tmdb_rating'] === null) {
+        $hit = tmdb_search($title, $year, $tmdbKey);
+        if ($hit !== null && $hit['rating'] !== null) {
+            $response['tmdb_rating'] = $hit['rating'];
+            $response['type'] = $response['type'] ?? ($hit['kind'] === 'tv' ? 'series' : 'movie');
+            $response['name'] = $response['name'] ?? ($hit['name'] !== '' ? $hit['name'] : null);
+            if ($hit['id'] > 0) {
+                $response['tmdb_url'] = 'https://www.themoviedb.org/' . $hit['kind'] . '/' . $hit['id'];
+            }
+            if ($hit['imdb_id'] !== null && $hit['imdb_id'] !== $imdbId) {
+                $imdbId = $hit['imdb_id'];
+                $response['imdb_id'] = $imdbId;
+                $meta = cinemeta_rating($imdbId, $response['type']);
+                if ($meta !== null) {
+                    $response['imdb_rating'] = $meta['rating'];
+                    $response['type'] = $meta['type'];
+                    if ($response['name'] === null && $meta['name'] !== '') {
+                        $response['name'] = $meta['name'];
+                    }
+                }
+            }
+        }
+    }
+
+    cache_put($pdo, $cacheKey, $response);
+    $result = $response;
 }
 
-cache_put($pdo, $cacheKey, $response);
-tool_out($response);
+/* Spot detail page: poster, plot, cast, runtime, genres and trailer from TMDb */
+if (!empty($_GET['details']) && $tmdbKey !== '' && preg_match('~/(movie|tv)/(\d+)$~', (string) $result['tmdb_url'], $m)) {
+    $result['details'] = tmdb_details($pdo, $m[1], (int) $m[2], $tmdbKey);
+}
+tool_out($result);

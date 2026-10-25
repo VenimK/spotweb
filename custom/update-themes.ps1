@@ -108,6 +108,7 @@ Download-File "$GithubRawBase/custom/js/theme-switcher.js" (Join-Path $JsDir "th
 Download-File "$GithubRawBase/custom/js/filter-manager-link.js" (Join-Path $JsDir "filter-manager-link.js")
 try { Download-File "$GithubRawBase/custom/js/ratings.js" (Join-Path $JsDir "ratings.js") } catch {}
 try { Download-File "$GithubRawBase/custom/js/nzbgeek.js" (Join-Path $JsDir "nzbgeek.js") } catch {}
+try { Download-File "$GithubRawBase/custom/js/spotlist.js" (Join-Path $JsDir "spotlist.js") } catch {}
 Write-Host ""
 
 # --- Update tools ---

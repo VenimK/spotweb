@@ -12,8 +12,9 @@ custom/
 ├── js/                  # Custom JavaScript
 │   ├── theme-switcher.js
 │   ├── filter-manager-link.js
-│   ├── ratings.js       # IMDb/TMDb badges on spot details
-│   └── nzbgeek.js       # NZBGeek results panel on search
+│   ├── ratings.js       # IMDb/TMDb badges + details/trailer on spot pages
+│   ├── nzbgeek.js       # NZBGeek results panel on search
+│   └── spotlist.js      # List rating badges, sort/hide, duplicate grouping
 ├── tools/               # Theme management tools
 │   ├── theme-customizer.html
 │   ├── theme-upload.php

@@ -19,7 +19,23 @@
         + '.sw-rt-imdb{background:#f5c518;color:#000 !important}'
         + '.sw-rt-imdb:hover{filter:brightness(1.12)}'
         + '.sw-rt-tmdb{background:#01b4e4;color:#fff !important}'
-        + '.sw-rt-tmdb:hover{filter:brightness(1.12)}';
+        + '.sw-rt-tmdb:hover{filter:brightness(1.12)}'
+        + '.sw-rt-trailer{background:#dc2626;color:#fff !important}'
+        + '.sw-rt-trailer:hover{filter:brightness(1.12)}'
+        + '.sw-info{display:flex;gap:14px;margin:10px 0;padding:12px;border:1px solid rgba(148,163,184,.25);'
+        + 'border-radius:8px;background:rgba(148,163,184,.07);line-height:1.45}'
+        + '.sw-info-poster{width:92px;height:auto;flex:none;border-radius:4px;align-self:flex-start}'
+        + '.sw-info-text{flex:1;min-width:0}'
+        + '.sw-info-title{font-weight:700;margin-bottom:3px}'
+        + '.sw-info-tagline{font-style:italic;opacity:.75;margin-bottom:4px}'
+        + '.sw-info-plot{margin:4px 0 6px}'
+        + '.sw-info-cast{opacity:.85}'
+        + '.sw-trailer{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.82);display:flex;'
+        + 'align-items:center;justify-content:center}'
+        + '.sw-trailer-frame{position:relative;width:min(960px,92vw);aspect-ratio:16/9}'
+        + '.sw-trailer-frame iframe{width:100%;height:100%;border:0;border-radius:6px;background:#000}'
+        + '.sw-trailer-close{position:absolute;top:-38px;right:0;background:none;border:0;color:#fff;'
+        + 'font-size:32px;line-height:1;cursor:pointer}';
 
     function injectStyle() {
         if (document.getElementById('sw-ratings-style')) {
@@ -103,9 +119,120 @@
             wrap.appendChild(tmdb);
         }
 
+        var info = data.details;
+        if (info && info.trailer) {
+            var play = document.createElement('a');
+            play.className = 'sw-rt sw-rt-trailer';
+            play.href = 'https://www.youtube.com/watch?v=' + info.trailer;
+            play.textContent = '▶ Trailer';
+            play.title = 'Watch the trailer';
+            play.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                openTrailer(info.trailer);
+            });
+            wrap.appendChild(play);
+        }
+
         if (wrap.childNodes.length) {
             host.appendChild(wrap);
         }
+        if (info) {
+            renderInfo(details, info);
+        }
+    }
+
+    function el(tag, cls, text) {
+        var node = document.createElement(tag);
+        if (cls) {
+            node.className = cls;
+        }
+        if (text !== undefined) {
+            node.textContent = text;
+        }
+        return node;
+    }
+
+    /* Plot, year, runtime, genres and cast between the spot header and its details */
+    function renderInfo(details, info) {
+        var anchor = details.querySelector('table.spotdetails');
+        if (!anchor || details.querySelector('.sw-info') || !(info.overview || info.cast.length)) {
+            return;
+        }
+        var box = el('div', 'sw-info');
+        if (info.poster) {
+            var img = el('img', 'sw-info-poster');
+            img.src = info.poster;
+            img.alt = info.title;
+            img.loading = 'lazy';
+            box.appendChild(img);
+        }
+        var text = el('div', 'sw-info-text');
+        var facts = [];
+        if (info.year) {
+            facts.push(info.year);
+        }
+        if (info.runtime) {
+            facts.push(Math.floor(info.runtime / 60) ? Math.floor(info.runtime / 60) + 'h ' + (info.runtime % 60) + 'm' : info.runtime + 'm');
+        }
+        if (info.seasons) {
+            facts.push(info.seasons + (info.seasons === 1 ? ' season' : ' seasons'));
+        }
+        if (info.genres.length) {
+            facts.push(info.genres.join(', '));
+        }
+        text.appendChild(el('div', 'sw-info-title', info.title + (facts.length ? '  ·  ' + facts.join('  ·  ') : '')));
+        if (info.tagline) {
+            text.appendChild(el('div', 'sw-info-tagline', info.tagline));
+        }
+        if (info.overview) {
+            text.appendChild(el('p', 'sw-info-plot', info.overview));
+        }
+        if (info.cast.length) {
+            var cast = el('div', 'sw-info-cast');
+            cast.appendChild(el('strong', null, 'Cast: '));
+            cast.appendChild(document.createTextNode(info.cast.join(', ')));
+            text.appendChild(cast);
+        }
+        box.appendChild(text);
+        anchor.parentNode.insertBefore(box, anchor);
+    }
+
+    /* In-page YouTube player; closes on the backdrop, the X or Escape */
+    function openTrailer(key) {
+        var backdrop = el('div', 'sw-trailer');
+        var frame = el('div', 'sw-trailer-frame');
+        var iframe = document.createElement('iframe');
+        iframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(key) + '?autoplay=1&rel=0';
+        iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+        iframe.allowFullscreen = true;
+        var close = el('button', 'sw-trailer-close', '×');
+        close.type = 'button';
+        close.title = 'Close (Esc)';
+        frame.appendChild(iframe);
+        frame.appendChild(close);
+        backdrop.appendChild(frame);
+
+        function shut() {
+            document.removeEventListener('keydown', onKey, true);
+            backdrop.remove();
+        }
+        function onKey(ev) {
+            if (ev.key === 'Escape') {
+                // Keep Spotweb's own Escape (close spot) from firing as well
+                ev.stopPropagation();
+                ev.preventDefault();
+                shut();
+            }
+        }
+        backdrop.addEventListener('click', function (ev) {
+            if (ev.target === backdrop) {
+                shut();
+            }
+        });
+        close.addEventListener('click', shut);
+        document.addEventListener('keydown', onKey, true);
+        document.body.appendChild(backdrop);
     }
 
     function process(details) {
@@ -124,10 +251,10 @@
             : 'title=' + encodeURIComponent(info.title)
                 + (info.year ? '&year=' + encodeURIComponent(info.year) : '');
 
-        fetch(ENDPOINT + '?' + qs, { credentials: 'same-origin' })
+        fetch(ENDPOINT + '?details=1&' + qs, { credentials: 'same-origin' })
             .then(function (res) { return res.ok ? res.json() : null; })
             .then(function (data) {
-                if (data && (data.imdb_rating || data.tmdb_rating)) {
+                if (data && (data.imdb_rating || data.tmdb_rating || data.details)) {
                     render(details, data);
                 }
             })

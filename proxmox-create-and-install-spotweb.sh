@@ -805,6 +805,9 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
     curl -fsSL "${GITHUB_REPO}/custom/js/nzbgeek.js" \
         -o "${SPOTWEB_DIR}/custom/js/nzbgeek.js" 2>/dev/null || \
         echo "    ⚠ Failed to download nzbgeek.js"
+    curl -fsSL "${GITHUB_REPO}/custom/js/spotlist.js" \
+        -o "${SPOTWEB_DIR}/custom/js/spotlist.js" 2>/dev/null || \
+        echo "    ⚠ Failed to download spotlist.js"
     
     echo "  → Downloading theme tools"
     curl -fsSL "${GITHUB_REPO}/custom/tools/theme-customizer.html" \

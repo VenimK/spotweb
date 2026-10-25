@@ -263,6 +263,9 @@ install_themes() {
     curl -fsSL "${GITHUB_RAW_BASE}/custom/js/nzbgeek.js" \
       -o "${spotweb_dir}/custom/js/nzbgeek.js" || \
       print_warn "Failed to download nzbgeek.js"
+    curl -fsSL "${GITHUB_RAW_BASE}/custom/js/spotlist.js" \
+      -o "${spotweb_dir}/custom/js/spotlist.js" || \
+      print_warn "Failed to download spotlist.js"
 
     print_info "Downloading tools"
     curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/theme-customizer.html" \
