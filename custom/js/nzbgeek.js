@@ -166,7 +166,12 @@
             panel.classList.toggle('collapsed');
         });
 
-        anchor.parentNode.insertBefore(panel, anchor);
+        /* Inside div.spots so it inherits the margin that clears the filter sidebar */
+        if (anchor.tagName === 'DIV') {
+            anchor.insertBefore(panel, anchor.firstChild);
+        } else {
+            anchor.parentNode.insertBefore(panel, anchor);
+        }
 
         fetch(ENDPOINT + '?q=' + encodeURIComponent(query), { credentials: 'same-origin' })
             .then(function (res) { return res.ok ? res.json() : res.json().catch(function () { return { error: 'NZBGeek lookup failed.' }; }); })
