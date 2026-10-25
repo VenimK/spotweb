@@ -21,11 +21,12 @@ custom/
 │   ├── health-dashboard.php
 │   ├── ratings.php      # IMDb/TMDb JSON lookup (login required)
 │   └── nzbgeek.php      # NZBGeek search proxy (login required)
-├── config/              # Tool configuration
-│   ├── ratings.php      # Optional TMDb API key
+├── config/              # Shared fallback keys (users set their own in Spotweb preferences)
+│   ├── ratings.php      # TMDb API key
 │   └── nzbgeek.php      # NZBGeek API key
 ├── includes/            # Integration hooks
-│   └── theme-loader.inc.php
+│   ├── theme-loader.inc.php
+│   └── tool-session.inc.php  # Session check + key lookup for ratings/nzbgeek
 └── README.md           # This file
 ```
 

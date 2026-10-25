@@ -837,6 +837,9 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
     curl -fsSL "${GITHUB_REPO}/custom/includes/theme-loader.inc.php" \
         -o "${SPOTWEB_DIR}/custom/includes/theme-loader.inc.php" 2>/dev/null || \
         echo "    ⚠ Failed to download theme-loader.inc.php"
+    curl -fsSL "${GITHUB_REPO}/custom/includes/tool-session.inc.php" \
+        -o "${SPOTWEB_DIR}/custom/includes/tool-session.inc.php" 2>/dev/null || \
+        echo "    ⚠ Failed to download tool-session.inc.php"
     
     echo "  → Downloading README"
     curl -fsSL "${GITHUB_REPO}/custom/README.md" \

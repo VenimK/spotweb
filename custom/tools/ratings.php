@@ -5,52 +5,12 @@
  * Called by custom/js/ratings.js. Requires a valid Spotweb session
  * (the "spotsession" cookie) and returns JSON only.
  *
- * Optional TMDb support: create/edit custom/config/ratings.php and set
- * 'tmdb_api_key' to a free key from https://www.themoviedb.org/settings/api
+ * Optional TMDb support: enter a free key from
+ * https://www.themoviedb.org/settings/api as "TMDB API key" in your
+ * Spotweb preferences, or set 'tmdb_api_key' in custom/config/ratings.php
+ * as a fallback for all users.
  */
-$root = dirname(__DIR__, 2);
-$dbFile = $root . '/dbsettings.inc.php';
-header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: no-store');
-if (!is_readable($dbFile)) {
-    http_response_code(500);
-    exit(json_encode(['error' => 'Spotweb database settings are unavailable.']));
-}
-require $dbFile;
-
-function out(array $data, int $code = 200): void
-{
-    http_response_code($code);
-    echo json_encode($data);
-    exit;
-}
-
-function connect_db(array $settings): PDO
-{
-    $engine = (string) ($settings['engine'] ?? 'mysql');
-    if (in_array($engine, ['mysql', 'pdo_mysql'], true)) {
-        $driver = 'mysql';
-    } elseif (in_array($engine, ['pgsql', 'pdo_pgsql', 'postgres'], true)) {
-        $driver = 'pgsql';
-    } elseif (in_array($engine, ['sqlite', 'pdo_sqlite'], true)) {
-        $pdo = new PDO('sqlite:' . ($settings['path'] ?? $settings['dbname'] ?? ''));
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        return $pdo;
-    } else {
-        $driver = $engine;
-    }
-    $host = $settings['host'] ?? '127.0.0.1';
-    $port = $settings['port'] ?? ($driver === 'pgsql' ? '5432' : '3306');
-    $dsn = sprintf('%s:host=%s;port=%s;dbname=%s', $driver, $host, $port, $settings['dbname'] ?? '');
-    if ($driver === 'mysql') {
-        $dsn .= ';charset=utf8mb4';
-    }
-    $pdo = new PDO($dsn, $settings['user'] ?? '', $settings['pass'] ?? '');
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-    return $pdo;
-}
+require dirname(__DIR__) . '/includes/tool-session.inc.php';
 
 function http_get_json(string $url): ?array
 {
@@ -284,61 +244,10 @@ function cache_put(PDO $pdo, string $key, array $payload): void
 
 /* ------------------------------------------------------------------ */
 
-try {
-    $pdo = connect_db($GLOBALS['dbsettings']);
-} catch (Throwable $e) {
-    out(['error' => 'Unable to connect to the Spotweb database.'], 500);
-}
+[$pdo, $userId] = tool_boot();
 
-/*
- * Require a valid Spotweb session (same "spotsession" cookie Spotweb
- * itself checks). Anonymous sessions are never stored in the sessions
- * table, so for installs that allow anonymous access we also accept the
- * configured nonauthenticated_userid - such an install exposes the same
- * data publicly anyway.
- */
-$sessionCookie = (string) ($_COOKIE['spotsession'] ?? '');
-$sessionParts = explode('.', $sessionCookie);
-$authed = false;
-if (count($sessionParts) === 2 && $sessionParts[0] !== '' && ctype_digit($sessionParts[1])) {
-    $cookieUserId = (int) $sessionParts[1];
-    try {
-        $stmt = $pdo->prepare("SELECT 1 FROM sessions s INNER JOIN users u ON u.id = s.userid
-            WHERE s.sessionid = ? AND s.userid = ? AND u.deleted = '0' LIMIT 1");
-        $stmt->execute([$sessionParts[0], $cookieUserId]);
-        $authed = (bool) $stmt->fetchColumn();
-        if (!$authed) {
-            $stmt = $pdo->prepare("SELECT value, serialized FROM settings WHERE name = 'nonauthenticated_userid' LIMIT 1");
-            $stmt->execute();
-            $row = $stmt->fetch();
-            $anonId = 0;
-            if ($row) {
-                $anonId = (int) $row['value'];
-                if (!empty($row['serialized'])) {
-                    $decoded = @unserialize((string) $row['value'], ['allowed_classes' => false]);
-                    if (is_numeric($decoded)) {
-                        $anonId = (int) $decoded;
-                    }
-                }
-            }
-            if ($anonId > 0 && $cookieUserId === $anonId) {
-                $stmt = $pdo->prepare("SELECT 1 FROM users WHERE id = ? AND deleted = '0' LIMIT 1");
-                $stmt->execute([$anonId]);
-                $authed = (bool) $stmt->fetchColumn();
-            }
-        }
-    } catch (Throwable $e) {
-        $authed = false;
-    }
-}
-if (!$authed) {
-    out(['error' => 'A Spotweb login is required.'], 401);
-}
-
-/* Optional TMDb API key */
-$cfgFile = dirname(__DIR__) . '/config/ratings.php';
-$config = is_file($cfgFile) ? include $cfgFile : [];
-$tmdbKey = is_array($config) ? trim((string) ($config['tmdb_api_key'] ?? '')) : '';
+/* TMDb key: the user's own key from Spotweb preferences, else custom/config/ratings.php */
+$tmdbKey = tool_api_key($pdo, $userId, 'tmdb_api_key', 'ratings.php', 'tmdb_api_key');
 
 /* Input: an IMDb id, or a (raw) spot title we resolve ourselves */
 $imdbId = '';
@@ -354,13 +263,14 @@ if (isset($_GET['year']) && preg_match('/^(19|20)\d{2}$/', (string) $_GET['year'
     $year = (int) $_GET['year'];
 }
 
-$cacheKey = $imdbId !== ''
+/* Results with and without TMDb data are cached separately */
+$cacheKey = ($tmdbKey !== '' ? 't' : '') . ($imdbId !== ''
     ? 'imdb:' . $imdbId
-    : 'title:' . md5(mb_strtolower($rawTitle) . '|' . ($year ?? ''));
+    : 'title:' . md5(mb_strtolower($rawTitle) . '|' . ($year ?? '')));
 
 $result = cache_get($pdo, $cacheKey);
 if ($result !== null) {
-    out($result + ['cached' => true]);
+    tool_out($result + ['cached' => true]);
 }
 
 $title = clean_title($rawTitle);
@@ -424,4 +334,4 @@ if ($imdbId !== '') {
 }
 
 cache_put($pdo, $cacheKey, $response);
-out($response);
+tool_out($response);

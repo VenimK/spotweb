@@ -193,8 +193,8 @@ Windows: `.\Uninstall-Spotweb.ps1 -DryRun` (see `Get-Help .\Uninstall-Spotweb.ps
 - ✅ **Update Script** - One-command theme updates
 - ✅ **Complete Docs** - Full documentation included
 - ✅ **Health Dashboard** - Read-only system checks and bounded retrieval log viewer at `/custom/tools/health-dashboard.php`
-- ✅ **IMDb/TMDb Ratings** - Rating badges on the spot detail page (IMDb works out of the box; TMDb needs a free API key in `custom/config/ratings.php`)
-- ✅ **NZBGeek Search** - NZBGeek results above the spots table whenever you search (API key in `custom/config/nzbgeek.php`)
+- ✅ **IMDb/TMDb Ratings** - Rating badges on the spot detail page (IMDb works out of the box; TMDb needs a free API key in your Spotweb preferences)
+- ✅ **NZBGeek Search** - NZBGeek results above the spots table whenever you search (API key in your Spotweb preferences)
 
 ### Theme Switcher UI:
 
@@ -245,7 +245,7 @@ Click any theme → **instant switch** with smooth transitions!
 Open any spot and rating badges appear next to the title:
 
 - **IMDb** works out of the box — no key needed. The spot's IMDb link is used when present; otherwise the spot title (release-name noise like `1080p`, `x264`, `-GROUP` is stripped automatically) is matched via IMDb's suggestion API and the rating is fetched via Cinemeta.
-- **TMDb** needs a free API key: create one at https://www.themoviedb.org/settings/api and paste the v3 key into `custom/config/ratings.php`.
+- **TMDb** needs a free API key: create one at https://www.themoviedb.org/settings/api and enter the v3 key as **TMDB API key** under *Change preferences* in Spotweb. An admin can also set one shared key for all users in `custom/config/ratings.php`; a user's own key takes precedence.
 
 Lookups run server-side in `custom/tools/ratings.php`, require a normal Spotweb login (your `spotsession` cookie), and are cached in the database (`rating_cache` table): resolved titles for a week, misses for 6 hours. Ratings appear on both the `we1rdo` and `modern` templates; anonymous browsing simply shows no badges.
 
@@ -253,7 +253,9 @@ Lookups run server-side in `custom/tools/ratings.php`, require a normal Spotweb 
 
 When you run a search in Spotweb, a collapsible **NZBGeek** panel appears above the spots table with matching releases from your NZBGeek index — handy while the local spot database is still backfilling. Each row shows size, age, category and a direct NZB download link.
 
-Set your NZBGeek API key (Dashboard → API Key on nzbgeek.info) in `custom/config/nzbgeek.php`. Queries go through `custom/tools/nzbgeek.php` (Spotweb login required) and are cached for 2 minutes per query to stay within API limits. If no key is configured the panel simply stays hidden.
+Get your NZBGeek API key (Dashboard → API Key on nzbgeek.info) and enter it as **NZBGeek API key** under *Change preferences* in Spotweb. An admin can also set one shared key for all users in `custom/config/nzbgeek.php`; a user's own key takes precedence. The preferences field comes from the overlays (`apply-spotweb-overlays.sh` / `.ps1`); `update-themes` alone only updates `custom/`, so use the config file there.
+
+Queries go through `custom/tools/nzbgeek.php` (Spotweb login required) and are cached for 2 minutes per query and key to stay within API limits. Without a key the panel shows a hint to add one.
 
 ---
 

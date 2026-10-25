@@ -6,52 +6,11 @@
  * query. Requires a valid Spotweb session (the "spotsession" cookie,
  * same check as custom/tools/ratings.php) and returns JSON only.
  *
- * Configure your NZBGeek API key (Dashboard -> API Key on nzbgeek.info)
- * in custom/config/nzbgeek.php.
+ * Enter your NZBGeek API key (Dashboard -> API Key on nzbgeek.info) as
+ * "NZBGeek API key" in your Spotweb preferences, or set 'api_key' in
+ * custom/config/nzbgeek.php as a fallback for all users.
  */
-$root = dirname(__DIR__, 2);
-$dbFile = $root . '/dbsettings.inc.php';
-header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: no-store');
-if (!is_readable($dbFile)) {
-    http_response_code(500);
-    exit(json_encode(['error' => 'Spotweb database settings are unavailable.']));
-}
-require $dbFile;
-
-function out(array $data, int $code = 200): void
-{
-    http_response_code($code);
-    echo json_encode($data);
-    exit;
-}
-
-function connect_db(array $settings): PDO
-{
-    $engine = (string) ($settings['engine'] ?? 'mysql');
-    if (in_array($engine, ['mysql', 'pdo_mysql'], true)) {
-        $driver = 'mysql';
-    } elseif (in_array($engine, ['pgsql', 'pdo_pgsql', 'postgres'], true)) {
-        $driver = 'pgsql';
-    } elseif (in_array($engine, ['sqlite', 'pdo_sqlite'], true)) {
-        $pdo = new PDO('sqlite:' . ($settings['path'] ?? $settings['dbname'] ?? ''));
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        return $pdo;
-    } else {
-        $driver = $engine;
-    }
-    $host = $settings['host'] ?? '127.0.0.1';
-    $port = $settings['port'] ?? ($driver === 'pgsql' ? '5432' : '3306');
-    $dsn = sprintf('%s:host=%s;port=%s;dbname=%s', $driver, $host, $port, $settings['dbname'] ?? '');
-    if ($driver === 'mysql') {
-        $dsn .= ';charset=utf8mb4';
-    }
-    $pdo = new PDO($dsn, $settings['user'] ?? '', $settings['pass'] ?? '');
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-    return $pdo;
-}
+require dirname(__DIR__) . '/includes/tool-session.inc.php';
 
 function http_get(string $url): ?string
 {
@@ -131,72 +90,33 @@ function cache_put(PDO $pdo, string $key, array $payload, int $ttl): void
 
 /* ------------------------------------------------------------------ */
 
-try {
-    $pdo = connect_db($GLOBALS['dbsettings']);
-} catch (Throwable $e) {
-    out(['error' => 'Unable to connect to the Spotweb database.'], 500);
-}
+[$pdo, $userId] = tool_boot();
 
-/* Same session check as ratings.php: valid session, or anonymous browsing */
-$sessionCookie = (string) ($_COOKIE['spotsession'] ?? '');
-$sessionParts = explode('.', $sessionCookie);
-$authed = false;
-if (count($sessionParts) === 2 && $sessionParts[0] !== '' && ctype_digit($sessionParts[1])) {
-    $cookieUserId = (int) $sessionParts[1];
-    try {
-        $stmt = $pdo->prepare("SELECT 1 FROM sessions s INNER JOIN users u ON u.id = s.userid
-            WHERE s.sessionid = ? AND s.userid = ? AND u.deleted = '0' LIMIT 1");
-        $stmt->execute([$sessionParts[0], $cookieUserId]);
-        $authed = (bool) $stmt->fetchColumn();
-        if (!$authed) {
-            $stmt = $pdo->prepare("SELECT value, serialized FROM settings WHERE name = 'nonauthenticated_userid' LIMIT 1");
-            $stmt->execute();
-            $row = $stmt->fetch();
-            $anonId = 0;
-            if ($row) {
-                $anonId = (int) $row['value'];
-                if (!empty($row['serialized'])) {
-                    $decoded = @unserialize((string) $row['value'], ['allowed_classes' => false]);
-                    if (is_numeric($decoded)) {
-                        $anonId = (int) $decoded;
-                    }
-                }
-            }
-            if ($anonId > 0 && $cookieUserId === $anonId) {
-                $stmt = $pdo->prepare("SELECT 1 FROM users WHERE id = ? AND deleted = '0' LIMIT 1");
-                $stmt->execute([$anonId]);
-                $authed = (bool) $stmt->fetchColumn();
-            }
-        }
-    } catch (Throwable $e) {
-        $authed = false;
-    }
-}
-if (!$authed) {
-    out(['error' => 'A Spotweb login is required.'], 401);
-}
-
-/* NZBGeek API key */
+/* NZBGeek key: the user's own key from Spotweb preferences, else custom/config/nzbgeek.php */
+$apiKey = tool_api_key($pdo, $userId, 'nzbgeek_api_key', 'nzbgeek.php', 'api_key');
 $cfgFile = dirname(__DIR__) . '/config/nzbgeek.php';
 $config = is_file($cfgFile) ? include $cfgFile : [];
-$apiKey = is_array($config) ? trim((string) ($config['api_key'] ?? '')) : '';
-$baseUrl = is_array($config) ? rtrim((string) ($config['base_url'] ?? 'https://api.nzbgeek.info'), '/') : 'https://api.nzbgeek.info';
+$baseUrl = rtrim((string) (is_array($config) ? ($config['base_url'] ?? '') : ''), '/') ?: 'https://api.nzbgeek.info';
 if ($apiKey === '') {
-    out(['error' => 'NZBGeek is not configured (missing api_key in custom/config/nzbgeek.php).'], 400);
+    tool_out([
+        'error' => 'No NZBGeek API key: enter yours under Change preferences.',
+        'prefs_url' => '?page=edituserprefs&userid=' . $userId,
+    ], 400);
 }
 
 $q = trim((string) ($_GET['q'] ?? ''));
 if (mb_strlen($q) < 2 || mb_strlen($q) > 200) {
-    out(['error' => 'Missing or invalid query.'], 400);
+    tool_out(['error' => 'Missing or invalid query.'], 400);
 }
 $cat = preg_replace('/[^0-9,]/', '', (string) ($_GET['cat'] ?? ''));
 $limit = (int) ($_GET['limit'] ?? 25);
 $limit = max(1, min(100, $limit));
 
-$cacheKey = 'nzbgeek:' . md5(mb_strtolower($q) . '|' . $cat . '|' . $limit);
+/* NZB links embed the API key, so cached results must never be shared across keys */
+$cacheKey = 'nzbgeek:' . md5($apiKey . '|' . mb_strtolower($q) . '|' . $cat . '|' . $limit);
 $cached = cache_get($pdo, $cacheKey);
 if ($cached !== null) {
-    out($cached + ['cached' => true]);
+    tool_out($cached + ['cached' => true]);
 }
 
 $url = $baseUrl . '/api?t=search&apikey=' . rawurlencode($apiKey)
@@ -205,15 +125,15 @@ $url = $baseUrl . '/api?t=search&apikey=' . rawurlencode($apiKey)
     . '&extended=1';
 $body = http_get($url);
 if ($body === null) {
-    out(['error' => 'NZBGeek is unreachable.'], 502);
+    tool_out(['error' => 'NZBGeek is unreachable.'], 502);
 }
 if (strpos($body, 'code="100"') !== false || stripos($body, 'incorrect user credentials') !== false) {
-    out(['error' => 'NZBGeek rejected the API key.'], 502);
+    tool_out(['error' => 'NZBGeek rejected the API key.'], 502);
 }
 
 $xml = @simplexml_load_string($body);
 if ($xml === false) {
-    out(['error' => 'Unexpected response from NZBGeek.'], 502);
+    tool_out(['error' => 'Unexpected response from NZBGeek.'], 502);
 }
 
 $total = 0;
@@ -250,4 +170,4 @@ foreach ($xml->xpath('//channel/item') ?: [] as $item) {
 
 $response = ['total' => $total, 'items' => $items];
 cache_put($pdo, $cacheKey, $response, 120);
-out($response);
+tool_out($response);

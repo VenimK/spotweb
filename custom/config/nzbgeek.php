@@ -2,8 +2,11 @@
 /**
  * NZBGeek configuration for custom/tools/nzbgeek.php.
  *
- * Get your API key at https://nzbgeek.info/dashboard.php
- * ("API Key" in your account dashboard) and paste it below.
+ * Users normally enter their own key as "NZBGeek API key" under
+ * Change preferences in Spotweb. A key set here is the shared fallback
+ * for users who have not entered one.
+ *
+ * Get a key at https://nzbgeek.info/dashboard.php ("API Key").
  *
  * This file survives Spotweb updates because it lives in /custom/.
  */

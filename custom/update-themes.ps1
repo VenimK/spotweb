@@ -145,6 +145,7 @@ if (-not (Test-Path $IncludesDir)) {
 
 Write-Host "  Downloading latest includes..." -ForegroundColor Yellow
 Download-File "$GithubRawBase/custom/includes/theme-loader.inc.php" (Join-Path $IncludesDir "theme-loader.inc.php")
+try { Download-File "$GithubRawBase/custom/includes/tool-session.inc.php" (Join-Path $IncludesDir "tool-session.inc.php") } catch {}
 Write-Host ""
 
 # --- Update README ---

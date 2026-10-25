@@ -101,7 +101,14 @@
         body.innerHTML = '';
 
         if (data.error) {
-            body.appendChild(el('div', 'sw-geek-note', data.error));
+            var note = el('div', 'sw-geek-note', data.error);
+            if (data.prefs_url) {
+                note.appendChild(document.createTextNode(' '));
+                var link = el('a', null, 'Open preferences');
+                link.href = data.prefs_url;
+                note.appendChild(link);
+            }
+            body.appendChild(note);
             panel.querySelector('.sw-geek-count').textContent = 'unavailable';
             return;
         }

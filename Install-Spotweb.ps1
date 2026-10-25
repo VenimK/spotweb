@@ -860,6 +860,7 @@ function Install-Themes([string]$Dir, [string]$Mode) {
       @('custom/config/ratings.php', 'custom\config\ratings.php'),
       @('custom/config/nzbgeek.php', 'custom\config\nzbgeek.php'),
       @('custom/includes/theme-loader.inc.php', 'custom\includes\theme-loader.inc.php'),
+      @('custom/includes/tool-session.inc.php', 'custom\includes\tool-session.inc.php'),
       @('custom/README.md', 'custom\README.md'),
       @('custom/update-themes.sh', 'custom\update-themes.sh'),
       @('custom/update-themes.ps1', 'custom\update-themes.ps1')

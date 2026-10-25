@@ -294,6 +294,9 @@ install_themes() {
     curl -fsSL "${GITHUB_RAW_BASE}/custom/includes/theme-loader.inc.php" \
       -o "${spotweb_dir}/custom/includes/theme-loader.inc.php" || \
       print_warn "Failed to download theme-loader.inc.php"
+    curl -fsSL "${GITHUB_RAW_BASE}/custom/includes/tool-session.inc.php" \
+      -o "${spotweb_dir}/custom/includes/tool-session.inc.php" || \
+      print_warn "Failed to download tool-session.inc.php"
 
     curl -fsSL "${GITHUB_RAW_BASE}/custom/README.md" \
       -o "${spotweb_dir}/custom/README.md" || true

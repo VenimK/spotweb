@@ -80,6 +80,7 @@ echo ""
 echo "⬇️  Downloading latest theme loader..."
 cd "${CUSTOM_DIR}/includes"
 curl -fsSL "${GITHUB_REPO}/custom/includes/theme-loader.inc.php" -o "theme-loader.inc.php"
+curl -fsSL "${GITHUB_REPO}/custom/includes/tool-session.inc.php" -o "tool-session.inc.php" 2>/dev/null || true
 
 # Update README
 echo ""
