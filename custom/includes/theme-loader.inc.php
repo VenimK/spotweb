@@ -68,6 +68,12 @@ if (file_exists($ratingsJs) && file_exists($customBase . '/tools/ratings.php')) 
     echo "<script src='custom/js/ratings.js'></script>\n";
 }
 
+// NZBGeek results panel on index pages with a search query
+$nzbGeekJs = $jsPath . '/nzbgeek.js';
+if (file_exists($nzbGeekJs) && file_exists($customBase . '/tools/nzbgeek.php')) {
+    echo "<script src='custom/js/nzbgeek.js'></script>\n";
+}
+
 // Add theme switcher styles (inline to avoid extra file)
 ?>
 <style>

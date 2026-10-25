@@ -802,6 +802,9 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
     curl -fsSL "${GITHUB_REPO}/custom/js/ratings.js" \
         -o "${SPOTWEB_DIR}/custom/js/ratings.js" 2>/dev/null || \
         echo "    ⚠ Failed to download ratings.js"
+    curl -fsSL "${GITHUB_REPO}/custom/js/nzbgeek.js" \
+        -o "${SPOTWEB_DIR}/custom/js/nzbgeek.js" 2>/dev/null || \
+        echo "    ⚠ Failed to download nzbgeek.js"
     
     echo "  → Downloading theme tools"
     curl -fsSL "${GITHUB_REPO}/custom/tools/theme-customizer.html" \
@@ -822,8 +825,13 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
     curl -fsSL "${GITHUB_REPO}/custom/tools/ratings.php" \
         -o "${SPOTWEB_DIR}/custom/tools/ratings.php" 2>/dev/null || \
         echo "    ⚠ Failed to download ratings.php"
+    curl -fsSL "${GITHUB_REPO}/custom/tools/nzbgeek.php" \
+        -o "${SPOTWEB_DIR}/custom/tools/nzbgeek.php" 2>/dev/null || \
+        echo "    ⚠ Failed to download nzbgeek.php"
     curl -fsSL "${GITHUB_REPO}/custom/config/ratings.php" \
         -o "${SPOTWEB_DIR}/custom/config/ratings.php" 2>/dev/null || true
+    curl -fsSL "${GITHUB_REPO}/custom/config/nzbgeek.php" \
+        -o "${SPOTWEB_DIR}/custom/config/nzbgeek.php" 2>/dev/null || true
     
     echo "  → Downloading theme-loader.inc.php (integration hook)"
     curl -fsSL "${GITHUB_REPO}/custom/includes/theme-loader.inc.php" \

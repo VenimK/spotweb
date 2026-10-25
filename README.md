@@ -194,6 +194,7 @@ Windows: `.\Uninstall-Spotweb.ps1 -DryRun` (see `Get-Help .\Uninstall-Spotweb.ps
 - ✅ **Complete Docs** - Full documentation included
 - ✅ **Health Dashboard** - Read-only system checks and bounded retrieval log viewer at `/custom/tools/health-dashboard.php`
 - ✅ **IMDb/TMDb Ratings** - Rating badges on the spot detail page (IMDb works out of the box; TMDb needs a free API key in `custom/config/ratings.php`)
+- ✅ **NZBGeek Search** - NZBGeek results above the spots table whenever you search (API key in `custom/config/nzbgeek.php`)
 
 ### Theme Switcher UI:
 
@@ -247,6 +248,12 @@ Open any spot and rating badges appear next to the title:
 - **TMDb** needs a free API key: create one at https://www.themoviedb.org/settings/api and paste the v3 key into `custom/config/ratings.php`.
 
 Lookups run server-side in `custom/tools/ratings.php`, require a normal Spotweb login (your `spotsession` cookie), and are cached in the database (`rating_cache` table): resolved titles for a week, misses for 6 hours. Ratings appear on both the `we1rdo` and `modern` templates; anonymous browsing simply shows no badges.
+
+## 🔍 NZBGeek Search Results
+
+When you run a search in Spotweb, a collapsible **NZBGeek** panel appears above the spots table with matching releases from your NZBGeek index — handy while the local spot database is still backfilling. Each row shows size, age, category and a direct NZB download link.
+
+Set your NZBGeek API key (Dashboard → API Key on nzbgeek.info) in `custom/config/nzbgeek.php`. Queries go through `custom/tools/nzbgeek.php` (Spotweb login required) and are cached for 2 minutes per query to stay within API limits. If no key is configured the panel simply stays hidden.
 
 ---
 

@@ -12,15 +12,18 @@ custom/
 ├── js/                  # Custom JavaScript
 │   ├── theme-switcher.js
 │   ├── filter-manager-link.js
-│   └── ratings.js       # IMDb/TMDb badges on spot details
+│   ├── ratings.js       # IMDb/TMDb badges on spot details
+│   └── nzbgeek.js       # NZBGeek results panel on search
 ├── tools/               # Theme management tools
 │   ├── theme-customizer.html
 │   ├── theme-upload.php
 │   ├── filter-manager.php
 │   ├── health-dashboard.php
-│   └── ratings.php      # IMDb/TMDb JSON lookup (login required)
+│   ├── ratings.php      # IMDb/TMDb JSON lookup (login required)
+│   └── nzbgeek.php      # NZBGeek search proxy (login required)
 ├── config/              # Tool configuration
-│   └── ratings.php      # Optional TMDb API key
+│   ├── ratings.php      # Optional TMDb API key
+│   └── nzbgeek.php      # NZBGeek API key
 ├── includes/            # Integration hooks
 │   └── theme-loader.inc.php
 └── README.md           # This file

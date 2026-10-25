@@ -53,6 +53,7 @@ cd "${CUSTOM_DIR}/js"
 curl -fsSL "${GITHUB_REPO}/custom/js/theme-switcher.js" -o "theme-switcher.js"
 curl -fsSL "${GITHUB_REPO}/custom/js/filter-manager-link.js" -o "filter-manager-link.js"
 curl -fsSL "${GITHUB_REPO}/custom/js/ratings.js" -o "ratings.js" 2>/dev/null || true
+curl -fsSL "${GITHUB_REPO}/custom/js/nzbgeek.js" -o "nzbgeek.js" 2>/dev/null || true
 
 # Update tools
 echo ""
@@ -63,13 +64,16 @@ curl -fsSL "${GITHUB_REPO}/custom/tools/theme-upload.php" -o "theme-upload.php"
 curl -fsSL "${GITHUB_REPO}/custom/tools/filter-manager.php" -o "filter-manager.php"
 curl -fsSL "${GITHUB_REPO}/custom/tools/health-dashboard.php" -o "health-dashboard.php"
 curl -fsSL "${GITHUB_REPO}/custom/tools/ratings.php" -o "ratings.php" 2>/dev/null || true
+curl -fsSL "${GITHUB_REPO}/custom/tools/nzbgeek.php" -o "nzbgeek.php" 2>/dev/null || true
 curl -fsSL "${GITHUB_REPO}/custom/tools/.htaccess" -o ".htaccess" 2>/dev/null || true
 
-# Ratings config (only created when missing so an existing TMDb key survives)
+# Config files (only created when missing so existing API keys survive)
 mkdir -p "${CUSTOM_DIR}/config"
-if [ ! -f "${CUSTOM_DIR}/config/ratings.php" ]; then
-    curl -fsSL "${GITHUB_REPO}/custom/config/ratings.php" -o "${CUSTOM_DIR}/config/ratings.php" 2>/dev/null || true
-fi
+for cfg in ratings nzbgeek; do
+    if [ ! -f "${CUSTOM_DIR}/config/${cfg}.php" ]; then
+        curl -fsSL "${GITHUB_REPO}/custom/config/${cfg}.php" -o "${CUSTOM_DIR}/config/${cfg}.php" 2>/dev/null || true
+    fi
+done
 
 # Update theme loader
 echo ""
