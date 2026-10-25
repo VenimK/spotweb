@@ -856,6 +856,7 @@ function Install-Themes([string]$Dir, [string]$Mode) {
       @('custom/tools/health-dashboard.php', 'custom\tools\health-dashboard.php'),
       @('custom/tools/ratings.php', 'custom\tools\ratings.php'),
       @('custom/tools/nzbgeek.php', 'custom\tools\nzbgeek.php'),
+      @('custom/tools/nzbgeek-send.php', 'custom\tools\nzbgeek-send.php'),
       @('custom/tools/.htaccess', 'custom\tools\.htaccess'),
       @('custom/config/ratings.php', 'custom\config\ratings.php'),
       @('custom/config/nzbgeek.php', 'custom\config\nzbgeek.php'),

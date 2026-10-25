@@ -283,6 +283,9 @@ install_themes() {
     curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/nzbgeek.php" \
       -o "${spotweb_dir}/custom/tools/nzbgeek.php" || \
       print_warn "Failed to download nzbgeek.php"
+    curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/nzbgeek-send.php" \
+      -o "${spotweb_dir}/custom/tools/nzbgeek-send.php" || \
+      print_warn "Failed to download nzbgeek-send.php"
     curl -fsSL "${GITHUB_RAW_BASE}/custom/config/ratings.php" \
       -o "${spotweb_dir}/custom/config/ratings.php" || true
     curl -fsSL "${GITHUB_RAW_BASE}/custom/config/nzbgeek.php" \

@@ -20,7 +20,8 @@ custom/
 │   ├── filter-manager.php
 │   ├── health-dashboard.php
 │   ├── ratings.php      # IMDb/TMDb JSON lookup (login required)
-│   └── nzbgeek.php      # NZBGeek search proxy (login required)
+│   ├── nzbgeek.php      # NZBGeek search proxy (login required)
+│   └── nzbgeek-send.php # Sends an NZBGeek release to your NZB handler
 ├── config/              # Shared fallback keys (users set their own in Spotweb preferences)
 │   ├── ratings.php      # TMDb API key
 │   └── nzbgeek.php      # NZBGeek API key

@@ -106,25 +106,40 @@ function tool_boot(): array
     return [$pdo, $userId];
 }
 
-/*
- * API key lookup: the user's own key from Spotweb preferences
- * (edituserprefs page) wins, custom/config/<file>.php is the fallback.
- */
-function tool_api_key(PDO $pdo, int $userId, string $prefName, string $configFile, string $configKey): string
+/* The user's Spotweb preferences (usersettings.otherprefs) */
+function tool_user_prefs(PDO $pdo, int $userId): array
 {
     try {
         $stmt = $pdo->prepare('SELECT otherprefs FROM usersettings WHERE userid = ? LIMIT 1');
         $stmt->execute([$userId]);
         $prefs = @unserialize((string) $stmt->fetchColumn(), ['allowed_classes' => false]);
-        $key = is_array($prefs) ? trim((string) ($prefs[$prefName] ?? '')) : '';
-        if ($key !== '') {
-            return $key;
-        }
+        return is_array($prefs) ? $prefs : [];
     } catch (Throwable $e) {
-        // fall back to the config file
+        return [];
+    }
+}
+
+/*
+ * API key lookup: the user's own key from Spotweb preferences
+ * (edituserprefs page) wins, custom/config/<file>.php is the fallback.
+ */
+function tool_api_key(array $prefs, string $prefName, string $configFile, string $configKey): string
+{
+    $key = trim((string) ($prefs[$prefName] ?? ''));
+    if ($key !== '') {
+        return $key;
     }
 
     $cfgFile = dirname(__DIR__) . '/config/' . $configFile;
     $config = is_file($cfgFile) ? include $cfgFile : [];
     return is_array($config) ? trim((string) ($config[$configKey] ?? '')) : '';
 }
+
+/* NZB handlers that run server-side and can take an NZBGeek release */
+const TOOL_SEND_HANDLERS = [
+    'push-sabnzbd' => 'SABnzbd',
+    'nzbget' => 'NZBGet',
+    'nzbvortex' => 'NZBVortex',
+    'save' => 'Save',
+    'runcommand' => 'Run',
+];

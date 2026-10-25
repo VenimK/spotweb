@@ -828,6 +828,9 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
     curl -fsSL "${GITHUB_REPO}/custom/tools/nzbgeek.php" \
         -o "${SPOTWEB_DIR}/custom/tools/nzbgeek.php" 2>/dev/null || \
         echo "    ⚠ Failed to download nzbgeek.php"
+    curl -fsSL "${GITHUB_REPO}/custom/tools/nzbgeek-send.php" \
+        -o "${SPOTWEB_DIR}/custom/tools/nzbgeek-send.php" 2>/dev/null || \
+        echo "    ⚠ Failed to download nzbgeek-send.php"
     curl -fsSL "${GITHUB_REPO}/custom/config/ratings.php" \
         -o "${SPOTWEB_DIR}/custom/config/ratings.php" 2>/dev/null || true
     curl -fsSL "${GITHUB_REPO}/custom/config/nzbgeek.php" \

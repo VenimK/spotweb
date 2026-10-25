@@ -247,7 +247,7 @@ function cache_put(PDO $pdo, string $key, array $payload): void
 [$pdo, $userId] = tool_boot();
 
 /* TMDb key: the user's own key from Spotweb preferences, else custom/config/ratings.php */
-$tmdbKey = tool_api_key($pdo, $userId, 'tmdb_api_key', 'ratings.php', 'tmdb_api_key');
+$tmdbKey = tool_api_key(tool_user_prefs($pdo, $userId), 'tmdb_api_key', 'ratings.php', 'tmdb_api_key');
 
 /* Input: an IMDb id, or a (raw) spot title we resolve ourselves */
 $imdbId = '';

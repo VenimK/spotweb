@@ -65,6 +65,7 @@ curl -fsSL "${GITHUB_REPO}/custom/tools/filter-manager.php" -o "filter-manager.p
 curl -fsSL "${GITHUB_REPO}/custom/tools/health-dashboard.php" -o "health-dashboard.php"
 curl -fsSL "${GITHUB_REPO}/custom/tools/ratings.php" -o "ratings.php" 2>/dev/null || true
 curl -fsSL "${GITHUB_REPO}/custom/tools/nzbgeek.php" -o "nzbgeek.php" 2>/dev/null || true
+curl -fsSL "${GITHUB_REPO}/custom/tools/nzbgeek-send.php" -o "nzbgeek-send.php" 2>/dev/null || true
 curl -fsSL "${GITHUB_REPO}/custom/tools/.htaccess" -o ".htaccess" 2>/dev/null || true
 
 # Config files (only created when missing so existing API keys survive)

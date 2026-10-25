@@ -253,6 +253,8 @@ Lookups run server-side in `custom/tools/ratings.php`, require a normal Spotweb 
 
 When you run a search in Spotweb, a collapsible **NZBGeek** panel appears above the spots table with matching releases from your NZBGeek index — handy while the local spot database is still backfilling. Each row shows size, age, category and a direct NZB download link.
 
+If your NZB handling (*Change preferences*) is SABnzbd (push), NZBGet, NZBVortex, save to disk or run a command, each row also gets a green button named after that client. It sends the release through Spotweb's own handler with your existing settings, including the movies/tv category mapping. "Client-sabnzbd" and "display" handling only get the plain NZB link.
+
 Get your NZBGeek API key (Dashboard → API Key on nzbgeek.info) and enter it as **NZBGeek API key** under *Change preferences* in Spotweb. An admin can also set one shared key for all users in `custom/config/nzbgeek.php`; a user's own key takes precedence. The preferences field comes from the overlays (`apply-spotweb-overlays.sh` / `.ps1`); `update-themes` alone only updates `custom/`, so use the config file there.
 
 Queries go through `custom/tools/nzbgeek.php` (Spotweb login required) and are cached for 2 minutes per query and key to stay within API limits. Without a key the panel shows a hint to add one.

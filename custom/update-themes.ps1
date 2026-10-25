@@ -123,6 +123,7 @@ Download-File "$GithubRawBase/custom/tools/filter-manager.php" (Join-Path $Tools
 Download-File "$GithubRawBase/custom/tools/health-dashboard.php" (Join-Path $ToolsDir "health-dashboard.php")
 try { Download-File "$GithubRawBase/custom/tools/ratings.php" (Join-Path $ToolsDir "ratings.php") } catch {}
 try { Download-File "$GithubRawBase/custom/tools/nzbgeek.php" (Join-Path $ToolsDir "nzbgeek.php") } catch {}
+try { Download-File "$GithubRawBase/custom/tools/nzbgeek-send.php" (Join-Path $ToolsDir "nzbgeek-send.php") } catch {}
 Download-File "$GithubRawBase/custom/tools/.htaccess" (Join-Path $ToolsDir ".htaccess")
 
 # Ratings config (only created when missing so an existing TMDb key survives)

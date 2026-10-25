@@ -10,6 +10,7 @@
     'use strict';
 
     var ENDPOINT = 'custom/tools/nzbgeek.php';
+    var SEND_ENDPOINT = 'custom/tools/nzbgeek-send.php';
 
     var CSS = ''
         + '#sw-geek{margin:6px 0 12px;border:1px solid rgba(148,163,184,.25);border-radius:8px;overflow:hidden;font-size:12px}'
@@ -25,6 +26,10 @@
         + '#sw-geek .sw-geek-dl{flex:none;text-decoration:none;font-weight:700;padding:0 6px;border-radius:4px;'
         + 'background:#3b82f6;color:#fff !important;line-height:1.8}'
         + '#sw-geek .sw-geek-dl:hover{filter:brightness(1.15)}'
+        + '#sw-geek .sw-geek-send{background:#16a34a}'
+        + '#sw-geek .sw-geek-send.busy{opacity:.6;cursor:progress}'
+        + '#sw-geek .sw-geek-send.done{background:#15803d;cursor:default}'
+        + '#sw-geek .sw-geek-send.fail{background:#dc2626}'
         + '#sw-geek .sw-geek-note{padding:6px 10px;opacity:.7}';
 
     function injectStyle() {
@@ -96,6 +101,52 @@
         return node;
     }
 
+    /* Sends the release to the user's NZB handler (SABnzbd, NZBGet, ...) */
+    function sendButton(handler, item) {
+        var btn = el('a', 'sw-geek-dl sw-geek-send', handler);
+        btn.href = '#';
+        btn.title = 'Send to ' + handler;
+        btn.addEventListener('click', function (ev) {
+            ev.preventDefault();
+            if (btn.classList.contains('busy') || btn.classList.contains('done')) {
+                return;
+            }
+            btn.classList.add('busy');
+            btn.textContent = '…';
+            var form = new URLSearchParams();
+            form.set('id', item.id);
+            form.set('title', item.title);
+            form.set('cat', String(item.catid || 0));
+            fetch(SEND_ENDPOINT, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'spotweb' },
+                body: form
+            })
+                .then(function (res) { return res.json(); })
+                .then(function (res) {
+                    btn.classList.remove('busy');
+                    if (res && res.ok) {
+                        btn.classList.add('done');
+                        btn.textContent = '✓ ' + handler;
+                        btn.title = 'Sent to ' + handler;
+                    } else {
+                        btn.classList.add('fail');
+                        btn.textContent = handler;
+                        btn.title = (res && res.error) || 'Sending failed';
+                        window.alert(btn.title);
+                    }
+                })
+                .catch(function () {
+                    btn.classList.remove('busy');
+                    btn.classList.add('fail');
+                    btn.textContent = handler;
+                    window.alert('Sending to ' + handler + ' failed.');
+                });
+        });
+        return btn;
+    }
+
     function render(panel, query, data) {
         var body = panel.querySelector('.sw-geek-body');
         body.innerHTML = '';
@@ -144,6 +195,9 @@
                 meta.push(item.grabs + ' grabs');
             }
             row.appendChild(dl);
+            if (data.handler && item.id) {
+                row.appendChild(sendButton(data.handler, item));
+            }
             row.appendChild(title);
             row.appendChild(el('span', 'sw-geek-meta', meta.join(' · ')));
             body.appendChild(row);

@@ -93,7 +93,11 @@ function cache_put(PDO $pdo, string $key, array $payload, int $ttl): void
 [$pdo, $userId] = tool_boot();
 
 /* NZBGeek key: the user's own key from Spotweb preferences, else custom/config/nzbgeek.php */
-$apiKey = tool_api_key($pdo, $userId, 'nzbgeek_api_key', 'nzbgeek.php', 'api_key');
+$prefs = tool_user_prefs($pdo, $userId);
+$apiKey = tool_api_key($prefs, 'nzbgeek_api_key', 'nzbgeek.php', 'api_key');
+$handlerAction = (string) ($prefs['nzbhandling']['action'] ?? 'disable');
+/* Label for the per-row "send to download client" button, null when unsupported */
+$handler = TOOL_SEND_HANDLERS[$handlerAction] ?? null;
 $cfgFile = dirname(__DIR__) . '/config/nzbgeek.php';
 $config = is_file($cfgFile) ? include $cfgFile : [];
 $baseUrl = rtrim((string) (is_array($config) ? ($config['base_url'] ?? '') : ''), '/') ?: 'https://api.nzbgeek.info';
@@ -116,7 +120,7 @@ $limit = max(1, min(100, $limit));
 $cacheKey = 'nzbgeek:' . md5($apiKey . '|' . mb_strtolower($q) . '|' . $cat . '|' . $limit);
 $cached = cache_get($pdo, $cacheKey);
 if ($cached !== null) {
-    tool_out($cached + ['cached' => true]);
+    tool_out($cached + ['handler' => $handler, 'cached' => true]);
 }
 
 $url = $baseUrl . '/api?t=search&apikey=' . rawurlencode($apiKey)
@@ -160,6 +164,8 @@ foreach ($xml->xpath('//channel/item') ?: [] as $item) {
         'title' => (string) $item->title,
         'nzb' => $link,
         'guid' => (string) $item->guid,
+        'id' => preg_match('/^[a-f0-9]{16,64}$/i', $attrs['guid'] ?? '') ? $attrs['guid'] : '',
+        'catid' => (int) ($attrs['category'] ?? 0),
         'date' => strtotime((string) $item->pubDate) ?: null,
         'size' => $size,
         'category' => (string) $item->category ?: ($attrs['category'] ?? ''),
@@ -170,4 +176,4 @@ foreach ($xml->xpath('//channel/item') ?: [] as $item) {
 
 $response = ['total' => $total, 'items' => $items];
 cache_put($pdo, $cacheKey, $response, 120);
-tool_out($response);
+tool_out($response + ['handler' => $handler]);
