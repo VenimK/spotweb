@@ -2,9 +2,10 @@
  * NZBGeek search results panel on the Spotweb index page.
  *
  * Injected by custom/includes/theme-loader.inc.php. When the current
- * URL carries a real search query (search[value][]=...), fetches
- * matching releases from NZBGeek via custom/tools/nzbgeek.php and
- * shows them above the spots table with NZB download links.
+ * URL carries a real search query (search[value][]=...) and/or a
+ * category (search[tree]=cat0_z0...), fetches matching releases, or the
+ * newest ones in that category, from NZBGeek via
+ * custom/tools/nzbgeek.php and shows them above the spots table.
  */
 (function () {
     'use strict';
@@ -72,6 +73,45 @@
             }
         });
         return terms.join(' ').trim();
+    }
+
+    /* Spotweb category tree -> Newznab categories (NZBGeek) */
+    var CAT_MAP = {
+        cat0_z0: { cats: ['2000'], label: 'Movies' },
+        cat0_z1: { cats: ['5000'], label: 'Series' },
+        cat0_z2: { cats: ['7000'], label: 'Books' },
+        cat0_z3: { cats: ['6000'], label: 'Erotic' },
+        cat0: { cats: ['2000', '5000'], label: 'Movies & Series' },
+        cat1: { cats: ['3000'], label: 'Sound' },
+        cat2: { cats: ['1000', '4050'], label: 'Games' },
+        cat3: { cats: ['4000'], label: 'Applications' }
+    };
+
+    /* Categories Spotweb is currently showing, from search[tree]=cat0_z0_a4,... */
+    function currentCategories() {
+        var tree = new URLSearchParams(window.location.search).get('search[tree]') || '';
+        var cats = [];
+        var labels = [];
+        tree.split(',').forEach(function (node) {
+            // Excluded nodes are prefixed with "!" or "~"
+            var m = node.trim().match(/^(cat\d)(?:_(z\d))?/);
+            if (!m) {
+                return;
+            }
+            var hit = CAT_MAP[m[1] + (m[2] ? '_' + m[2] : '')] || CAT_MAP[m[1]];
+            if (!hit) {
+                return;
+            }
+            hit.cats.forEach(function (c) {
+                if (cats.indexOf(c) === -1) {
+                    cats.push(c);
+                }
+            });
+            if (labels.indexOf(hit.label) === -1) {
+                labels.push(hit.label);
+            }
+        });
+        return { cats: cats, label: labels.join(', ') };
     }
 
     function fmtSize(bytes) {
@@ -147,7 +187,7 @@
         return btn;
     }
 
-    function render(panel, query, data) {
+    function render(panel, desc, data) {
         var body = panel.querySelector('.sw-geek-body');
         body.innerHTML = '';
 
@@ -164,7 +204,7 @@
             return;
         }
         if (!data.items || !data.items.length) {
-            body.appendChild(el('div', 'sw-geek-note', 'No NZBGeek results for “' + query + '”.'));
+            body.appendChild(el('div', 'sw-geek-note', 'No NZBGeek results for ' + desc + '.'));
             panel.querySelector('.sw-geek-count').textContent = '0 results';
             return;
         }
@@ -206,9 +246,13 @@
 
     function run() {
         var query = currentQuery();
-        if (!query) {
+        var category = currentCategories();
+        if (!query && !category.cats.length) {
             return;
         }
+        var desc = query
+            ? '“' + query + '”' + (category.label ? ' in ' + category.label : '')
+            : 'newest in ' + category.label;
         var anchor = document.querySelector('div.spots') || document.querySelector('table.spots');
         if (!anchor || document.getElementById('sw-geek')) {
             return;
@@ -218,8 +262,8 @@
         var panel = el('div');
         panel.id = 'sw-geek';
         var head = el('div', 'sw-geek-head');
-        head.appendChild(el('span', null, 'NZBGeek — “' + query + '”'));
-        head.appendChild(el('span', 'sw-geek-count', 'searching…'));
+        head.appendChild(el('span', null, 'NZBGeek — ' + desc));
+        head.appendChild(el('span', 'sw-geek-count', 'loading…'));
         var body = el('div', 'sw-geek-body');
         panel.appendChild(head);
         panel.appendChild(body);
@@ -234,10 +278,17 @@
             anchor.parentNode.insertBefore(panel, anchor);
         }
 
-        fetch(ENDPOINT + '?q=' + encodeURIComponent(query), { credentials: 'same-origin' })
+        var params = new URLSearchParams();
+        if (query) {
+            params.set('q', query);
+        }
+        if (category.cats.length) {
+            params.set('cat', category.cats.join(','));
+        }
+        fetch(ENDPOINT + '?' + params.toString(), { credentials: 'same-origin' })
             .then(function (res) { return res.ok ? res.json() : res.json().catch(function () { return { error: 'NZBGeek lookup failed.' }; }); })
-            .then(function (data) { render(panel, query, data || {}); })
-            .catch(function () { render(panel, query, { error: 'NZBGeek lookup failed.' }); });
+            .then(function (data) { render(panel, desc, data || {}); })
+            .catch(function () { render(panel, desc, { error: 'NZBGeek lookup failed.' }); });
     }
 
     if (document.readyState === 'loading') {

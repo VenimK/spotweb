@@ -108,11 +108,12 @@ if ($apiKey === '') {
     ], 400);
 }
 
+/* A query searches; categories alone list the newest releases there */
 $q = trim((string) ($_GET['q'] ?? ''));
-if (mb_strlen($q) < 2 || mb_strlen($q) > 200) {
+$cat = trim(preg_replace('/[^0-9,]/', '', (string) ($_GET['cat'] ?? '')), ',');
+if (($q === '' && $cat === '') || ($q !== '' && mb_strlen($q) < 2) || mb_strlen($q) > 200) {
     tool_out(['error' => 'Missing or invalid query.'], 400);
 }
-$cat = preg_replace('/[^0-9,]/', '', (string) ($_GET['cat'] ?? ''));
 $limit = (int) ($_GET['limit'] ?? 25);
 $limit = max(1, min(100, $limit));
 
@@ -124,7 +125,7 @@ if ($cached !== null) {
 }
 
 $url = $baseUrl . '/api?t=search&apikey=' . rawurlencode($apiKey)
-    . '&q=' . rawurlencode($q) . '&limit=' . $limit
+    . ($q !== '' ? '&q=' . rawurlencode($q) : '') . '&limit=' . $limit
     . ($cat !== '' ? '&cat=' . $cat : '')
     . '&extended=1';
 $body = http_get($url);
