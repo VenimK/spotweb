@@ -37,11 +37,24 @@
         document.head.appendChild(style);
     }
 
-    /* The search query Spotweb is currently showing */
+    /* The search query Spotweb is currently showing.
+       Values look like "Title:=:DEF:spiderman" (field:=:op:value);
+       take the part after the last ':=:'. */
     function currentQuery() {
         var values = new URLSearchParams(window.location.search).getAll('search[value][]');
-        values = values.filter(function (v) { return v && v !== 'NULL'; });
-        return values.join(' ').trim();
+        var terms = [];
+        values.forEach(function (v) {
+            if (!v || v === 'NULL') {
+                return;
+            }
+            var idx = v.lastIndexOf(':=:');
+            var term = idx >= 0 ? v.slice(idx + 3) : v;
+            term = term.trim();
+            if (term && term !== 'NULL') {
+                terms.push(term);
+            }
+        });
+        return terms.join(' ').trim();
     }
 
     function fmtSize(bytes) {
