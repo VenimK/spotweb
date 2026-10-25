@@ -50,7 +50,7 @@
             var idx = v.lastIndexOf(':=:');
             if (idx >= 0) {
                 // Field search: "Title:=:DEF:spiderman" -> "spiderman"
-                var term = v.slice(idx + 3).trim();
+                var term = v.slice(idx + 3).replace(/^[A-Z]+:/, '').trim();
                 if (term && term !== 'NULL') {
                     terms.push(term);
                 }
