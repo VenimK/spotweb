@@ -65,13 +65,13 @@ if (file_exists($filterManagerJs) && file_exists($customBase . '/tools/filter-ma
 // IMDb/TMDb rating badges on spot detail pages
 $ratingsJs = $jsPath . '/ratings.js';
 if (file_exists($ratingsJs) && file_exists($customBase . '/tools/ratings.php')) {
-    echo "<script src='custom/js/ratings.js'></script>\n";
+    echo "<script src='custom/js/ratings.js?v=" . filemtime($ratingsJs) . "'></script>\n";
 }
 
 // NZBGeek results panel on index pages with a search query
 $nzbGeekJs = $jsPath . '/nzbgeek.js';
 if (file_exists($nzbGeekJs) && file_exists($customBase . '/tools/nzbgeek.php')) {
-    echo "<script src='custom/js/nzbgeek.js'></script>\n";
+    echo "<script src='custom/js/nzbgeek.js?v=" . filemtime($nzbGeekJs) . "'></script>\n";
 }
 
 // Add theme switcher styles (inline to avoid extra file)
