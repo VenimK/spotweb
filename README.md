@@ -296,6 +296,8 @@ Sub-filters narrow it further. Per Spotweb category, the selected sub-filters th
 
 The panel title shows what was used, for example *newest in Movies (HD, BluRay)*.
 
+Source filters (the "type" group: CAM, VCD, Promo, Retail, HDTV, Satellite, R5, Telecine, Telesync, Scan, WEB-DL, WEBRip, HDRip) have no NZBGeek category, so releases are keyword-matched on their titles instead — *Movies (HD, WEB-DL)* shows only HD releases whose name contains WEB-DL. Chained filters like `cat0_z0_a9_b11` (Movies → x264 → WEB-DL) work. Language filters are ignored.
+
 If your NZB handling (*Change preferences*) is SABnzbd (push), NZBGet, NZBVortex, save to disk or run a command, each row also gets a green button named after that client. It sends the release through Spotweb's own handler with your existing settings, including the movies/tv category mapping. "Client-sabnzbd" and "display" handling only get the plain NZB link.
 
 Get your NZBGeek API key (Dashboard → API Key on nzbgeek.info) and enter it as **NZBGeek API key** under *Change preferences* in Spotweb. An admin can also set one shared key for all users in `custom/config/nzbgeek.php`; a user's own key takes precedence. The preferences field comes from the overlays (`apply-spotweb-overlays.sh` / `.ps1`); `update-themes` alone only updates `custom/`, so use the config file there.

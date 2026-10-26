@@ -98,6 +98,22 @@
     /* Spotweb video formats: DivX/WMV/MPG/DVD5/DVD9, HD other/HD-DVD/WMVHD/x264, Blu-ray, UHD, 3D */
     var VIDEO = { sd: 'a0 a1 a2 a3 a10', hd: 'a4 a7 a8 a9', bd: 'a6', uhd: 'a15', '3d': 'a14' };
 
+    /*
+     * Spotweb source filters (the b-group) have no Newznab category, but
+     * release titles carry the tag. Each code maps to regex alternates
+     * matched against the title (dots/underscores are spaces there).
+     */
+    var SOURCE_KW = {
+        b0: 'cam', b1: 'vcd|svcd', b2: 'promo', b3: 'retail', b4: 'hdtv',
+        b6: 'satellite', b7: 'r5', b8: 'telecine|tc', b9: 'telesync|ts',
+        b10: 'scan', b11: 'web.?dl', b12: 'web.?rip', b13: 'hdrip'
+    };
+    var SOURCE_NAMES = {
+        b0: 'CAM', b1: 'VCD', b2: 'Promo', b3: 'Retail', b4: 'HDTV',
+        b6: 'Satellite', b7: 'R5', b8: 'Telecine', b9: 'Telesync',
+        b10: 'Scan', b11: 'WEB-DL', b12: 'WEBRip', b13: 'HDRip'
+    };
+
     /* Spotweb category tree -> Newznab categories; "sub" refines by Spotweb sub-filter */
     var CAT_MAP = {
         cat0_z0: { cats: ['2000'], label: 'Movies', sub: subs(
@@ -127,7 +143,8 @@
         var groups = {};
         var order = [];
         tree.split(',').forEach(function (node) {
-            var m = node.trim().match(/^(cat\d)(?:_(z\d))?(?:_([a-d]\d+))?$/);
+            /* Nodes chain sub-codes: cat0_z0_a9_b11 = Movies > x264 > WEB-DL */
+            var m = node.trim().match(/^(cat\d)(?:_(z\d))?((?:_[a-d]\d+)+)?$/);
             if (!m) {
                 return;
             }
@@ -137,17 +154,29 @@
                 return;
             }
             if (!groups[key]) {
-                groups[key] = { def: def, cats: [] };
+                groups[key] = { def: def, cats: [], kw: [], kwnames: [] };
                 order.push(key);
             }
-            var nzb = m[3] && def.sub[m[3]];
-            if (nzb && groups[key].cats.indexOf(nzb) === -1) {
-                groups[key].cats.push(nzb);
-            }
+            var g = groups[key];
+            (m[3] || '').split('_').forEach(function (code) {
+                if (!code) {
+                    return;
+                }
+                var nzb = def.sub[code];
+                if (nzb && g.cats.indexOf(nzb) === -1) {
+                    g.cats.push(nzb);
+                }
+                /* b-codes are source filters: keyword-match the titles instead */
+                if (code[0] === 'b' && SOURCE_KW[code] && g.kw.indexOf(SOURCE_KW[code]) === -1) {
+                    g.kw.push(SOURCE_KW[code]);
+                    g.kwnames.push(SOURCE_NAMES[code]);
+                }
+            });
         });
 
         var cats = [];
         var labels = [];
+        var kw = [];
         order.forEach(function (key) {
             var g = groups[key];
             var picked = g.cats.length ? g.cats : g.def.cats;
@@ -158,9 +187,16 @@
             });
             var names = g.cats.map(function (c) { return NZB_NAMES[c]; })
                 .filter(function (n, i, all) { return n && all.indexOf(n) === i; });
-            labels.push(g.def.label + (names.length ? ' (' + names.join(', ') + ')' : ''));
+            var label = g.def.label;
+            if (names.length || g.kwnames.length) {
+                label += ' (' + names.concat(g.kwnames).join(', ') + ')';
+            }
+            labels.push(label);
+            if (g.kw) {
+                kw = kw.concat(g.kw);
+            }
         });
-        return { cats: cats, label: labels.join(', ') };
+        return { cats: cats, label: labels.join(', '), kw: kw };
     }
 
     function fmtSize(bytes) {
@@ -236,7 +272,18 @@
         return btn;
     }
 
-    function render(panel, desc, data) {
+    /* Title matcher for b-group source filters, e.g. "web.?dl" */
+    function kwMatcher(kw) {
+        if (!kw.length) {
+            return null;
+        }
+        var re = new RegExp('\\b(' + kw.join('|') + ')\\b', 'i');
+        return function (title) {
+            return re.test(title.replace(/[._]+/g, ' '));
+        };
+    }
+
+    function render(panel, desc, data, matches) {
         var body = panel.querySelector('.sw-geek-body');
         body.innerHTML = '';
 
@@ -252,18 +299,20 @@
             panel.querySelector('.sw-geek-count').textContent = 'unavailable';
             return;
         }
-        if (!data.items || !data.items.length) {
+        var items = matches ? data.items.filter(function (i) { return matches(i.title); }) : data.items;
+        if (!data.items || !data.items.length || !items.length) {
             body.appendChild(el('div', 'sw-geek-note', 'No NZBGeek results for ' + desc + '.'));
             panel.querySelector('.sw-geek-count').textContent = '0 results';
             return;
         }
 
         panel.querySelector('.sw-geek-count').textContent =
-            data.total > data.items.length
-                ? data.items.length + ' of ' + data.total + ' results'
-                : data.items.length + ' results';
+            (data.total > items.length
+                ? items.length + ' of ' + data.total + ' results'
+                : items.length + ' results')
+            + (matches ? ' (filtered)' : '');
 
-        data.items.forEach(function (item) {
+        items.forEach(function (item) {
             var row = el('div', 'sw-geek-row');
             var dl = el('a', 'sw-geek-dl', 'NZB');
             dl.href = item.nzb;
@@ -337,9 +386,10 @@
         if (category.cats.length) {
             params.set('cat', category.cats.join(','));
         }
+        var matches = kwMatcher(category.kw || []);
         fetch(ENDPOINT + '?' + params.toString(), { credentials: 'same-origin' })
             .then(function (res) { return res.ok ? res.json() : res.json().catch(function () { return { error: 'NZBGeek lookup failed.' }; }); })
-            .then(function (data) { render(panel, desc, data || {}); })
+            .then(function (data) { render(panel, desc, data || {}, matches); })
             .catch(function () { render(panel, desc, { error: 'NZBGeek lookup failed.' }); });
     }
 
