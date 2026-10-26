@@ -386,6 +386,13 @@
         if (category.cats.length) {
             params.set('cat', category.cats.join(','));
         }
+        /* Spotweb's "New" filter -> only recent NZBGeek releases */
+        var isNew = new URLSearchParams(window.location.search).getAll('search[value][]')
+            .some(function (v) { return /^New:\d+$/.test(v); });
+        if (isNew) {
+            params.set('maxage', '7');
+            desc += ', last 7 days';
+        }
         var matches = kwMatcher(category.kw || []);
         fetch(ENDPOINT + '?' + params.toString(), { credentials: 'same-origin' })
             .then(function (res) { return res.ok ? res.json() : res.json().catch(function () { return { error: 'NZBGeek lookup failed.' }; }); })

@@ -116,9 +116,11 @@ if (($q === '' && $cat === '') || ($q !== '' && mb_strlen($q) < 2) || mb_strlen(
 }
 $limit = (int) ($_GET['limit'] ?? 25);
 $limit = max(1, min(100, $limit));
+$maxage = (int) ($_GET['maxage'] ?? 0);
+$maxage = max(0, min(90, $maxage));
 
 /* NZB links embed the API key, so cached results must never be shared across keys */
-$cacheKey = 'nzbgeek:' . md5($apiKey . '|' . mb_strtolower($q) . '|' . $cat . '|' . $limit);
+$cacheKey = 'nzbgeek:' . md5($apiKey . '|' . mb_strtolower($q) . '|' . $cat . '|' . $limit . '|' . $maxage);
 $cached = cache_get($pdo, $cacheKey);
 if ($cached !== null) {
     tool_out($cached + ['handler' => $handler, 'cached' => true]);
@@ -127,6 +129,7 @@ if ($cached !== null) {
 $url = $baseUrl . '/api?t=search&apikey=' . rawurlencode($apiKey)
     . ($q !== '' ? '&q=' . rawurlencode($q) : '') . '&limit=' . $limit
     . ($cat !== '' ? '&cat=' . $cat : '')
+    . ($maxage > 0 ? '&maxage=' . $maxage : '')
     . '&extended=1';
 $body = http_get($url);
 if ($body === null) {
