@@ -808,6 +808,9 @@ if [[ "INSTALL_THEMES_PLACEHOLDER" == "pack" ]]; then
     curl -fsSL "${GITHUB_REPO}/custom/js/spotlist.js" \
         -o "${SPOTWEB_DIR}/custom/js/spotlist.js" 2>/dev/null || \
         echo "    ⚠ Failed to download spotlist.js"
+    curl -fsSL "${GITHUB_REPO}/custom/js/features.js" \
+        -o "${SPOTWEB_DIR}/custom/js/features.js" 2>/dev/null || \
+        echo "    ⚠ Failed to download features.js"
     
     echo "  → Downloading theme tools"
     curl -fsSL "${GITHUB_REPO}/custom/tools/theme-customizer.html" \

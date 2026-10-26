@@ -320,6 +320,9 @@
     }
 
     function init() {
+        if (window.swFeatureOn && !window.swFeatureOn('spotlist')) {
+            return;
+        }
         if (!document.querySelector('tbody#spots')) {
             return;
         }

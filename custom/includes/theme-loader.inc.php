@@ -62,6 +62,13 @@ if (file_exists($filterManagerJs) && file_exists($customBase . '/tools/filter-ma
     echo "<script src='custom/js/filter-manager-link.js'></script>\n";
 }
 
+// Per-browser feature toggles (the gear button); loads first so the
+// other extras can consult it
+$featuresJs = $jsPath . '/features.js';
+if (file_exists($featuresJs)) {
+    echo "<script src='custom/js/features.js?v=" . filemtime($featuresJs) . "'></script>\n";
+}
+
 // IMDb/TMDb rating badges on spot detail pages
 $ratingsJs = $jsPath . '/ratings.js';
 if (file_exists($ratingsJs) && file_exists($customBase . '/tools/ratings.php')) {

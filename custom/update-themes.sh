@@ -55,6 +55,7 @@ curl -fsSL "${GITHUB_REPO}/custom/js/filter-manager-link.js" -o "filter-manager-
 curl -fsSL "${GITHUB_REPO}/custom/js/ratings.js" -o "ratings.js" 2>/dev/null || true
 curl -fsSL "${GITHUB_REPO}/custom/js/nzbgeek.js" -o "nzbgeek.js" 2>/dev/null || true
 curl -fsSL "${GITHUB_REPO}/custom/js/spotlist.js" -o "spotlist.js" 2>/dev/null || true
+curl -fsSL "${GITHUB_REPO}/custom/js/features.js" -o "features.js" 2>/dev/null || true
 
 # Update tools
 echo ""

@@ -109,6 +109,7 @@ Download-File "$GithubRawBase/custom/js/filter-manager-link.js" (Join-Path $JsDi
 try { Download-File "$GithubRawBase/custom/js/ratings.js" (Join-Path $JsDir "ratings.js") } catch {}
 try { Download-File "$GithubRawBase/custom/js/nzbgeek.js" (Join-Path $JsDir "nzbgeek.js") } catch {}
 try { Download-File "$GithubRawBase/custom/js/spotlist.js" (Join-Path $JsDir "spotlist.js") } catch {}
+try { Download-File "$GithubRawBase/custom/js/features.js" (Join-Path $JsDir "features.js") } catch {}
 Write-Host ""
 
 # --- Update tools ---

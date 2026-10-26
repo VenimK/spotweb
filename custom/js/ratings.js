@@ -11,6 +11,10 @@
 
     var ENDPOINT = 'custom/tools/ratings.php';
 
+    function feat(name) {
+        return !window.swFeatureOn || window.swFeatureOn(name);
+    }
+
     var CSS = ''
         + '.sw-ratings{display:inline-block;margin-left:10px;white-space:nowrap;vertical-align:middle}'
         + '.sw-rt{display:inline-block;padding:1px 7px;margin-right:6px;border-radius:4px;'
@@ -81,61 +85,81 @@
         return (Math.round(rating * 10) / 10).toFixed(1);
     }
 
-    function render(details, data) {
+    /* Finds or lazily creates the badge wrap in the spot header */
+    function badgeWrap(details) {
         var host = details.querySelector('table.spotheader th.rating')
             || details.querySelector('table.spotheader th.title');
-        if (!host || host.querySelector('.sw-ratings')) {
+        if (!host) {
+            return null;
+        }
+        var wrap = host.querySelector('.sw-ratings');
+        if (!wrap) {
+            wrap = document.createElement('span');
+            wrap.className = 'sw-ratings';
+            host.appendChild(wrap);
+        }
+        return wrap;
+    }
+
+    function render(details, data) {
+        var info = data.details;
+
+        if (feat('ratings')) {
+            var wrap = null;
+            if (data.imdb_rating) {
+                wrap = wrap || badgeWrap(details);
+                if (wrap) {
+                    var imdb = document.createElement('a');
+                    imdb.className = 'sw-rt sw-rt-imdb';
+                    imdb.textContent = 'IMDb ' + fmt(data.imdb_rating);
+                    if (data.imdb_id) {
+                        imdb.href = 'https://www.imdb.com/title/' + data.imdb_id + '/';
+                        imdb.target = '_blank';
+                        imdb.rel = 'noopener noreferrer';
+                    }
+                    imdb.title = data.name ? 'IMDb rating for ' + data.name : 'IMDb rating';
+                    wrap.appendChild(imdb);
+                }
+            }
+
+            if (data.tmdb_rating) {
+                wrap = wrap || badgeWrap(details);
+                if (wrap) {
+                    var tmdb;
+                    if (data.tmdb_url) {
+                        tmdb = document.createElement('a');
+                        tmdb.href = data.tmdb_url;
+                        tmdb.target = '_blank';
+                        tmdb.rel = 'noopener noreferrer';
+                    } else {
+                        tmdb = document.createElement('span');
+                    }
+                    tmdb.className = 'sw-rt sw-rt-tmdb';
+                    tmdb.textContent = 'TMDb ' + fmt(data.tmdb_rating);
+                    tmdb.title = data.name ? 'TMDb rating for ' + data.name : 'TMDb rating';
+                    wrap.appendChild(tmdb);
+                }
+            }
+        }
+
+        if (!feat('info')) {
             return;
         }
-        var wrap = document.createElement('span');
-        wrap.className = 'sw-ratings';
-
-        if (data.imdb_rating) {
-            var imdb = document.createElement('a');
-            imdb.className = 'sw-rt sw-rt-imdb';
-            imdb.textContent = 'IMDb ' + fmt(data.imdb_rating);
-            if (data.imdb_id) {
-                imdb.href = 'https://www.imdb.com/title/' + data.imdb_id + '/';
-                imdb.target = '_blank';
-                imdb.rel = 'noopener noreferrer';
-            }
-            imdb.title = data.name ? 'IMDb rating for ' + data.name : 'IMDb rating';
-            wrap.appendChild(imdb);
-        }
-
-        if (data.tmdb_rating) {
-            var tmdb;
-            if (data.tmdb_url) {
-                tmdb = document.createElement('a');
-                tmdb.href = data.tmdb_url;
-                tmdb.target = '_blank';
-                tmdb.rel = 'noopener noreferrer';
-            } else {
-                tmdb = document.createElement('span');
-            }
-            tmdb.className = 'sw-rt sw-rt-tmdb';
-            tmdb.textContent = 'TMDb ' + fmt(data.tmdb_rating);
-            tmdb.title = data.name ? 'TMDb rating for ' + data.name : 'TMDb rating';
-            wrap.appendChild(tmdb);
-        }
-
-        var info = data.details;
         if (info && info.trailer) {
-            var play = document.createElement('a');
-            play.className = 'sw-rt sw-rt-trailer';
-            play.href = 'https://www.youtube.com/watch?v=' + info.trailer;
-            play.textContent = '▶ Trailer';
-            play.title = 'Watch the trailer';
-            play.addEventListener('click', function (ev) {
-                ev.preventDefault();
-                ev.stopPropagation();
-                openTrailer(info.trailer);
-            });
-            wrap.appendChild(play);
-        }
-
-        if (wrap.childNodes.length) {
-            host.appendChild(wrap);
+            var wrap = badgeWrap(details);
+            if (wrap) {
+                var play = document.createElement('a');
+                play.className = 'sw-rt sw-rt-trailer';
+                play.href = 'https://www.youtube.com/watch?v=' + info.trailer;
+                play.textContent = '\u25B6 Trailer';
+                play.title = 'Watch the trailer';
+                play.addEventListener('click', function (ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    openTrailer(info.trailer);
+                });
+                wrap.appendChild(play);
+            }
         }
         if (info) {
             renderInfo(details, info);
@@ -236,6 +260,9 @@
     }
 
     function process(details) {
+        if (!feat('ratings') && !feat('info')) {
+            return;
+        }
         if (details.dataset.swRatings) {
             return;
         }

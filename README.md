@@ -196,6 +196,7 @@ Windows: `.\Uninstall-Spotweb.ps1 -DryRun` (see `Get-Help .\Uninstall-Spotweb.ps
 - ✅ **IMDb/TMDb Ratings** - Rating badges on the spot detail page *and* in the spots list (IMDb works out of the box; TMDb needs a free API key in your Spotweb preferences)
 - ✅ **Details & Trailer** - Poster, plot, cast, runtime and a ▶ Trailer button on the spot detail page (needs the TMDb key)
 - ✅ **List tools** - "Sort by rating", "hide rated below N" and "Group duplicates" (720p/1080p/4K of the same title collapse to one row with version chips)
+- ✅ **Feature toggles** - a small ⚙ button (bottom-right) lets each user switch every extra on or off; saved per browser
 - ✅ **NZBGeek Search** - NZBGeek results above the spots table whenever you search (API key in your Spotweb preferences)
 
 ### Theme Switcher UI:
@@ -252,6 +253,10 @@ Open any spot and rating badges appear next to the title:
 With a TMDb key the detail page also shows a small info block above the spot details — poster, year, runtime or season count, genres, tagline, plot and the top cast — plus a red **▶ Trailer** badge that opens the YouTube trailer in a page overlay (Esc or click-away closes it).
 
 On the spots list a toolbar appears above the table: rating badges next to each title (IMDb yellow, TMDb blue when IMDb has no score), **Sort by rating**, **Hide rated below** (5+/6+/7+/8+ — unrated spots stay visible), and **Group duplicates** which collapses releases sharing a cleaned-up title into one row with clickable version chips (`+1080p`, `+720p`, …). These three controls are saved per browser. Lookups are shared with the detail page, so ratings that are already cached show instantly.
+
+## ⚙ Feature toggles
+
+Every extra — rating badges, details & trailer, list tools, the NZBGeek panel — can be switched on or off per user from the ⚙ button in the bottom-right corner. Choices are stored in the browser's localStorage (nothing is written to Spotweb itself) and apply on reload. All features default to on.
 
 Lookups run server-side in `custom/tools/ratings.php`, require a normal Spotweb login (your `spotsession` cookie), and are cached in the database (`rating_cache` table): resolved titles for a week, misses for 6 hours. Ratings appear on both the `we1rdo` and `modern` templates; anonymous browsing simply shows no badges.
 

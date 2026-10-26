@@ -12,6 +12,7 @@ custom/
 ├── js/                  # Custom JavaScript
 │   ├── theme-switcher.js
 │   ├── filter-manager-link.js
+│   ├── features.js      # ⚙ gear button: per-browser on/off for each extra
 │   ├── ratings.js       # IMDb/TMDb badges + details/trailer on spot pages
 │   ├── nzbgeek.js       # NZBGeek results panel on search
 │   └── spotlist.js      # List rating badges, sort/hide, duplicate grouping

@@ -294,6 +294,9 @@
     }
 
     function run() {
+        if (window.swFeatureOn && !window.swFeatureOn('nzbgeek')) {
+            return;
+        }
         var query = currentQuery();
         var category = currentCategories();
         if (!query && !category.cats.length) {

@@ -266,6 +266,9 @@ install_themes() {
     curl -fsSL "${GITHUB_RAW_BASE}/custom/js/spotlist.js" \
       -o "${spotweb_dir}/custom/js/spotlist.js" || \
       print_warn "Failed to download spotlist.js"
+    curl -fsSL "${GITHUB_RAW_BASE}/custom/js/features.js" \
+      -o "${spotweb_dir}/custom/js/features.js" || \
+      print_warn "Failed to download features.js"
 
     print_info "Downloading tools"
     curl -fsSL "${GITHUB_RAW_BASE}/custom/tools/theme-customizer.html" \

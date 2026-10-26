@@ -851,6 +851,7 @@ function Install-Themes([string]$Dir, [string]$Mode) {
       @('custom/js/ratings.js', 'custom\js\ratings.js'),
       @('custom/js/nzbgeek.js', 'custom\js\nzbgeek.js'),
       @('custom/js/spotlist.js', 'custom\js\spotlist.js'),
+      @('custom/js/features.js', 'custom\js\features.js'),
       @('custom/tools/theme-customizer.html', 'custom\tools\theme-customizer.html'),
       @('custom/tools/theme-upload.php', 'custom\tools\theme-upload.php'),
       @('custom/tools/filter-manager.php', 'custom\tools\filter-manager.php'),
