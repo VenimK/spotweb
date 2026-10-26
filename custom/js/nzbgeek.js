@@ -79,7 +79,7 @@
     var NZB_NAMES = {
         1010: 'NDS', 1020: 'PSP', 1030: 'Wii', 1040: 'Xbox', 1050: 'Xbox 360', 1080: 'PS3',
         1090: 'Xbox One', 1100: 'PS4', 2030: 'SD', 2040: 'HD', 2045: 'UHD', 2050: 'BluRay',
-        2060: '3D', 3010: 'MP3', 3020: 'Video', 3040: 'Lossless', 4030: 'Mac',
+        2060: '3D', 3010: 'MP3', 3020: 'Video', 3040: 'Lossless', 4020: 'ISO', 1070: 'DLC', 4030: 'Mac',
         4040: 'Mobile', 4050: 'PC', 4060: 'iOS', 4070: 'Android', 5030: 'SD', 5040: 'HD',
         5045: 'UHD', 5060: 'Sport', 5070: 'Anime', 5080: 'Documentary', 6010: 'DVD',
         6020: 'WMV', 6030: 'XviD', 6040: 'x264', 7010: 'Mags', 7020: 'Ebook', 7030: 'Comics'
@@ -116,9 +116,9 @@
 
     /* Spotweb category tree -> Newznab categories; "sub" refines by Spotweb sub-filter */
     var CAT_MAP = {
-        cat0_z0: { cats: ['2000'], label: 'Movies', sub: subs(
+        cat0_z0: { cats: ['2000'], label: 'Movies', src: true, sub: subs(
             { sd: '2030', hd: '2040', bd: '2050', uhd: '2045', '3d': '2060' }, VIDEO) },
-        cat0_z1: { cats: ['5000'], label: 'Series', sub: subs(
+        cat0_z1: { cats: ['5000'], label: 'Series', src: true, sub: subs(
             { sd: '5030', hd: '5040', bd: '5040', uhd: '5045', '3d': '5040', anime: '5070', doc: '5080', sport: '5060' },
             { sd: VIDEO.sd, hd: VIDEO.hd, bd: VIDEO.bd, uhd: VIDEO.uhd, '3d': VIDEO['3d'], anime: 'd2 d29 d32', doc: 'd6', sport: 'd18' }) },
         cat0_z2: { cats: ['7000'], label: 'Books', sub: subs({}, { 7020: 'a5 a11', 7010: 'd43 d44', 7030: 'd31' }) },
@@ -128,7 +128,9 @@
         cat1_z3: { cats: ['3030'], label: 'Audiobooks', sub: {} },
         cat2: { cats: ['1000', '4050'], label: 'Games', sub: subs({}, {
             4050: 'a0 a1 a2', 1020: 'a5', 1040: 'a6', 1050: 'a7', 1010: 'a10 a16', 1030: 'a11',
-            1080: 'a12', 1100: 'a17', 1090: 'a18', 4040: 'a13', 4060: 'a14', 4070: 'a15' }) },
+            1080: 'a12', 1100: 'a17', 1090: 'a18', 4040: 'a13', 4060: 'a14', 4070: 'a15',
+            /* in the games tree the b-group means file form, not video source */
+            4020: 'b0', 1070: 'b3' }) },
         cat3: { cats: ['4000'], label: 'Applications', sub: subs({}, { 4030: 'a1', 4040: 'a4', 4060: 'a6', 4070: 'a7' }) }
     };
 
@@ -166,8 +168,8 @@
                 if (nzb && g.cats.indexOf(nzb) === -1) {
                     g.cats.push(nzb);
                 }
-                /* b-codes are source filters: keyword-match the titles instead */
-                if (code[0] === 'b' && SOURCE_KW[code] && g.kw.indexOf(SOURCE_KW[code]) === -1) {
+                /* b-codes are video source filters: keyword-match the titles instead */
+                if (def.src && code[0] === 'b' && SOURCE_KW[code] && g.kw.indexOf(SOURCE_KW[code]) === -1) {
                     g.kw.push(SOURCE_KW[code]);
                     g.kwnames.push(SOURCE_NAMES[code]);
                 }
