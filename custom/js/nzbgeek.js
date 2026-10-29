@@ -396,6 +396,24 @@
             desc += ', last 7 days';
         }
         var matches = kwMatcher(category.kw || []);
+        /*
+         * In "newest" browse mode, keep only titles that look like new
+         * releases: a detected title year must be the current year (old
+         * films get re-uploaded daily and flood the list). Titles
+         * without a year (episodes etc.) pass. Searches are unaffected.
+         */
+        if (!query) {
+            var thisYear = new Date().getFullYear();
+            var yearTest = function (title) {
+                var m = title.replace(/[._]+/g, ' ').match(/\b(19|20)\d{2}\b/);
+                return !m || +m[0] >= thisYear;
+            };
+            desc += ', ' + thisYear + ' releases';
+            var prev = matches;
+            matches = function (title) {
+                return yearTest(title) && (!prev || prev(title));
+            };
+        }
         fetch(ENDPOINT + '?' + params.toString(), { credentials: 'same-origin' })
             .then(function (res) { return res.ok ? res.json() : res.json().catch(function () { return { error: 'NZBGeek lookup failed.' }; }); })
             .then(function (data) { render(panel, desc, data || {}, matches); })
